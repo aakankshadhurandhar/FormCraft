@@ -1,19 +1,15 @@
-// app.js
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const formRouter = require('./routes/');
 const app = express();
 const port = process.env.PORT || 3000;
 
-
-// Middleware
-app.use(express.json());
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
-require('dotenv').config();
-
 const mongoString = process.env.DATABASE_URL
-mongoose.connect(mongoString);
+mongoose.connect(mongoString, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 const database = mongoose.connection
 database.on('error', (error) => {
   console.log(error)
@@ -22,3 +18,13 @@ database.on('error', (error) => {
 database.once('connected', () => {
   console.log('Database Connected');
 })
+
+
+// Middleware
+app.use(express.json());
+app.use('/', formRouter);
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
+
+
