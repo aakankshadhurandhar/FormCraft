@@ -1,10 +1,10 @@
 const Models = require("../models");
-const { formPageSchema } = require("../validators/validations");
+const {validateForm } = require("../validators/validations");
 const Joi = require('joi');
 
 module.exports.create = async (req, res) => {
   try {
-    const { error, value } = formPageSchema.validate(req.body);
+    const { error, value } = validateForm(req.body);
 
     if (error) {
       // If validation fails, return a 400 Bad Request response with the validation error details
