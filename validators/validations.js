@@ -1,4 +1,7 @@
-const Joi = require("joi");
+const Joi = require('joi');
+
+
+
 
 module.exports.validateFormResponse = function (form, formResponse) {
   const inputSchema = {};
@@ -46,3 +49,38 @@ module.exports.validateFormResponse = function (form, formResponse) {
 }
 
 
+
+
+// Define a Joi schema for the form input options
+const inputOptionSchema = Joi.object({
+  label: Joi.string().required(),
+  value: Joi.string().required(),
+});
+
+// Define a Joi schema for the form input
+const formInputSchema = Joi.object({
+  type: Joi.string().valid(
+    'small-text', 'long-text', 'number', 'email', 'multi-select', 'radio'
+  ).required(),
+  label: Joi.string().required(),
+  minLength: Joi.number().when('type', { is: 'small-text', then: Joi.optional() }),
+  maxLength: Joi.number().when('type', { is: Joi.any().valid('small-text', 'long-text'), then:  Joi.optional() }),
+  minValue: Joi.number().when('type', { is: 'number', then: Joi.required() }),
+  maxValue: Joi.number().when('type', { is: 'number', then: Joi.required() }),
+  options: Joi.array().items(inputOptionSchema).when('type', { 
+    is: Joi.any().valid('multi-select', 'radio'), 
+    then: Joi.required() 
+  }),
+});
+
+// Define a Joi schema for the form page
+const formPageSchema = Joi.object({
+  title: Joi.string().min(1).required(),
+  description: Joi.string(),
+  created: Joi.date(),
+  modified: Joi.date(),
+  expiry: Joi.date(),
+  inputs: Joi.array().items(formInputSchema),
+});
+
+module.exports = { formPageSchema };
