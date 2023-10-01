@@ -3,10 +3,6 @@ const mongoose = require("mongoose");
 // Form inputs Schema
 const formInputSchema = new mongoose.Schema({
   _id: false,
-  id: {
-    type: Number,
-    required: true,
-  },
   type: {
     type: String,
     enum: ['small-text', 'long-text', 'number', 'email', 'multi-select', 'radio'],
