@@ -45,16 +45,14 @@ module.exports.read = async (req, res) => {
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
   }
 }
-module.exports.delete=async(req,res)=>{
+module.exports.delete = async (req, res) => {
   try {
     const formID = req.params.formID
     const deletedForm = await Models.FormPage.findByIdAndRemove(formID)
     if (!deletedResource) {
-      return res.status(404).json({ message: 'Resource not found' });
+      return res.status(404).json({ message: 'Resource not found' })
     }
-    res.json({ message: 'Resource deleted successfully' });
-
-
+    res.json({ message: 'Resource deleted successfully' })
   } catch (err) {
     console.error(err)
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
