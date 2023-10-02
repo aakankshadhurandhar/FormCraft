@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const formResponseSchema = new mongoose.Schema({
   form: {
@@ -16,6 +16,6 @@ const formResponseSchema = new mongoose.Schema({
     _id: false,
     default: {},
   },
-});
+})
 
 module.exports = mongoose.model('FormResponse', formResponseSchema);
