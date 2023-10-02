@@ -32,9 +32,9 @@ module.exports.create = async (req, res) => {
 
 module.exports.read = async (req, res) => {
   try {
-    const formID = req.params.formID
+    const formID = req.params.formId
     const form = await Models.FormPage.findById(formID)
-
+    console.log(formID)
     if (!form) {
       return res
         .status(404)
