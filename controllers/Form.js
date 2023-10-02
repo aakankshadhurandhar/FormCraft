@@ -7,12 +7,10 @@ module.exports.create = async (req, res) => {
 
     if (error) {
       // If validation fails, return a 400 Bad Request response with the validation error details
-      return res
-        .status(400)
-        .json({
-          statusCode: 400,
-          message: error.details.map((detail) => detail.message),
-        })
+      return res.status(400).json({
+        statusCode: 400,
+        message: error.details.map((detail) => detail.message),
+      })
     }
     const { title, description, inputs } = value
 
