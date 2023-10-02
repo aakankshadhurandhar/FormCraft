@@ -3,10 +3,6 @@ const mongoose = require('mongoose')
 // Form inputs Schema
 const formInputSchema = new mongoose.Schema({
   _id: false,
-  id: {
-    type: Number,
-    required: true,
-  },
   type: {
     type: String,
     enum: [
@@ -23,17 +19,19 @@ const formInputSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  // Additional properties specific to certain input types
   minLength: {
     type: Number,
     required: function () {
-      return this.type === 'small-text'
+      return this.type === 'small-text' && this.minLength !== undefined
     },
   },
   maxLength: {
     type: Number,
     required: function () {
-      return this.type === 'small-text' || this.type === 'long-text'
+      return (
+        (this.type === 'small-text' || this.type === 'long-text') &&
+        this.maxLength !== undefined
+      )
     },
   },
   minValue: {
