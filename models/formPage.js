@@ -22,13 +22,16 @@ const formInputSchema = new mongoose.Schema({
   minLength: {
     type: Number,
     required: function () {
-      return  this.type === 'small-text' && this.minLength !== undefined;
+      return this.type === 'small-text' && this.minLength !== undefined
     },
   },
   maxLength: {
     type: Number,
     required: function () {
-      return (this.type === 'small-text' || this.type === 'long-text') && this.maxLength !== undefined;
+      return (
+        (this.type === 'small-text' || this.type === 'long-text') &&
+        this.maxLength !== undefined
+      )
     },
   },
   minValue: {
@@ -82,8 +85,6 @@ const formPageSchema = new mongoose.Schema(
   },
 )
 
+const FormPage = mongoose.model('FormPage', formPageSchema)
 
-
-const FormPage = mongoose.model("FormPage", formPageSchema);
-
-module.exports = FormPage;
+module.exports = FormPage

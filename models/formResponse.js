@@ -18,4 +18,4 @@ const formResponseSchema = new mongoose.Schema({
   },
 })
 
-module.exports = mongoose.model('FormResponse', formResponseSchema);
+module.exports = mongoose.model('FormResponse', formResponseSchema)
