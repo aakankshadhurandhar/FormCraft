@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 
 // Form inputs Schema
 const formInputSchema = new mongoose.Schema({
@@ -9,7 +9,14 @@ const formInputSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['small-text', 'long-text', 'number', 'email', 'multi-select', 'radio'],
+    enum: [
+      'small-text',
+      'long-text',
+      'number',
+      'email',
+      'multi-select',
+      'radio',
+    ],
     required: true,
   },
   label: {
@@ -20,40 +27,40 @@ const formInputSchema = new mongoose.Schema({
   minLength: {
     type: Number,
     required: function () {
-      return this.type === 'small-text';
+      return this.type === 'small-text'
     },
   },
   maxLength: {
     type: Number,
     required: function () {
-      return this.type === 'small-text' || this.type === 'long-text';
+      return this.type === 'small-text' || this.type === 'long-text'
     },
   },
   minValue: {
     type: Number,
     required: function () {
-      return this.type === 'number';
+      return this.type === 'number'
     },
   },
   maxValue: {
     type: Number,
     required: function () {
-      return this.type === 'number';
+      return this.type === 'number'
     },
   },
   options: {
-    type: [{
-      _id: false,
-      label: String,
-      value: String,
-    }],
+    type: [
+      {
+        _id: false,
+        label: String,
+        value: String,
+      },
+    ],
     required: function () {
-      return this.type === 'multi-select' || this.type === 'radio';
+      return this.type === 'multi-select' || this.type === 'radio'
     },
-  }
-});
-
-
+  },
+})
 
 // Define the Mongoose schema for FormPage
 const formPageSchema = new mongoose.Schema(
@@ -73,14 +80,13 @@ const formPageSchema = new mongoose.Schema(
       default: Date.now,
     },
     expiry: Date,
-    inputs: [formInputSchema],    
+    inputs: [formInputSchema],
   },
   {
     timestamps: true,
-  }
-);
+  },
+)
 
+const FormPage = mongoose.model('FormPage', formPageSchema)
 
-const FormPage = mongoose.model("FormPage", formPageSchema);
-
-module.exports = FormPage;
+module.exports = FormPage
