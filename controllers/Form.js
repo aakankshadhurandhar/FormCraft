@@ -1,6 +1,5 @@
 const Models = require("../models");
 const {validateForm } = require("../validators/validations");
-const Joi = require('joi');
 
 module.exports.create = async (req, res) => {
   try {
@@ -19,7 +18,7 @@ module.exports.create = async (req, res) => {
     });
 
     const savedForm = await form.save();
-    res.status(201).json(savedForm);
+    res.status(201).json({statusCode: 201,savedForm})
   } catch (err) {
     console.error(err);
     res.status(500).json({statusCode: 500, message: "Internal server error" });

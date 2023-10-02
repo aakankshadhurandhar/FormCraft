@@ -86,6 +86,8 @@ function validateForm(formBody) {
     expiry: Joi.date(),
     inputs: Joi.array().items(formInputSchema),
   });
+
+  return formPageSchema.validate(formBody);
 }
 
 module.exports = { validateForm, validateFormResponse };
