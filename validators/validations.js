@@ -56,6 +56,7 @@ function validateForm(formBody) {
         'email',
         'multi-select',
         'radio',
+        'file',
       )
       .required(),
     label: Joi.string().required(),
@@ -75,6 +76,8 @@ function validateForm(formBody) {
         is: Joi.any().valid('multi-select', 'radio'),
         then: Joi.required(),
       }),
+    fileTypes: Joi.array().items(Joi.string()), // Validate allowed file types
+    maxFileSizeinKB: Joi.number(), // Validate maximum file size
   })
 
   // Define a Joi schema for the form page

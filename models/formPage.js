@@ -12,6 +12,7 @@ const formInputSchema = new mongoose.Schema({
       'email',
       'multi-select',
       'radio',
+      'file'
     ],
     required: true,
   },
@@ -58,6 +59,10 @@ const formInputSchema = new mongoose.Schema({
       return this.type === 'multi-select' || this.type === 'radio'
     },
   },
+  fileTypes: [{ // Define allowed file types (e.g., 'image/jpeg', 'application/pdf')
+    type: String,
+  }],
+  maxFileSizeinKB: Number, 
 })
 
 // Define the Mongoose schema for FormPage
