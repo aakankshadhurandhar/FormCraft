@@ -3,24 +3,24 @@ const fs = require('fs');
 
 const fileFilter = function (req, file, cb) {
   const formSchema = req.form;
-  const fileInput = formSchema.inputs.find((input) => input.type === 'file');
+  const fileInput = formSchema.inputs.find((input) => input.type === 'file' &&input.label !=file.fieldname );
 
   if (!fileInput) {
-    return cb(new Error('File upload not allowed for this form'), false);
+    return cb(new Error('File upload not allowed some form values'), false);
   }
 
   if (!fileInput.fileTypes.includes(file.mimetype)) {
-    return cb(new Error('File type not allowed'), false);
+    return cb(new Error('File type not allowed '), false);
   }
 
   if (file.size > fileInput.maxFileSizeinKB * 1024) {
     return cb(new Error('File size exceeds limit'), false);
   }
 
-  const fieldname = file.fieldname;
-  if (fieldname !== fileInput.label) {
-    return cb(new Error('File fieldname does not match form input label'), false);
-  }
+  // const fieldname = file.fieldname;
+  // if (fieldname !== fileInput.label) {
+  //   return cb(new Error('File fieldname does not match form input label'), false);
+  // }
 
   cb(null, true); // File is accepted
 };

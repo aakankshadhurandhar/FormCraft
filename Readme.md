@@ -1,16 +1,16 @@
 # FormCraft
-
+* File Upload (Multiple file inputs,Multiple Files for single file input)
 
 
 
 ## Future Features
+* Data Export
 * Authentication and Authorization
-* File Upload
 * Filtering and Pagination
 * Custom validation rules
 * Conditional Forms
 * Notifications
-* Data Export
+
 * PDF generation
 * custom domains
 * Form Cloning

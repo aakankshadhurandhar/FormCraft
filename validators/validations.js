@@ -1,5 +1,7 @@
 const Joi = require('joi')
 
+
+
 function validateFormResponse(form, formResponse) {
   const inputSchema = {}
   form.inputs.forEach((input) => {
@@ -32,10 +34,35 @@ function validateFormResponse(form, formResponse) {
       inputSchema[inputLabel] = Joi.string()
         .valid(...input.options.map((option) => option.value))
         .required()
+    } else if (input.type == 'file') {
+      const maxFileSizeKB = input.maxFileSizeinKB
+      inputSchema[inputLabel] = Joi.array()
+        .items(
+          Joi.object({
+            filename: Joi.string().required(),
+            path: Joi.string().required(),
+            sizeInKB: Joi.number().required(),
+          }),
+        )
+        .custom((files, helpers) => {
+          // Calculate total file size for the current label
+          const totalSizeKB = files.reduce(
+            (total, file) => total + file.sizeinKB,
+            0,
+          )
+          if (totalSizeKB > maxFileSizeKB) {
+            return helpers.error('any.custom', {
+              message: `Total file size exceeds ${maxFileSizeKB} KB`,
+            })
+          }
+          return files
+        })
+        .required()
     }
   })
-
   const formSchema = Joi.object(inputSchema)
+  
+  console.log(formResponse)
   return formSchema.validate(formResponse)
 }
 
@@ -93,4 +120,4 @@ function validateForm(formBody) {
   return formPageSchema.validate(formBody)
 }
 
-module.exports = { validateForm, validateFormResponse }
+module.exports = { validateForm,validateFormResponse }
