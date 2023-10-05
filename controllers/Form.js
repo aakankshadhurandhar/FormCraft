@@ -45,11 +45,38 @@ module.exports.read = async (req, res) => {
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
   }
 }
+module.exports.update=async(req,res)=>{
+  try{
+    const formID = req.params.formID
+
+  }
+  catch (err) {
+    console.error(err)
+    res.status(500).json({ statusCode: 500, message: 'Internal server error' })
+  }
+}
+module.exports.update=async(req,res)=>{
+  const formID = req.params.formID
+  const updatedFormData = req.body; 
+  try{
+    const form = await Models.FormPage.findByIdAndUpdate(formID, updatedFormData, { new: true });
+
+    if (!form) {
+      return res.status(404).json({ error: 'Form not found' });
+    }
+
+    res.json({statusCode: 200, message: 'Form updated successfully', form });
+  }catch (err) {
+    console.error(err)
+    res.status(500).json({ statusCode: 500, message: 'Internal server error' })
+  }
+  
+}
 module.exports.delete = async (req, res) => {
   try {
     const formID = req.params.formID
     const deletedForm = await Models.FormPage.findByIdAndRemove(formID)
-    if (!deletedResource) {
+    if (!deletedForm) {
       return res.status(404).json({ message: 'Resource not found' })
     }
     res.json({ message: 'Resource deleted successfully' })
