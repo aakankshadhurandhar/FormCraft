@@ -32,13 +32,7 @@ module.exports.create = async (req, res) => {
 
 module.exports.read = async (req, res) => {
   try {
-    const formID = req.params.formId;
-    const form = await Models.FormPage.findById(formID);
-
-    if (!form) {
-      return res.status(404).json({ message: 'Form not found' });
-    }
-    res.status(200).json(form);
+    res.json(req.form)
   } catch (err) {
     console.error(err);
     res.status(500).json({ statusCode: 500,message: "Internal server error" });

@@ -11,7 +11,7 @@ const handleFileUpload = require('../middlewares/handleFileUpload');
 router.post('/forms', controllers.Form.create)
 
 // Read Form
-router.get("/forms/:formId",validateParamAsObjectId('formId') ,controllers.Form.read);
+router.get("/forms/:formId",validateParamAsObjectId('formId'),fetchFormMiddleware ,controllers.Form.read);
 
 // Submit Form Response
 router.post("/forms/:formId/responses",validateParamAsObjectId('formId'),fetchFormMiddleware,handleFileUpload, controllers.FormResponse.create);

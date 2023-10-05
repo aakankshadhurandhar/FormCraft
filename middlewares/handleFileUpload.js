@@ -3,7 +3,7 @@ const fs = require('fs');
 
 const fileFilter = function (req, file, cb) {
   const formSchema = req.form;
-  const fileInput = formSchema.inputs.find((input) => input.type === 'file' &&input.label !=file.fieldname );
+  const fileInput = formSchema.inputs.find((input) => input.type === 'file' &&input.label ==file.fieldname );
 
   if (!fileInput) {
     return cb(new Error('File upload not allowed some form values'), false);
@@ -17,12 +17,8 @@ const fileFilter = function (req, file, cb) {
     return cb(new Error('File size exceeds limit'), false);
   }
 
-  // const fieldname = file.fieldname;
-  // if (fieldname !== fileInput.label) {
-  //   return cb(new Error('File fieldname does not match form input label'), false);
-  // }
 
-  cb(null, true); // File is accepted
+  cb(null, true);
 };
 
 

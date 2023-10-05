@@ -1,7 +1,6 @@
 const Joi = require('joi')
 
 
-
 function validateFormResponse(form, formResponse) {
   const inputSchema = {}
   form.inputs.forEach((input) => {
@@ -36,6 +35,7 @@ function validateFormResponse(form, formResponse) {
         .required()
     } else if (input.type == 'file') {
       const maxFileSizeKB = input.maxFileSizeinKB
+      const maxFilesAllowed = input.maxFilesAllowed
       inputSchema[inputLabel] = Joi.array()
         .items(
           Joi.object({
@@ -55,14 +55,17 @@ function validateFormResponse(form, formResponse) {
               message: `Total file size exceeds ${maxFileSizeKB} KB`,
             })
           }
+          if (input.maxFilesAllowed > files.length){
+            return helpers.error('any.custom',{
+              message: `File Count exceeds maximum files allowed (${maxFilesAllowed}) `,
+            })
+          }
           return files
         })
         .required()
     }
   })
   const formSchema = Joi.object(inputSchema)
-  
-  console.log(formResponse)
   return formSchema.validate(formResponse)
 }
 
@@ -104,7 +107,8 @@ function validateForm(formBody) {
         then: Joi.required(),
       }),
     fileTypes: Joi.array().items(Joi.string()), // Validate allowed file types
-    maxFileSizeinKB: Joi.number(), // Validate maximum file size
+    maxFileSizeinKB: Joi.number().when('type', { is: 'file', then: Joi.required() }),
+    maxFilesAllowed: Joi.number().when('type', { is: 'file', then: Joi.required() }), // Validate maximum file size
   })
 
   // Define a Joi schema for the form page

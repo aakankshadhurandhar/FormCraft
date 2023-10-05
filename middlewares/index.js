@@ -18,7 +18,6 @@ const fetchFormMiddleware = async (req, res, next) => {
   const formId = req.params.formId;
   try {
     const form = await Models.FormPage.findById(formId);
-
     if (!form) {
       return res.status(404).json({ message: 'Form not found' });
     }
