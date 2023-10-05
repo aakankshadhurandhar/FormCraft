@@ -11,9 +11,9 @@ router.post('/forms', controllers.Form.create)
 router.get('/forms/:formID', controllers.Form.read)
 
 //Delete Form
-router.delete('/forms/:formID',controllers.Form.delete)
+router.delete('/forms/:formID', controllers.Form.delete)
 //Update Form
-router.put('/forms/:formID',controllers.Form.update)
+router.put('/forms/:formID', controllers.Form.update)
 // Submit Form Response
 router.post('/forms/:formID/responses', controllers.FormResponse.create)
 
