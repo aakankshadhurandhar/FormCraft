@@ -1,5 +1,5 @@
 const Models = require('../models')
-const { validateForm } = require('../validators/validations')
+const { validateForm, validateUpdateForm } = require('../validators/validations')
 
 
 module.exports.create = async (req, res) => {
@@ -48,14 +48,6 @@ module.exports.read = async (req, res) => {
   }
 }
 module.exports.update = async (req, res) => {
-  try {
-    const formID = req.params.formID
-  } catch (err) {
-    console.error(err)
-    res.status(500).json({ statusCode: 500, message: 'Internal server error' })
-  }
-}
-module.exports.update = async (req, res) => {
   const formID = req.params.formID
   const updatedFormData = req.body
   try {
@@ -64,7 +56,16 @@ module.exports.update = async (req, res) => {
       updatedFormData,
       { new: true },
     )
+    const { error} = validateUpdateForm(req.body)
 
+    if (error) {
+      // If validation fails, return a 400 Bad Request response with the validation error details
+
+      return res.status(400).json({
+        statusCode: 400,
+        message: error.details.map((detail) => detail.message),
+      })
+    }
     if (!form) {
       return res.status(404).json({ error: 'Form not found' })
     }
