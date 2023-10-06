@@ -19,7 +19,8 @@
     "husky": "^8.0.3",
     "joi": "^17.10.2",
     "lmc-api-util": "^2.1.0",
-    "mongoose": "^7.5.3"
+    "mongoose": "^7.5.3",
+    "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.1",

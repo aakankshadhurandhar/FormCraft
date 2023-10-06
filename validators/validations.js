@@ -1,5 +1,6 @@
 const Joi = require('joi')
 
+
 function validateFormResponse(form, formResponse) {
   const inputSchema = {}
   form.inputs.forEach((input) => {
@@ -32,9 +33,38 @@ function validateFormResponse(form, formResponse) {
       inputSchema[inputLabel] = Joi.string()
         .valid(...input.options.map((option) => option.value))
         .required()
+    } else if (input.type == 'file') {
+      const maxFileSizeKB = input.maxFileSizeinKB
+      const maxFilesAllowed = input.maxFilesAllowed
+      inputSchema[inputLabel] = Joi.array()
+        .items(
+          Joi.object({
+            filename: Joi.string().required(),
+            path: Joi.string().required(),
+            sizeInKB: Joi.number().required(),
+          }),
+        )
+        .custom((files, helpers) => {
+          // Calculate total file size for the current label
+          const totalSizeKB = files.reduce(
+            (total, file) => total + file.sizeinKB,
+            0,
+          )
+          if (totalSizeKB > maxFileSizeKB) {
+            return helpers.error('any.custom', {
+              message: `Total file size exceeds ${maxFileSizeKB} KB`,
+            })
+          }
+          if (input.maxFilesAllowed > files.length){
+            return helpers.error('any.custom',{
+              message: `File Count exceeds maximum files allowed (${maxFilesAllowed}) `,
+            })
+          }
+          return files
+        })
+        .required()
     }
   })
-
   const formSchema = Joi.object(inputSchema)
   return formSchema.validate(formResponse)
 }
@@ -56,6 +86,7 @@ function validateForm(formBody) {
         'email',
         'multi-select',
         'radio',
+        'file',
       )
       .required(),
     label: Joi.string().required(),
@@ -75,6 +106,9 @@ function validateForm(formBody) {
         is: Joi.any().valid('multi-select', 'radio'),
         then: Joi.required(),
       }),
+    fileTypes: Joi.array().items(Joi.string()), // Validate allowed file types
+    maxFileSizeinKB: Joi.number().when('type', { is: 'file', then: Joi.required() }),
+    maxFilesAllowed: Joi.number().when('type', { is: 'file', then: Joi.required() }), // Validate maximum file size
   })
 
   // Define a Joi schema for the form page
@@ -90,4 +124,4 @@ function validateForm(formBody) {
   return formPageSchema.validate(formBody)
 }
 
-module.exports = { validateForm, validateFormResponse }
+module.exports = { validateForm,validateFormResponse }
