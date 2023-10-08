@@ -12,6 +12,7 @@ module.exports.create = async (req, res) => {
       return res.status(400).json({
         statusCode: 400,
         message: error.details.map((detail) => detail.message),
+        error
       })
     }
     const { title, description, inputs } = value

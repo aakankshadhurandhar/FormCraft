@@ -82,6 +82,10 @@ const formInputSchema = new mongoose.Schema({
       return this.type === 'file'
     },
   },
+  customValidations: {
+    type: Object, // Store customValidations as an object
+    default: {},
+  },
 })
 
 // Define the Mongoose schema for FormPage
