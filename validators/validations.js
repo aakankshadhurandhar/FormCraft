@@ -3,10 +3,10 @@ const Joi = require('joi')
 // Function to validate a regular expression pattern
 function isValidRegex(pattern) {
   try {
-    new RegExp(pattern);
-    return true;
+    new RegExp(pattern)
+    return true
   } catch (error) {
-    return false;
+    return false
   }
 }
 
@@ -64,8 +64,8 @@ function validateFormResponse(form, formResponse) {
               message: `Total file size exceeds ${maxFileSizeKB} KB`,
             })
           }
-          if (input.maxFilesAllowed > files.length){
-            return helpers.error('any.custom',{
+          if (input.maxFilesAllowed > files.length) {
+            return helpers.error('any.custom', {
               message: `File Count exceeds maximum files allowed (${maxFilesAllowed}) `,
             })
           }
@@ -84,7 +84,6 @@ function validateForm(formBody) {
     label: Joi.string().required(),
     value: Joi.string().required(),
   })
-
 
   // Define a Joi schema for the form input
   const formInputSchema = Joi.object({
@@ -117,19 +116,28 @@ function validateForm(formBody) {
         then: Joi.required(),
       }),
     fileTypes: Joi.array().items(Joi.string()), // Validate allowed file types
-    maxFileSizeinKB: Joi.number().when('type', { is: 'file', then: Joi.required() }),
-    maxFilesAllowed: Joi.number().when('type', { is: 'file', then: Joi.required() }), // Validate maximum file size
-    customValidations: Joi.object().custom((obj,helpers)=>{
-      for (const [ruleName, rulePattern] of Object.entries(obj)){
-        if(!isValidRegex(rulePattern)){
-          console.log("Not valid",ruleName)
-          return helpers.error('any.custom',{
-            message: `${ruleName} is not a valid regex Pattern`,
-          })
+    maxFileSizeinKB: Joi.number().when('type', {
+      is: 'file',
+      then: Joi.required(),
+    }),
+    maxFilesAllowed: Joi.number().when('type', {
+      is: 'file',
+      then: Joi.required(),
+    }), // Validate maximum file size
+    rules: Joi.when('type', {
+      is: Joi.string().valid('small-text', 'large-text', 'number', 'email'),
+      then: Joi.object().custom((obj, helpers) => {
+        for (const [ruleName, rulePattern] of Object.entries(obj)) {
+          if (!isValidRegex(rulePattern)) {
+            return helpers.error('any.custom', {
+              message: `${ruleName} is not a valid regex Pattern`,
+            })
+          }
         }
-      }
-      return obj
-    })
+        return obj
+      }),
+      otherwise: Joi.forbidden(),
+    }),
   })
 
   // Define a Joi schema for the form page
@@ -145,4 +153,4 @@ function validateForm(formBody) {
   return formPageSchema.validate(formBody)
 }
 
-module.exports = { validateForm,validateFormResponse }
+module.exports = { validateForm, validateFormResponse }

@@ -82,7 +82,7 @@ const formInputSchema = new mongoose.Schema({
       return this.type === 'file'
     },
   },
-  customValidations: {
+  rules: {
     type: Object, // Store customValidations as an object
     default: {},
   },
