@@ -22,12 +22,19 @@ const formInputSchema = new mongoose.Schema({
   },
   minLength: {
     type: Number,
+    default: 0,
     required: function () {
       return this.type === 'small-text' && this.minLength !== undefined
     },
   },
   maxLength: {
     type: Number,
+    default: function () {
+      if (this.type === 'small-text' || this.type === 'email') {
+        return 255; 
+      }
+      return 1000;
+    },
     required: function () {
       return (
         (this.type === 'small-text' || this.type === 'long-text') &&
@@ -37,12 +44,14 @@ const formInputSchema = new mongoose.Schema({
   },
   minValue: {
     type: Number,
+    default: -1e10,
     required: function () {
       return this.type === 'number'
     },
   },
   maxValue: {
     type: Number,
+    default:1e10,
     required: function () {
       return this.type === 'number'
     },
@@ -85,6 +94,7 @@ const formInputSchema = new mongoose.Schema({
   rules: {
     type: Object, // Store customValidations as an object
     default: {},
+    required:false,
   },
 })
 

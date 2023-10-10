@@ -87,7 +87,7 @@ function validateFormResponse(form, formResponse) {
 
     // Add custom validation for regex patterns if defined in 'rules'
     if (input.rules) {
-      for (const [ruleName, rulePattern] in Object.entries(input.rules)) {
+      for (const [ruleName, rulePattern] of Object.entries(input.rules)) {
         const regexPattern = new RegExp(rulePattern)
 
         baseSchema = baseSchema.custom((value, helpers) => {
