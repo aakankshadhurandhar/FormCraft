@@ -53,12 +53,7 @@ module.exports.update = async (req, res) => {
   const formID = req.params.formID
   const updatedFormData = req.body
   try {
-    const form = await Models.FormPage.findByIdAndUpdate(
-      formID,
-      updatedFormData,
-      { new: true },
-    )
-    const { error } = validateUpdateForm(req.body)
+    const { error } = validateUpdateForm(updatedFormData)
 
     if (error) {
       // If validation fails, return a 400 Bad Request response with the validation error details
@@ -68,6 +63,12 @@ module.exports.update = async (req, res) => {
         message: error.details.map((detail) => detail.message),
       })
     }
+    const form = await Models.FormPage.findByIdAndUpdate(
+      formID,
+      updatedFormData,
+      { new: true },
+    )
+  
     if (!form) {
       return res.status(404).json({ error: 'Form not found' })
     }
