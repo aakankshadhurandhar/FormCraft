@@ -1,21 +1,34 @@
 const Models = require('../models')
-const { validateFormResponse } = require('../validators/validations')
+const {
+  validateFormResponse,
+  validateFormFilesResponse,
+} = require('../validators/validations')
 
 module.exports.create = async (req, res) => {
   try {
-    const formID = req.params.formId
+    const { form, files } = req
+    let formValues = req.body
 
-    const form = await Models.FormPage.findById(formID)
-    if (!form) {
-      return res.status(404).json({ message: 'Form not found' })
+    for (const file of files) {
+      const { fieldname } = file
+      const fileDetails = {
+        filename: file.originalname,
+        path: file.path,
+        sizeInKB: file.size / 1000,
+      }
+      if (formValues[fieldname] == undefined) {
+        formValues[fieldname] = []
+      }
+      formValues[fieldname].push(fileDetails)
     }
-    const { error, value } = validateFormResponse(form, req.body.response)
+
+    let { error, value } = validateFormResponse(form, formValues)
     if (error) {
       return res.status(400).json({ error })
     }
 
     const formResponse = new Models.FormResponse({
-      form: formID,
+      form: form._id,
       response: value,
     })
 

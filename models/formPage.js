@@ -12,6 +12,7 @@ const formInputSchema = new mongoose.Schema({
       'email',
       'multi-select',
       'radio',
+      'file',
     ],
     required: true,
   },
@@ -56,6 +57,29 @@ const formInputSchema = new mongoose.Schema({
     ],
     required: function () {
       return this.type === 'multi-select' || this.type === 'radio'
+    },
+  },
+  fileTypes: {
+    type: [
+      {
+        // Define allowed file types (e.g., 'image/jpeg', 'application/pdf')
+        type: String,
+      },
+    ],
+    required: function () {
+      return this.type === 'file'
+    },
+  },
+  maxFileSizeinKB: {
+    type: Number,
+    required: function () {
+      return this.type === 'file'
+    },
+  },
+  maxFilesAllowed: {
+    type: Number,
+    required: function () {
+      return this.type === 'file'
     },
   },
 })
