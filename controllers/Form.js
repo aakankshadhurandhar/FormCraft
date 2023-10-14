@@ -4,17 +4,17 @@ const {
   validateUpdateForm,
 } = require('../validators/validations')
 
-module.exports.create = async (req, res) => {
+module.exports.Create = async (req, res) => {
   try {
     const { error, value } = validateForm(req.body)
 
     if (error) {
       // If validation fails, return a 400 Bad Request response with the validation error details
-      
+
       return res.status(400).json({
         statusCode: 400,
         message: error.details.map((detail) => detail.message),
-        error
+        error,
       })
     }
     const { title, description, inputs } = value
@@ -33,7 +33,7 @@ module.exports.create = async (req, res) => {
   }
 }
 
-module.exports.read = async (req, res) => {
+module.exports.Read = async (req, res) => {
   try {
     const formID = req.params.formId
     const form = await Models.FormPage.findById(formID)
@@ -50,7 +50,7 @@ module.exports.read = async (req, res) => {
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
   }
 }
-module.exports.update = async (req, res) => {
+module.exports.Update = async (req, res) => {
   const formID = req.params.formID
   const updatedFormData = req.body
   try {
@@ -69,7 +69,7 @@ module.exports.update = async (req, res) => {
       updatedFormData,
       { new: true },
     )
-  
+
     if (!form) {
       return res.status(404).json({ error: 'Form not found' })
     }
@@ -81,7 +81,7 @@ module.exports.update = async (req, res) => {
   }
 }
 
-module.exports.delete = async (req, res) => {
+module.exports.Delete = async (req, res) => {
   try {
     const formID = req.params.formID
     const deletedForm = await Models.FormPage.findByIdAndRemove(formID)

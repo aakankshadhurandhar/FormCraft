@@ -31,9 +31,9 @@ const formInputSchema = new mongoose.Schema({
     type: Number,
     default: function () {
       if (this.type === 'small-text' || this.type === 'email') {
-        return 255; 
+        return 255
       }
-      return 1000;
+      return 1000
     },
     required: function () {
       return (
@@ -51,7 +51,7 @@ const formInputSchema = new mongoose.Schema({
   },
   maxValue: {
     type: Number,
-    default:1e10,
+    default: 1e10,
     required: function () {
       return this.type === 'number'
     },
@@ -94,12 +94,12 @@ const formInputSchema = new mongoose.Schema({
   rules: {
     type: Object, // Store customValidations as an object
     default: {},
-    required:false,
+    required: false,
   },
 })
 
 // Define the Mongoose schema for FormPage
-const formPageSchema = new mongoose.Schema(
+const formSchema = new mongoose.Schema(
   {
     title: {
       type: String,
@@ -107,14 +107,6 @@ const formPageSchema = new mongoose.Schema(
       minlength: 1,
     },
     description: String,
-    created: {
-      type: Date,
-      default: Date.now,
-    },
-    modified: {
-      type: Date,
-      default: Date.now,
-    },
     expiry: Date,
     inputs: [formInputSchema],
   },
@@ -123,6 +115,6 @@ const formPageSchema = new mongoose.Schema(
   },
 )
 
-const FormPage = mongoose.model('FormPage', formPageSchema)
+const Form = mongoose.model('FormPages', formSchema)
 
-module.exports = FormPage
+module.exports = Form

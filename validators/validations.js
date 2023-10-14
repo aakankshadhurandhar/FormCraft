@@ -5,24 +5,26 @@ function isValidRegex(pattern) {
   try {
     new RegExp(pattern)
     return true
-  } catch (error) { 
+  } catch (error) {
     return false
   }
 }
 
-const fileValidationHelper = (files, helpers) => {
-  const totalSizeKB = files.reduce((total, file) => total + file.sizeinKB, 0)
-  if (totalSizeKB > maxFileSizeKB) {
-    return helpers.error('any.custom', {
-      message: `Total file size exceeds ${maxFileSizeKB} KB`,
-    })
+const fileValidationHelper = (maxFileSizeKB, maxFilesAllowed) => {
+  return (files, helpers) => {
+    const totalSizeKB = files.reduce((total, file) => total + file.sizeinKB, 0)
+    if (totalSizeKB > maxFileSizeKB) {
+      return helpers.error('any.custom', {
+        message: `Total file size exceeds ${maxFileSizeKB} KB`,
+      })
+    }
+    if (maxFilesAllowed > files.length) {
+      return helpers.error('any.custom', {
+        message: `File Count exceeds maximum files allowed (${maxFilesAllowed}) `,
+      })
+    }
+    return files
   }
-  if (maxFilesAllowed > files.length) {
-    return helpers.error('any.custom', {
-      message: `File Count exceeds maximum files allowed (${maxFilesAllowed}) `,
-    })
-  }
-  return files
 }
 
 function validateFormResponse(form, formResponse) {
@@ -78,7 +80,7 @@ function validateFormResponse(form, formResponse) {
               sizeInKB: Joi.number().required(),
             }),
           )
-          .custom(fileValidationHelper)
+          .custom(fileValidationHelper(maxFileSizeKB, maxFilesAllowed))
           .required()
         break
       default:
@@ -89,7 +91,7 @@ function validateFormResponse(form, formResponse) {
     if (input.rules) {
       for (const [ruleName, rulePattern] of Object.entries(input.rules)) {
         const regexPattern = new RegExp(rulePattern)
-        
+
         baseSchema = baseSchema.custom((value, helpers) => {
           if (!regexPattern.test(value)) {
             return helpers.error('any.custom', {
@@ -109,12 +111,10 @@ function validateFormResponse(form, formResponse) {
 }
 
 function validateForm(formBody) {
-
   const inputOptionSchema = Joi.object({
     label: Joi.string().required(),
     value: Joi.string().required(),
   })
-
 
   const formInputSchema = Joi.object({
     type: Joi.string()
@@ -174,8 +174,6 @@ function validateForm(formBody) {
   const formPageSchema = Joi.object({
     title: Joi.string().min(1).required(),
     description: Joi.string(),
-    created: Joi.date(),
-    modified: Joi.date(),
     expiry: Joi.date(),
     inputs: Joi.array().items(formInputSchema),
   })
@@ -197,7 +195,7 @@ function validateUpdateForm(formBody) {
       'email',
       'multi-select',
       'radio',
-      'file'
+      'file',
     ),
     label: Joi.string(),
     minLength: Joi.number().when('type', {
@@ -216,38 +214,35 @@ function validateUpdateForm(formBody) {
         is: Joi.any().valid('multi-select', 'radio'),
         then: Joi.required(),
       }),
-      fileTypes: Joi.array().items(Joi.string()), // Validate allowed file types
-      maxFileSizeinKB: Joi.number().when('type', {
-        is: 'file',
-        then: Joi.required(),
-      }),
-      maxFilesAllowed: Joi.number().when('type', {
-        is: 'file',
-        then: Joi.required(),
-      }), // Validate maximum file size
-      rules: Joi.when('type', {
-        is: Joi.string().valid('small-text', 'large-text', 'number', 'email'),
-        then: Joi.object().custom((obj, helpers) => {
-          for (const [ruleName, rulePattern] of Object.entries(obj)) {
-            if (!isValidRegex(rulePattern)) {
-              return helpers.error('any.custom', {
-                message: `${ruleName} is not a valid regex Pattern`,
-              })
-            }
+    fileTypes: Joi.array().items(Joi.string()), // Validate allowed file types
+    maxFileSizeinKB: Joi.number().when('type', {
+      is: 'file',
+      then: Joi.required(),
+    }),
+    maxFilesAllowed: Joi.number().when('type', {
+      is: 'file',
+      then: Joi.required(),
+    }), // Validate maximum file size
+    rules: Joi.when('type', {
+      is: Joi.string().valid('small-text', 'large-text', 'number', 'email'),
+      then: Joi.object().custom((obj, helpers) => {
+        for (const [ruleName, rulePattern] of Object.entries(obj)) {
+          if (!isValidRegex(rulePattern)) {
+            return helpers.error('any.custom', {
+              message: `${ruleName} is not a valid regex Pattern`,
+            })
           }
-          return obj
-        }),
-        otherwise: Joi.forbidden(),
+        }
+        return obj
       }),
-
+      otherwise: Joi.forbidden(),
+    }),
   })
 
   // Define a Joi schema for the form page
   const formPageSchema = Joi.object({
     title: Joi.string().min(1),
     description: Joi.string(),
-    created: Joi.date(),
-    modified: Joi.date(),
     expiry: Joi.date(),
     inputs: Joi.array().items(formInputSchema),
   })
