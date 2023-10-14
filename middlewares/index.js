@@ -2,16 +2,18 @@ const {isValidObjectId} = require("mongoose");
 const Models = require("../models/");
 
 // Validate ObjectId parameters
-const validateParamAsObjectId =(...paramNames) =>(req, res, next) => {
+const validateParamAsObjectId =
+  (...paramNames) =>
+  (req, res, next) => {
     for (const paramName of paramNames) {
-      const paramValue = req.params[paramName];
+      const paramValue = req.params[paramName]
 
       if (!isValidObjectId(paramValue)) {
-        return res.status(400).json({ message: `Invalid ${paramName}` });
+        return res.status(400).json({ message: `Invalid ${paramName}` })
       }
     }
-    next();
-  };
+    next()
+  }
 
 
 const fetchFormMiddleware = async (req, res, next) => {
