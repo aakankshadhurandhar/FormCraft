@@ -20,7 +20,7 @@ router.get(
 //Delete Form
 router.delete('/forms/:formID', controllers.Form.delete)
 //Update Form
-router.put('/forms/:formID', controllers.Form.update)
+router.patch('/forms/:formID', controllers.Form.update)
 // Submit Form Response
 router.post(
   '/forms/:formId/responses',

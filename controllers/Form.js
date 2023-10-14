@@ -10,7 +10,7 @@ module.exports.create = async (req, res) => {
 
     if (error) {
       // If validation fails, return a 400 Bad Request response with the validation error details
-
+      
       return res.status(400).json({
         statusCode: 400,
         message: error.details.map((detail) => detail.message),
@@ -80,6 +80,7 @@ module.exports.update = async (req, res) => {
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
   }
 }
+
 module.exports.delete = async (req, res) => {
   try {
     const formID = req.params.formID

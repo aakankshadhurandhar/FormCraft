@@ -5,7 +5,7 @@ function isValidRegex(pattern) {
   try {
     new RegExp(pattern)
     return true
-  } catch (error) {
+  } catch (error) { 
     return false
   }
 }
@@ -89,7 +89,7 @@ function validateFormResponse(form, formResponse) {
     if (input.rules) {
       for (const [ruleName, rulePattern] of Object.entries(input.rules)) {
         const regexPattern = new RegExp(rulePattern)
-
+        
         baseSchema = baseSchema.custom((value, helpers) => {
           if (!regexPattern.test(value)) {
             return helpers.error('any.custom', {
@@ -109,13 +109,13 @@ function validateFormResponse(form, formResponse) {
 }
 
 function validateForm(formBody) {
-  // Define a Joi schema for the form input options
+
   const inputOptionSchema = Joi.object({
     label: Joi.string().required(),
     value: Joi.string().required(),
   })
 
-  // Define a Joi schema for the form input
+
   const formInputSchema = Joi.object({
     type: Joi.string()
       .valid(
@@ -137,15 +137,15 @@ function validateForm(formBody) {
       is: Joi.any().valid('small-text', 'long-text'),
       then: Joi.optional(),
     }),
-    minValue: Joi.number().when('type', { is: 'number', then: Joi.required() }),
-    maxValue: Joi.number().when('type', { is: 'number', then: Joi.required() }),
+    minValue: Joi.number().when('type', { is: 'number', then: Joi.optional() }),
+    maxValue: Joi.number().when('type', { is: 'number', then: Joi.optional() }),
     options: Joi.array()
       .items(inputOptionSchema)
       .when('type', {
         is: Joi.any().valid('multi-select', 'radio'),
         then: Joi.required(),
       }),
-    fileTypes: Joi.array().items(Joi.string()), // Validate allowed file types
+    fileTypes: Joi.array().items(Joi.string()).optional(), // Validate allowed file types
     maxFileSizeinKB: Joi.number().when('type', {
       is: 'file',
       then: Joi.required(),
@@ -153,9 +153,9 @@ function validateForm(formBody) {
     maxFilesAllowed: Joi.number().when('type', {
       is: 'file',
       then: Joi.required(),
-    }), // Validate maximum file size
+    }),
     rules: Joi.when('type', {
-      is: Joi.string().valid('small-text', 'large-text', 'number', 'email'),
+      is: Joi.string().valid('small-text', 'long-text', 'number', 'email'),
       then: Joi.object().custom((obj, helpers) => {
         for (const [ruleName, rulePattern] of Object.entries(obj)) {
           if (!isValidRegex(rulePattern)) {
@@ -182,14 +182,13 @@ function validateForm(formBody) {
 
   return formPageSchema.validate(formBody)
 }
+
 function validateUpdateForm(formBody) {
-  // Define a Joi schema for the form input options
   const inputOptionSchema = Joi.object({
     label: Joi.string().required(),
     value: Joi.string().required(),
   })
 
-  // Define a Joi schema for the form input
   const formInputSchema = Joi.object({
     type: Joi.string().valid(
       'small-text',
@@ -198,6 +197,7 @@ function validateUpdateForm(formBody) {
       'email',
       'multi-select',
       'radio',
+      'file'
     ),
     label: Joi.string(),
     minLength: Joi.number().when('type', {
@@ -216,6 +216,30 @@ function validateUpdateForm(formBody) {
         is: Joi.any().valid('multi-select', 'radio'),
         then: Joi.required(),
       }),
+      fileTypes: Joi.array().items(Joi.string()), // Validate allowed file types
+      maxFileSizeinKB: Joi.number().when('type', {
+        is: 'file',
+        then: Joi.required(),
+      }),
+      maxFilesAllowed: Joi.number().when('type', {
+        is: 'file',
+        then: Joi.required(),
+      }), // Validate maximum file size
+      rules: Joi.when('type', {
+        is: Joi.string().valid('small-text', 'large-text', 'number', 'email'),
+        then: Joi.object().custom((obj, helpers) => {
+          for (const [ruleName, rulePattern] of Object.entries(obj)) {
+            if (!isValidRegex(rulePattern)) {
+              return helpers.error('any.custom', {
+                message: `${ruleName} is not a valid regex Pattern`,
+              })
+            }
+          }
+          return obj
+        }),
+        otherwise: Joi.forbidden(),
+      }),
+
   })
 
   // Define a Joi schema for the form page

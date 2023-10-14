@@ -8,18 +8,19 @@ module.exports.create = async (req, res) => {
   try {
     const { form, files } = req
     let formValues = req.body
-
-    for (const file of files) {
-      const { fieldname } = file
-      const fileDetails = {
-        filename: file.originalname,
-        path: file.path,
-        sizeInKB: file.size / 1000,
+    if(req.files){
+      for (const file of files) {
+        const { fieldname } = file
+        const fileDetails = {
+          filename: file.originalname,
+          path: file.path,
+          sizeInKB: file.size / 1000,
+        }
+        if (formValues[fieldname] == undefined) {
+          formValues[fieldname] = []
+        }
+        formValues[fieldname].push(fileDetails)
       }
-      if (formValues[fieldname] == undefined) {
-        formValues[fieldname] = []
-      }
-      formValues[fieldname].push(fileDetails)
     }
 
     let { error, value } = validateFormResponse(form, formValues)
