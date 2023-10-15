@@ -1,5 +1,7 @@
 const multer = require('multer')
 const fs = require('fs')
+const { default: ShortUniqueId } = require('short-unique-id')
+const uid = new ShortUniqueId({ length: 5 })
 
 const fileFilter = function (req, file, cb) {
   const formSchema = req.form
@@ -32,13 +34,7 @@ const storage = multer.diskStorage({
     cb(null, uploadPath)
   },
   filename: function (req, file, cb) {
-    const uniqueIdentifier =
-      Date.now() +
-      '-' +
-      Math.round(Math.random() * 1e9) +
-      '-' +
-      file.originalname
-    cb(null, uniqueIdentifier)
+    cb(null, uid.rnd())
   },
 })
 
