@@ -22,12 +22,37 @@ const formInputSchema = new mongoose.Schema({
   },
   minLength: {
     type: Number,
+    default: function () {
+      if (
+        this.type === 'number' ||
+        this.type == 'multi-select' ||
+        this.type === 'radio' ||
+        this.type === 'file'
+      ) {
+        return undefined
+      }
+      return 0
+    },
     required: function () {
       return this.type === 'small-text' && this.minLength !== undefined
     },
   },
   maxLength: {
     type: Number,
+    default: function () {
+      if (
+        this.type === 'number' ||
+        this.type == 'multi-select' ||
+        this.type === 'radio' ||
+        this.type === 'file'
+      ) {
+        return undefined
+      }
+      if (this.type === 'small-text' || this.type === 'email') {
+        return 255
+      }
+      return 1000
+    },
     required: function () {
       return (
         (this.type === 'small-text' || this.type === 'long-text') &&
@@ -37,12 +62,24 @@ const formInputSchema = new mongoose.Schema({
   },
   minValue: {
     type: Number,
+    default: function () {
+      if (this.type === 'number') {
+        return -1e10 // Default value for 'number' type
+      }
+      return undefined // No default value for other types
+    },
     required: function () {
       return this.type === 'number'
     },
   },
   maxValue: {
     type: Number,
+    default: function () {
+      if (this.type === 'number') {
+        return 1e10 // Default value for 'number' type
+      }
+      return undefined // No default value for other types
+    },
     required: function () {
       return this.type === 'number'
     },
@@ -55,6 +92,12 @@ const formInputSchema = new mongoose.Schema({
         value: String,
       },
     ],
+    default: function () {
+      if (this.type === 'multi-select' || this.type === 'radio') {
+        return [] // Default value for 'multi-select' and 'radio' types
+      }
+      return undefined // No default value for other types
+    },
     required: function () {
       return this.type === 'multi-select' || this.type === 'radio'
     },
@@ -66,6 +109,12 @@ const formInputSchema = new mongoose.Schema({
         type: String,
       },
     ],
+    default: function () {
+      if (this.type === 'file') {
+        return []
+      }
+      return undefined
+    },
     required: function () {
       return this.type === 'file'
     },
@@ -82,10 +131,15 @@ const formInputSchema = new mongoose.Schema({
       return this.type === 'file'
     },
   },
+  rules: {
+    type: Object, // Store customValidations as an object
+    default: {},
+    required: false,
+  },
 })
 
 // Define the Mongoose schema for FormPage
-const formPageSchema = new mongoose.Schema(
+const formSchema = new mongoose.Schema(
   {
     title: {
       type: String,
@@ -93,14 +147,6 @@ const formPageSchema = new mongoose.Schema(
       minlength: 1,
     },
     description: String,
-    created: {
-      type: Date,
-      default: Date.now,
-    },
-    modified: {
-      type: Date,
-      default: Date.now,
-    },
     expiry: Date,
     inputs: [formInputSchema],
   },
@@ -109,6 +155,6 @@ const formPageSchema = new mongoose.Schema(
   },
 )
 
-const FormPage = mongoose.model('FormPage', formPageSchema)
+const Form = mongoose.model('FormPages', formSchema)
 
-module.exports = FormPage
+module.exports = Form

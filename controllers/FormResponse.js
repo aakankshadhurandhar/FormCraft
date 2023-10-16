@@ -1,25 +1,23 @@
 const Models = require('../models')
-const {
-  validateFormResponse,
-  validateFormFilesResponse,
-} = require('../validators/validations')
+const { validateFormResponse } = require('../validators/validations')
 
-module.exports.create = async (req, res) => {
+module.exports.Create = async (req, res) => {
   try {
     const { form, files } = req
     let formValues = req.body
-
-    for (const file of files) {
-      const { fieldname } = file
-      const fileDetails = {
-        filename: file.originalname,
-        path: file.path,
-        sizeInKB: file.size / 1000,
+    if (req.files) {
+      for (const file of files) {
+        const { fieldname } = file
+        const fileDetails = {
+          filename: file.originalname,
+          path: file.path,
+          sizeInKB: file.size / 1000,
+        }
+        if (formValues[fieldname] == undefined) {
+          formValues[fieldname] = []
+        }
+        formValues[fieldname].push(fileDetails)
       }
-      if (formValues[fieldname] == undefined) {
-        formValues[fieldname] = []
-      }
-      formValues[fieldname].push(fileDetails)
     }
 
     let { error, value } = validateFormResponse(form, formValues)
@@ -28,7 +26,7 @@ module.exports.create = async (req, res) => {
     }
 
     const formResponse = new Models.FormResponse({
-      form: form._id,
+      formID: form._id,
       response: value,
     })
 
@@ -42,10 +40,10 @@ module.exports.create = async (req, res) => {
   }
 }
 
-module.exports.readAll = async (req, res) => {
+module.exports.ReadAll = async (req, res) => {
   try {
-    const formID = req.params.formId
-    const responses = await Models.FormResponse.find({ form: formID }).exec()
+    const formID = req.params.formID
+    const responses = await Models.FormResponse.find({ formID: formID }).exec()
     res.json(responses)
   } catch (error) {
     console.error(error)
@@ -53,7 +51,7 @@ module.exports.readAll = async (req, res) => {
   }
 }
 
-module.exports.read = async (req, res) => {
+module.exports.Read = async (req, res) => {
   try {
     const responseID = req.params.responseId
     const response = await Models.FormResponse.findById(responseID)

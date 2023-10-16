@@ -1,21 +1,22 @@
 const mongoose = require('mongoose')
 
-const formResponseSchema = new mongoose.Schema({
-  form: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Form',
-    required: true,
+const formResponseSchema = new mongoose.Schema(
+  {
+    formID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Form',
+      required: true,
+    },
+    // Response data as an object (map-like)
+    response: {
+      type: Object,
+      _id: false,
+      default: {},
+    },
   },
-  submittedAt: {
-    type: Date,
-    default: Date.now,
+  {
+    timestamps: true,
   },
-  // Response data as an object (map-like)
-  response: {
-    type: Object,
-    _id: false,
-    default: {},
-  },
-})
+)
 
 module.exports = mongoose.model('FormResponse', formResponseSchema)
