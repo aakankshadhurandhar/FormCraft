@@ -27,7 +27,7 @@ const fileFilter = function (req, file, cb) {
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const formID = req.params.formId
+    const formID = req.params.formID
     const uploadPath = `uploads/${formID}/`
 
     // Create the directory if it doesn't exist

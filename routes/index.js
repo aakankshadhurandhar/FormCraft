@@ -14,8 +14,8 @@ router.post('/forms', controllers.Form.Create)
 
 // Read Form
 router.get(
-  '/forms/:formId',
-  validateParamAsObjectId('formId'),
+  '/forms/:formID',
+  validateParamAsObjectId('formID'),
   fetchFormMiddleware,
   controllers.Form.Read,
 )
@@ -27,8 +27,8 @@ router.patch('/forms/:formID', controllers.Form.Update)
 
 // Submit Form Response
 router.post(
-  '/forms/:formId/responses',
-  validateParamAsObjectId('formId'),
+  '/forms/:formID/responses',
+  validateParamAsObjectId('formID'),
   fetchFormMiddleware,
   handleFileUpload,
   controllers.FormResponse.Create,
@@ -36,15 +36,15 @@ router.post(
 
 // Read All Form Responses
 router.get(
-  '/forms/:formId/responses',
-  validateParamAsObjectId('formId'),
+  '/forms/:formID/responses',
+  validateParamAsObjectId('formID'),
   controllers.FormResponse.ReadAll,
 )
 
 //Read One Form Response
 router.get(
-  '/forms/:formId/responses/:responseId',
-  validateParamAsObjectId('formId', 'responseId'),
+  '/forms/:formID/responses/:responseId',
+  validateParamAsObjectId('formID', 'responseId'),
   controllers.FormResponse.Read,
 )
 

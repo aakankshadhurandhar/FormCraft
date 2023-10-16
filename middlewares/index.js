@@ -17,9 +17,9 @@ const validateParamAsObjectId =
   }
 
 const fetchFormMiddleware = async (req, res, next) => {
-  const formId = req.params.formId
+  const formID = req.params.formID
   try {
-    const form = await Models.FormPage.findById(formId)
+    const form = await Models.FormPage.findById(formID)
     if (!form) {
       return res.status(404).json({ message: 'Form not found' })
     }

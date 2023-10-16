@@ -42,7 +42,7 @@ module.exports.Create = async (req, res) => {
 
 module.exports.ReadAll = async (req, res) => {
   try {
-    const formID = req.params.formId
+    const formID = req.params.formID
     const responses = await Models.FormResponse.find({ formID: formID }).exec()
     res.json(responses)
   } catch (error) {
