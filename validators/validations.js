@@ -18,7 +18,7 @@ const fileValidationHelper = (maxFileSizeKB, maxFilesAllowed) => {
         message: `Total file size exceeds ${maxFileSizeKB} KB`,
       })
     }
-    if (maxFilesAllowed > files.length) {
+    if (maxFilesAllowed < files.length) {
       return helpers.error('any.custom', {
         message: `File Count exceeds maximum files allowed (${maxFilesAllowed}) `,
       })
@@ -58,11 +58,19 @@ function validateFormResponse(form, formResponse) {
         baseSchema = Joi.string().email().required()
         break
       case 'multi-select':
-        baseSchema = Joi.array()
-          .items(
-            Joi.string().valid(...input.options.map((option) => option.value)),
-          )
-          .required()
+        baseSchema = Joi.alternatives(
+          Joi.array()
+            .items(
+              Joi.string().valid(
+                ...input.options.map((option) => option.value),
+              ),
+            )
+            .min(1) // Require at least one selection if it's an array
+            .required(),
+          Joi.string()
+            .valid(...input.options.map((option) => option.value))
+            .required(),
+        )
         break
       case 'radio':
         baseSchema = Joi.string()

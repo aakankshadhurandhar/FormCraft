@@ -7,8 +7,11 @@ const fileFilter = function (req, file, cb) {
     (input) => input.type === 'file' && input.label == file.fieldname,
   )
 
+  console.log(10, req.form)
+  console.log(11, file)
+
   if (!fileInput) {
-    return cb(new Error('File upload not allowed some form values'), false)
+    return cb(new Error('File upload not allowed for some form values'), false)
   }
 
   if (!fileInput.fileTypes.includes(file.mimetype)) {
