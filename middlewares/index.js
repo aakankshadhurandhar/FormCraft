@@ -16,10 +16,13 @@ const validateParamAsObjectId =
     next()
   }
 
-const fetchFormMiddleware = async (req, res, next) => {
-  const formId = req.params.formId
+const fetchForm = async (req, res, next) => {
+  const formID = req.params.formID
+  if (!isValidObjectId(formID)) {
+    return res.status(400).json({ message: `Invalid formID` })
+  }
   try {
-    const form = await Models.FormPage.findById(formId)
+    const form = await Models.FormPage.findById(formID)
     if (!form) {
       return res.status(404).json({ message: 'Form not found' })
     }
@@ -33,6 +36,6 @@ const fetchFormMiddleware = async (req, res, next) => {
 
 module.exports = {
   validateParamAsObjectId,
-  fetchFormMiddleware,
+  fetchForm,
   handleFileUpload,
 }

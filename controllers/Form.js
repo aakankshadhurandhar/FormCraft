@@ -1,16 +1,11 @@
 const Models = require('../models')
-const {
-  validateForm,
-  validateUpdateForm,
-} = require('../validators/validations')
+const { validateForm } = require('../validators/validations')
 
 module.exports.Create = async (req, res) => {
   try {
     const { error, value } = validateForm(req.body)
 
     if (error) {
-      // If validation fails, return a 400 Bad Request response with the validation error details
-
       return res.status(400).json({
         statusCode: 400,
         message: error.details.map((detail) => detail.message),
@@ -18,7 +13,6 @@ module.exports.Create = async (req, res) => {
       })
     }
     const { title, description, inputs } = value
-
     const form = new Models.FormPage({
       title,
       description,
@@ -35,46 +29,38 @@ module.exports.Create = async (req, res) => {
 
 module.exports.Read = async (req, res) => {
   try {
-    const formID = req.params.formId
-    const form = await Models.FormPage.findById(formID)
-    console.log(formID)
-    if (!form) {
-      return res
-        .status(404)
-        .json({ statusCode: 404, message: 'Form not found' })
-    }
-
+    const form = req.form
     res.status(200).json(form)
   } catch (err) {
     console.error(err)
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
   }
 }
+
 module.exports.Update = async (req, res) => {
-  const formID = req.params.formID
-  const updatedFormData = req.body
   try {
-    const { error } = validateUpdateForm(updatedFormData)
+    const { error, value } = validateForm(req.body)
 
     if (error) {
-      // If validation fails, return a 400 Bad Request response with the validation error details
-
       return res.status(400).json({
         statusCode: 400,
         message: error.details.map((detail) => detail.message),
+        error,
       })
     }
-    const form = await Models.FormPage.findByIdAndUpdate(
-      formID,
-      updatedFormData,
-      { new: true },
-    )
+    const existingForm = req.form
 
-    if (!form) {
-      return res.status(404).json({ error: 'Form not found' })
-    }
+    const { title, description, inputs } = value
+    existingForm.title = title
+    existingForm.description = description
+    existingForm.inputs = inputs
 
-    res.json({ statusCode: 200, message: 'Form updated successfully', form })
+    const updatedForm = await existingForm.save()
+    res.json({
+      statusCode: 200,
+      message: 'Form updated successfully',
+      updatedForm,
+    })
   } catch (err) {
     console.error(err)
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
@@ -83,12 +69,10 @@ module.exports.Update = async (req, res) => {
 
 module.exports.Delete = async (req, res) => {
   try {
-    const formID = req.params.formID
-    const deletedForm = await Models.FormPage.findByIdAndRemove(formID)
-    if (!deletedForm) {
-      return res.status(404).json({ message: 'Resource not found' })
-    }
-    res.json({ message: 'Resource deleted successfully' })
+    let form = req.form
+    form = await form.deleteOne()
+    Models.FormResponse.deleteMany({ formID: form._id })
+    res.status(200).json({ message: 'Resource deleted successfully' })
   } catch (err) {
     console.error(err)
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
