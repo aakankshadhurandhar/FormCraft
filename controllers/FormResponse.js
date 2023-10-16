@@ -1,5 +1,5 @@
 const Models = require('../models')
-const { UploadToS3 } = require('../services')
+const { UploadToS3 } = require('../services/S3')
 const { validateFormResponse } = require('../validators/validations')
 
 module.exports.Create = async (req, res) => {
@@ -30,7 +30,6 @@ module.exports.Create = async (req, res) => {
       formID: form._id,
       response: value,
     })
-
     // Save the form response
     const savedResponse = await formResponse.save()
 
