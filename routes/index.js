@@ -5,9 +5,9 @@ const router = express.Router()
 const controllers = require('../controllers')
 const {
   validateParamAsObjectId,
-  fetchFormMiddleware,
+  fetchForm,
+  handleFileUpload,
 } = require('../middlewares')
-const handleFileUpload = require('../middlewares/handleFileUpload')
 
 // Create Form
 router.post('/forms', controllers.Form.Create)
@@ -16,20 +16,19 @@ router.post('/forms', controllers.Form.Create)
 router.get(
   '/forms/:formID',
   validateParamAsObjectId('formID'),
-  fetchFormMiddleware,
+  fetchForm,
   controllers.Form.Read,
 )
 
 //Delete Form
-router.delete('/forms/:formID', controllers.Form.Delete)
+router.delete('/forms/:formID', fetchForm, controllers.Form.Delete)
 //Update Form
-router.patch('/forms/:formID', controllers.Form.Update)
+router.put('/forms/:formID', fetchForm, controllers.Form.Update)
 
 // Submit Form Response
 router.post(
   '/forms/:formID/responses',
-  validateParamAsObjectId('formID'),
-  fetchFormMiddleware,
+  fetchForm,
   handleFileUpload,
   controllers.FormResponse.Create,
 )
