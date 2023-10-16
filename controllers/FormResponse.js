@@ -1,4 +1,5 @@
 const Models = require('../models')
+const { UploadToS3 } = require('../services')
 const { validateFormResponse } = require('../validators/validations')
 
 module.exports.Create = async (req, res) => {
@@ -24,7 +25,7 @@ module.exports.Create = async (req, res) => {
     if (error) {
       return res.status(400).json({ error })
     }
-
+    UploadToS3(req.files, form._id)
     const formResponse = new Models.FormResponse({
       formID: form._id,
       response: value,

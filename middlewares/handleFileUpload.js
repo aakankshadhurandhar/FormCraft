@@ -3,14 +3,18 @@ const fs = require('fs')
 const { default: ShortUniqueId } = require('short-unique-id')
 const uid = new ShortUniqueId({ length: 5 })
 
+function getExtension(originalname) {
+  const parts = originalname.split('.')
+  const extension = parts[parts.length - 1]
+
+  return extension
+}
+
 const fileFilter = function (req, file, cb) {
   const formSchema = req.form
   const fileInput = formSchema.inputs.find(
     (input) => input.type === 'file' && input.label == file.fieldname,
   )
-
-  console.log(10, req.form)
-  console.log(11, file)
 
   if (!fileInput) {
     return cb(new Error('File upload not allowed for some form values'), false)
@@ -37,7 +41,8 @@ const storage = multer.diskStorage({
     cb(null, uploadPath)
   },
   filename: function (req, file, cb) {
-    cb(null, uid.rnd())
+    const modifiedName = uid.rnd() + '.' + getExtension(file.originalname)
+    cb(null, modifiedName)
   },
 })
 

@@ -12,7 +12,8 @@ function isValidRegex(pattern) {
 
 const fileValidationHelper = (maxFileSizeKB, maxFilesAllowed) => {
   return (files, helpers) => {
-    const totalSizeKB = files.reduce((total, file) => total + file.sizeinKB, 0)
+    const totalSizeKB = files.reduce((total, file) => total + file.sizeInKB, 0)
+
     if (totalSizeKB > maxFileSizeKB) {
       return helpers.error('any.custom', {
         message: `Total file size exceeds ${maxFileSizeKB} KB`,
@@ -84,7 +85,14 @@ function validateFormResponse(form, formResponse) {
           .items(
             Joi.object({
               filename: Joi.string().required(),
-              path: Joi.string().required(),
+              path: Joi.string()
+                .required()
+                .custom((value, helpers) => {
+                  const prefixedPath =
+                    'https://formcraft-responses.s3.ap-south-1.amazonaws.com/' +
+                    value
+                  return prefixedPath
+                }),
               sizeInKB: Joi.number().required(),
             }),
           )

@@ -28,10 +28,10 @@ const uploadToS3 = (file) => {
   })
 }
 
-module.exports.UploadToS3 = async (files, formID) => {
+module.exports.UploadToS3 = async (files) => {
   try {
     if (files) {
-      const uploadPromises = files.map((file) => uploadToS3(file, formID))
+      const uploadPromises = files.map((file) => uploadToS3(file))
       const s3Urls = await Promise.all(uploadPromises)
       return s3Urls
     }
