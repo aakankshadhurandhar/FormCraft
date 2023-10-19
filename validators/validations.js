@@ -1,6 +1,5 @@
 const Joi = require('joi')
 
-
 function validateFormResponse(form, formResponse) {
   const inputSchema = {}
   form.inputs.forEach((input) => {
@@ -55,8 +54,8 @@ function validateFormResponse(form, formResponse) {
               message: `Total file size exceeds ${maxFileSizeKB} KB`,
             })
           }
-          if (input.maxFilesAllowed > files.length){
-            return helpers.error('any.custom',{
+          if (input.maxFilesAllowed > files.length) {
+            return helpers.error('any.custom', {
               message: `File Count exceeds maximum files allowed (${maxFilesAllowed}) `,
             })
           }
@@ -107,8 +106,14 @@ function validateForm(formBody) {
         then: Joi.required(),
       }),
     fileTypes: Joi.array().items(Joi.string()), // Validate allowed file types
-    maxFileSizeinKB: Joi.number().when('type', { is: 'file', then: Joi.required() }),
-    maxFilesAllowed: Joi.number().when('type', { is: 'file', then: Joi.required() }), // Validate maximum file size
+    maxFileSizeinKB: Joi.number().when('type', {
+      is: 'file',
+      then: Joi.required(),
+    }),
+    maxFilesAllowed: Joi.number().when('type', {
+      is: 'file',
+      then: Joi.required(),
+    }), // Validate maximum file size
   })
 
   // Define a Joi schema for the form page
@@ -171,15 +176,19 @@ function validateUpdateForm(formBody) {
 
   return formPageSchema.validate(formBody)
 }
-function validateUserSchema(userBody){
-const userRegistrationSchema = Joi.object({
-  user_name: Joi.string().min(3).max(30).required(),
-  password: Joi.string().min(6).required(),
-  email: Joi.string().email().required(),
+function validateUserSchema(userBody) {
+  const userRegistrationSchema = Joi.object({
+    user_name: Joi.string().min(3).max(30).required(),
+    password: Joi.string().min(6).required(),
+    email: Joi.string().email().required(),
+  })
 
-});
-
-return userRegistrationSchema.validate(userBody)
+  return userRegistrationSchema.validate(userBody)
 }
 
-module.exports = { validateForm, validateFormResponse, validateUpdateForm,validateUserSchema }
+module.exports = {
+  validateForm,
+  validateFormResponse,
+  validateUpdateForm,
+  validateUserSchema,
+}

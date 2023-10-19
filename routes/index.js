@@ -3,9 +3,11 @@ const express = require('express')
 const router = express.Router()
 
 const controllers = require('../controllers')
-const { validateParamAsObjectId, fetchFormMiddleware } = require('../middlewares')
-const handleFileUpload = require('../middlewares/handleFileUpload');
-
+const {
+  validateParamAsObjectId,
+  fetchFormMiddleware,
+} = require('../middlewares')
+const handleFileUpload = require('../middlewares/handleFileUpload')
 
 // Create Form
 router.post('/forms', controllers.Form.create)
@@ -13,7 +15,8 @@ router.post('/forms', controllers.Form.create)
 // Read Form
 router.get(
   '/forms/:formId',
-  validateParamAsObjectId('formId'),fetchFormMiddleware,
+  validateParamAsObjectId('formId'),
+  fetchFormMiddleware,
   controllers.Form.read,
 )
 
@@ -24,7 +27,9 @@ router.put('/forms/:formID', controllers.Form.update)
 // Submit Form Response
 router.post(
   '/forms/:formId/responses',
-  validateParamAsObjectId('formId'),fetchFormMiddleware,handleFileUpload,
+  validateParamAsObjectId('formId'),
+  fetchFormMiddleware,
+  handleFileUpload,
   controllers.FormResponse.create,
 )
 
@@ -43,6 +48,6 @@ router.get(
 )
 
 //Create New User
-router.post('/register',controllers.Users.registerUser)
+router.post('/register', controllers.Users.registerUser)
 
 module.exports = router

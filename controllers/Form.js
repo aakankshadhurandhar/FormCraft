@@ -67,7 +67,7 @@ module.exports.update = async (req, res) => {
       updatedFormData,
       { new: true },
     )
-  
+
     if (!form) {
       return res.status(404).json({ error: 'Form not found' })
     }

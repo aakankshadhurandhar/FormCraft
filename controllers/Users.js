@@ -9,16 +9,16 @@ module.exports.registerUser = async (req, res) => {
     if (error) {
       return res.status(400).json({ error: error.details[0].message })
     }
-    const user =await  users.findOne({email})
+    const user = await users.findOne({ email })
     if (user) {
       return res.status(409).json({ error: 'Email already exists' })
     }
     const hashedPassword = await hashPassword(password)
-    const newUser = new users({ user_name, password: hashedPassword , email})
+    const newUser = new users({ user_name, password: hashedPassword, email })
     await newUser.save()
     res.status(201).json({ message: 'User registered successfully' })
-  } catch(err) {
-    console.log(err);
+  } catch (err) {
+    console.log(err)
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
   }
 }

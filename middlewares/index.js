@@ -1,5 +1,5 @@
-const {isValidObjectId} = require("mongoose");
-const Models = require("../models/");
+const { isValidObjectId } = require('mongoose')
+const Models = require('../models/')
 
 // Validate ObjectId parameters
 const validateParamAsObjectId =
@@ -15,21 +15,19 @@ const validateParamAsObjectId =
     next()
   }
 
-
 const fetchFormMiddleware = async (req, res, next) => {
-  const formId = req.params.formId;
+  const formId = req.params.formId
   try {
-    const form = await Models.FormPage.findById(formId);
+    const form = await Models.FormPage.findById(formId)
     if (!form) {
-      return res.status(404).json({ message: 'Form not found' });
+      return res.status(404).json({ message: 'Form not found' })
     }
-    req.form= form;
-    next(); 
+    req.form = form
+    next()
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Internal server error' });
+    console.error(err)
+    return res.status(500).json({ message: 'Internal server error' })
   }
-};
+}
 
-
-module.exports = { validateParamAsObjectId, fetchFormMiddleware };
+module.exports = { validateParamAsObjectId, fetchFormMiddleware }
