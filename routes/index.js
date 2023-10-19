@@ -42,5 +42,7 @@ router.get(
   controllers.FormResponse.read,
 )
 
+//Create New User
+router.post('/register',controllers.Users.registerUser)
 
 module.exports = router

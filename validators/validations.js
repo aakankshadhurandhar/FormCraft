@@ -171,5 +171,15 @@ function validateUpdateForm(formBody) {
 
   return formPageSchema.validate(formBody)
 }
+function validateUserSchema(userBody){
+const userRegistrationSchema = Joi.object({
+  user_name: Joi.string().min(3).max(30).required(),
+  password: Joi.string().min(6).required(),
+  email: Joi.string().email().required(),
 
-module.exports = { validateForm, validateFormResponse, validateUpdateForm }
+});
+
+return userRegistrationSchema.validate(userBody)
+}
+
+module.exports = { validateForm, validateFormResponse, validateUpdateForm,validateUserSchema }
