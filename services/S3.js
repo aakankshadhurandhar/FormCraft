@@ -16,7 +16,7 @@ function getKey(path) {
 }
 
 // Function to delete a file from S3
-const deleteFromS3 = (key) => {
+const deleteObjectFromS3 = (key) => {
   console.log(key)
   return new Promise((resolve, reject) => {
     const params = {
@@ -25,21 +25,19 @@ const deleteFromS3 = (key) => {
     }
     s3.deleteObject(params, (err, data) => {
       if (err) {
-        console.log(28, err, data)
         reject(err)
       } else {
-        console.log(31, err, data)
         resolve()
       }
     })
   })
 }
 
-module.exports.DeleteFromS3 = async (files) => {
+module.exports.DeleteFilesFromS3 = async (files) => {
   try {
     if (files && Array.isArray(files) && files.length > 0) {
       const deletePromises = files.map((file) =>
-        deleteFromS3(getKey(file.path)),
+        deleteObjectFromS3(getKey(file.path)),
       )
       await Promise.all(deletePromises)
     }
@@ -47,6 +45,30 @@ module.exports.DeleteFromS3 = async (files) => {
     console.error(err)
     throw err
   }
+}
+
+// Write a function that deletes files in a directory S3 recursively
+
+module.exports.DeleteFormDirectory = async (formID) => {
+  const params = {
+    Bucket: bucketName,
+    Prefix: `uploads/${formID}/`,
+  }
+  const listedObjects = await s3.listObjectsV2(params).promise()
+
+  if (listedObjects.Contents.length === 0) return
+  const deleteParams = {
+    Bucket: bucketName,
+    Delete: { Objects: [] },
+  }
+
+  listedObjects.Contents.forEach(({ Key }) => {
+    deleteParams.Delete.Objects.push({ Key })
+  })
+
+  await s3.deleteObjects(deleteParams).promise()
+
+  if (listedObjects.IsTruncated) await deleteFormDirectory(formID)
 }
 
 const uploadToS3 = (file) => {

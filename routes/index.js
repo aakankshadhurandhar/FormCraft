@@ -47,4 +47,10 @@ router.get(
   controllers.FormResponse.Read,
 )
 
+// Delete Form Response
+router.delete(
+  '/forms/:formID/responses/:responseId',
+  validateParamAsObjectId('formID', 'responseId'),
+  controllers.FormResponse.Delete,
+)
 module.exports = router

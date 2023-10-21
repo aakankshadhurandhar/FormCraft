@@ -1,4 +1,5 @@
 const Models = require('../models')
+const { deleteFormDirectory } = require('../services/S3')
 const { validateForm } = require('../validators/validations')
 
 module.exports.Create = async (req, res) => {
@@ -71,8 +72,7 @@ module.exports.Update = async (req, res) => {
 module.exports.Delete = async (req, res) => {
   try {
     let form = req.form
-    form = await form.deleteOne()
-    Models.FormResponse.deleteMany({ formID: form._id })
+    await form.deleteOne()
     res.status(200).json({ message: 'Resource deleted successfully' })
   } catch (err) {
     console.error(err)

@@ -61,3 +61,16 @@ module.exports.Read = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' })
   }
 }
+
+// Delete a form response
+module.exports.Delete = async (req, res) => {
+  try {
+    const responseID = req.params.responseId
+    const response = await Models.FormResponse.findById(responseID)
+    await response.deleteOne()
+    res.json({ message: 'Form response deleted successfully' })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'Internal server error' })
+  }
+}

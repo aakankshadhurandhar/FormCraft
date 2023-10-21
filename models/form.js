@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const { DeleteFormDirectory } = require('../services/S3')
 
 // Form inputs Schema
 const formInputSchema = new mongoose.Schema({
@@ -152,6 +153,17 @@ const formSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+  },
+)
+
+// Delete all responses to a form when the form is deleted
+formSchema.pre(
+  'deleteOne',
+  { document: true, query: true },
+  async function (next) {
+    await this.model('FormResponse').deleteMany({ formID: this._id })
+    await DeleteFormDirectory(this._id)
+    next()
   },
 )
 
