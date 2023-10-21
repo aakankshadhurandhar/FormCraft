@@ -10,12 +10,21 @@ aws.config.update({
 const s3 = new aws.S3()
 const bucketName = process.env.S3_BUCKET_NAME
 
-function getKey(path) {
+/**
+ * Returns the key of a file in S3
+ * @param {string} url - The url of the file in S3
+ * @returns {string} - The key of the file
+ */
+function getKey(url) {
   const S3URL = 'https://formcraft-responses.s3.ap-south-1.amazonaws.com/'
-  return path.replace(S3URL, '')
+  return url.replace(S3URL, '')
 }
 
-// Function to delete a file from S3
+/**
+ * Deletes a file from S3
+ * @param {string} key - The key of the file to delete
+ * @returns {Promise<void>} - A promise that resolves when the file is deleted
+ */
 const deleteObjectFromS3 = (key) => {
   console.log(key)
   return new Promise((resolve, reject) => {
@@ -33,6 +42,11 @@ const deleteObjectFromS3 = (key) => {
   })
 }
 
+/**
+ * Deletes multiple files from S3
+ * @param {Array} files - An array of files to delete
+ * @returns {Promise<void>} - A promise that resolves when all files are deleted
+ */
 module.exports.DeleteFilesFromS3 = async (files) => {
   try {
     if (files && Array.isArray(files) && files.length > 0) {
@@ -47,8 +61,11 @@ module.exports.DeleteFilesFromS3 = async (files) => {
   }
 }
 
-// Write a function that deletes files in a directory S3 recursively
-
+/**
+ * Deletes a directory and all its contents from S3
+ * @param {string} formID - The ID of the form whose directory is to be deleted
+ * @returns {Promise<void>} - A promise that resolves when the directory is deleted
+ */
 module.exports.DeleteFormDirectory = async (formID) => {
   const params = {
     Bucket: bucketName,
@@ -71,11 +88,16 @@ module.exports.DeleteFormDirectory = async (formID) => {
   if (listedObjects.IsTruncated) await deleteFormDirectory(formID)
 }
 
+/**
+ * Uploads a file to S3
+ * @param {Object} file - The file to upload
+ * @returns {Promise<string>} - A promise that resolves with the S3 URL of the uploaded file
+ */
 const uploadToS3 = (file) => {
   return new Promise((resolve, reject) => {
     const params = {
       Bucket: bucketName,
-      Key: file.path, // Use the file path as the key
+      Key: file.path,
       Body: fs.createReadStream(file.path),
     }
 
@@ -83,12 +105,17 @@ const uploadToS3 = (file) => {
       if (err) {
         reject(err)
       } else {
-        resolve(data.Location) // Return the S3 URL of the uploaded file
+        resolve(data.Location)
       }
     })
   })
 }
 
+/**
+ * Uploads multiple files to S3
+ * @param {Array} files - An array of files to upload
+ * @returns {Promise<Array>} - A promise that resolves with an array of S3 URLs of the uploaded files
+ */
 module.exports.UploadToS3 = async (files) => {
   try {
     if (files) {

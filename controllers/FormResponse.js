@@ -2,6 +2,15 @@ const Models = require('../models')
 const { UploadToS3 } = require('../services/S3')
 const { validateFormResponse } = require('../validators/validations')
 
+/**
+ * Creates a new form response.
+ * @param {Object} req - The request object.
+ * @param {Object} req.body - The form response data.
+ * @param {Object} req.form - The form object.
+ * @param {Array} req.files - The uploaded files.
+ * @param {Object} res - The response object.
+ * @returns {Object} The saved form response.
+ */
 module.exports.Create = async (req, res) => {
   try {
     const { form, files } = req
@@ -40,6 +49,13 @@ module.exports.Create = async (req, res) => {
   }
 }
 
+/**
+ * Retrieves all form responses for a given form.
+ * @param {Object} req - The request object.
+ * @param {string} req.params.formID - The ID of the form.
+ * @param {Object} res - The response object.
+ * @returns {Array} The form responses for the given form.
+ */
 module.exports.ReadAll = async (req, res) => {
   try {
     const formID = req.params.formID
@@ -51,6 +67,13 @@ module.exports.ReadAll = async (req, res) => {
   }
 }
 
+/**
+ * Retrieves a single form response by ID.
+ * @param {Object} req - The request object.
+ * @param {string} req.params.responseId - The ID of the form response.
+ * @param {Object} res - The response object.
+ * @returns {Object} The form response with the given ID.
+ */
 module.exports.Read = async (req, res) => {
   try {
     const responseID = req.params.responseId
@@ -62,7 +85,13 @@ module.exports.Read = async (req, res) => {
   }
 }
 
-// Delete a form response
+/**
+ * Deletes a form response by ID.
+ * @param {Object} req - The request object.
+ * @param {string} req.params.responseId - The ID of the form response.
+ * @param {Object} res - The response object.
+ * @returns {Object} A success message.
+ */
 module.exports.Delete = async (req, res) => {
   try {
     const responseID = req.params.responseId

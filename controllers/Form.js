@@ -2,6 +2,13 @@ const Models = require('../models')
 const { deleteFormDirectory } = require('../services/S3')
 const { validateForm } = require('../validators/validations')
 
+/**
+ * Creates a new form page.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Object} The saved form page.
+ */
 module.exports.Create = async (req, res) => {
   try {
     const { error, value } = validateForm(req.body)
@@ -13,6 +20,7 @@ module.exports.Create = async (req, res) => {
         error,
       })
     }
+
     const { title, description, inputs } = value
     const form = new Models.FormPage({
       title,
@@ -28,6 +36,13 @@ module.exports.Create = async (req, res) => {
   }
 }
 
+/**
+ * Retrieves a form page.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Object} The form page.
+ */
 module.exports.Read = async (req, res) => {
   try {
     const form = req.form
@@ -38,6 +53,13 @@ module.exports.Read = async (req, res) => {
   }
 }
 
+/**
+ * Updates an existing form page.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Object} The updated form page.
+ */
 module.exports.Update = async (req, res) => {
   try {
     const { error, value } = validateForm(req.body)
@@ -49,9 +71,10 @@ module.exports.Update = async (req, res) => {
         error,
       })
     }
-    const existingForm = req.form
 
+    const existingForm = req.form
     const { title, description, inputs } = value
+
     existingForm.title = title
     existingForm.description = description
     existingForm.inputs = inputs
@@ -68,7 +91,13 @@ module.exports.Update = async (req, res) => {
   }
 }
 
-//TODO: Delete Files from S3 of form responses
+/**
+ * Deletes a form page.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Object} A success message.
+ */
 module.exports.Delete = async (req, res) => {
   try {
     let form = req.form
