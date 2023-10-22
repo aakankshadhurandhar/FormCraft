@@ -26,7 +26,6 @@ function getKey(url) {
  * @returns {Promise<void>} - A promise that resolves when the file is deleted
  */
 const deleteObjectFromS3 = (key) => {
-  console.log(key)
   return new Promise((resolve, reject) => {
     const params = {
       Bucket: bucketName,

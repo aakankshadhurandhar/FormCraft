@@ -40,9 +40,8 @@ module.exports.Create = async (req, res) => {
     if (error) {
       return res.status(400).json({ error })
     }
-    
+
     UploadToS3(files)
-    console.log(responseID)
     const formResponse = new Models.FormResponse({
       _id: responseID,
       formID: form._id,

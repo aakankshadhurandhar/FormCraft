@@ -101,9 +101,8 @@ function validateFormResponse(form, formResponse) {
           .items(
             Joi.object({
               filename: Joi.string().required(),
-              path: Joi.string()
-                .required(),
-                
+              path: Joi.string().required(),
+
               sizeInKB: Joi.number().required(),
             }),
           )
