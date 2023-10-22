@@ -102,13 +102,8 @@ function validateFormResponse(form, formResponse) {
             Joi.object({
               filename: Joi.string().required(),
               path: Joi.string()
-                .required()
-                .custom((value, helpers) => {
-                  const prefixedPath =
-                    'https://formcraft-responses.s3.ap-south-1.amazonaws.com/' +
-                    value
-                  return prefixedPath
-                }),
+                .required(),
+                
               sizeInKB: Joi.number().required(),
             }),
           )

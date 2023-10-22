@@ -1,3 +1,4 @@
+const { default: mongoose } = require('mongoose')
 const Models = require('../models')
 const { UploadToS3 } = require('../services/S3')
 const { validateFormResponse } = require('../validators/validations')
@@ -14,32 +15,40 @@ const { validateFormResponse } = require('../validators/validations')
 module.exports.Create = async (req, res) => {
   try {
     const { form, files } = req
+    const responseID = new mongoose.Types.ObjectId().toHexString()
     let formValues = req.body
-    if (req.files) {
-      for (const file of files) {
-        const { fieldname } = file
-        const fileDetails = {
-          filename: file.originalname,
-          path: file.path,
-          sizeInKB: file.size / 1000,
-        }
-        if (formValues[fieldname] == undefined) {
-          formValues[fieldname] = []
-        }
-        formValues[fieldname].push(fileDetails)
+
+    for (let i = 0; i < files.length; i++) {
+      files[i].key = files[i].path.replace(
+        'uploads',
+        `uploads/${form._id}/${responseID}`,
+      )
+      const { fieldname, originalname, key, size } = files[i]
+
+      const fileDetails = {
+        filename: originalname,
+        path: 'https://formcraft-responses.s3.ap-south-1.amazonaws.com/' + key,
+        sizeInKB: size / 1000,
       }
+      if (formValues[fieldname] == undefined) {
+        formValues[fieldname] = []
+      }
+      formValues[fieldname].push(fileDetails)
     }
 
     let { error, value } = validateFormResponse(form, formValues)
     if (error) {
       return res.status(400).json({ error })
     }
-    UploadToS3(req.files, form._id)
+    
+    UploadToS3(files)
+    console.log(responseID)
     const formResponse = new Models.FormResponse({
+      _id: responseID,
       formID: form._id,
       response: value,
     })
-    // Save the form response
+
     const savedResponse = await formResponse.save()
 
     res.status(201).json(savedResponse)

@@ -55,10 +55,7 @@ const storage = multer.diskStorage({
    * @returns {Function} The callback function with the upload path.
    */
   destination: function (req, file, cb) {
-    const formID = req.params.formID
-    const uploadPath = `uploads/${formID}/`
-
-    // Create the directory if it doesn't exist
+    const uploadPath = `uploads/`
     fs.mkdirSync(uploadPath, { recursive: true })
     cb(null, uploadPath)
   },

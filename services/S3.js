@@ -97,14 +97,21 @@ const uploadToS3 = (file) => {
   return new Promise((resolve, reject) => {
     const params = {
       Bucket: bucketName,
-      Key: file.path,
+      Key: file.key,
       Body: fs.createReadStream(file.path),
     }
 
     s3.upload(params, (err, data) => {
+      // Delete file after uploading to S3
       if (err) {
         reject(err)
       } else {
+        fs.unlink(file.path, (err) => {
+          if (err) {
+            console.error(err)
+            return
+          }
+        })
         resolve(data.Location)
       }
     })
