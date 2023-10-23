@@ -1,6 +1,10 @@
 const Joi = require('joi')
 
-// Function to validate a regular expression pattern
+/**
+ * Checks if a given pattern is a valid regular expression
+ * @param {string} pattern - The pattern to validate
+ * @returns {boolean} - Returns true if the pattern is a valid regular expression, false otherwise
+ */
 function isValidRegex(pattern) {
   try {
     new RegExp(pattern)
@@ -10,9 +14,16 @@ function isValidRegex(pattern) {
   }
 }
 
+/**
+ * Returns a validation function for file uploads
+ * @param {number} maxFileSizeKB - The maximum file size allowed in kilobytes
+ * @param {number} maxFilesAllowed - The maximum number of files allowed
+ * @returns {function} - Returns a validation function that takes an array of files and returns an error if the total file size or number of files exceeds the specified limits
+ */
 const fileValidationHelper = (maxFileSizeKB, maxFilesAllowed) => {
   return (files, helpers) => {
-    const totalSizeKB = files.reduce((total, file) => total + file.sizeinKB, 0)
+    const totalSizeKB = files.reduce((total, file) => total + file.sizeInKB, 0)
+
     if (totalSizeKB > maxFileSizeKB) {
       return helpers.error('any.custom', {
         message: `Total file size exceeds ${maxFileSizeKB} KB`,
@@ -27,6 +38,12 @@ const fileValidationHelper = (maxFileSizeKB, maxFilesAllowed) => {
   }
 }
 
+/**
+ * Validates a form response against a given form schema
+ * @param {object} form - The form schema to validate against
+ * @param {object} formResponse - The form response to validate
+ * @returns {object} - Returns an object with an error property if the form response is invalid, otherwise returns the validated form response
+ */
 function validateFormResponse(form, formResponse) {
   const inputSchema = {}
   form.inputs.forEach((input) => {
@@ -85,6 +102,7 @@ function validateFormResponse(form, formResponse) {
             Joi.object({
               filename: Joi.string().required(),
               path: Joi.string().required(),
+
               sizeInKB: Joi.number().required(),
             }),
           )
@@ -118,6 +136,11 @@ function validateFormResponse(form, formResponse) {
   return formSchema.validate(formResponse)
 }
 
+/**
+ * Validates a form schema
+ * @param {object} formBody - The form schema to validate
+ * @returns {object} - Returns an object with an error property if the form schema is invalid, otherwise returns the validated form schema
+ */
 function validateForm(formBody) {
   const inputOptionSchema = Joi.object({
     label: Joi.string().required(),
