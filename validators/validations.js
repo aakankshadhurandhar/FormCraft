@@ -201,6 +201,5 @@ function validateUserSchema(userBody) {
 module.exports = {
   validateForm,
   validateFormResponse,
-  validateUpdateForm,
   validateUserSchema,
 }
