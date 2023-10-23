@@ -1,6 +1,6 @@
 require('dotenv').config()
 const express = require('express')
-const passport = require('passport');
+const passport = require('passport')
 const mongoose = require('mongoose')
 const formRouter = require('./routes/')
 const app = express()
@@ -8,9 +8,9 @@ const port = process.env.PORT || 3000
 const bodyParser = require('body-parser')
 const bcrypt = require('bcrypt')
 const mongoString = process.env.DATABASE_URL
-const crypto = require('crypto');
-const session = require('express-session');
-const initializePassport = require('./config/passport');
+const crypto = require('crypto')
+const session = require('express-session')
+const initializePassport = require('./config/passport')
 mongoose.connect(mongoString, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -23,24 +23,26 @@ database.on('error', (error) => {
 database.once('connected', () => {
   console.log('Database Connected')
 })
-initializePassport(passport);
+initializePassport(passport)
 const generateSecretKey = () => {
-  return crypto.randomBytes(32).toString('hex');
-};
+  return crypto.randomBytes(32).toString('hex')
+}
 
-const secretKey = generateSecretKey();
+const secretKey = generateSecretKey()
 
-app.use(session({
-  secret: secretKey, 
-  resave: false,
-  saveUninitialized: false,
-}));
+app.use(
+  session({
+    secret: secretKey,
+    resave: false,
+    saveUninitialized: false,
+  }),
+)
 // Middleware
 app.use(express.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(passport.initialize())
+app.use(passport.session())
 app.use('/', formRouter)
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`)
