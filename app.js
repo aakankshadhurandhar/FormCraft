@@ -6,9 +6,7 @@ const formRouter = require('./routes/')
 const app = express()
 const port = process.env.PORT || 3000
 const bodyParser = require('body-parser')
-const bcrypt = require('bcrypt')
 const mongoString = process.env.DATABASE_URL
-const crypto = require('crypto')
 const session = require('express-session')
 const initializePassport = require('./config/passport')
 mongoose.connect(mongoString, {
@@ -24,11 +22,8 @@ database.once('connected', () => {
   console.log('Database Connected')
 })
 initializePassport(passport)
-const generateSecretKey = () => {
-  return crypto.randomBytes(32).toString('hex')
-}
 
-const secretKey = generateSecretKey()
+const secretKey = process.env.PASSPORT_SECRET_KEY
 
 app.use(
   session({
