@@ -35,22 +35,18 @@ module.exports.registerUser = async (req, res) => {
 function loginUser(req, res) {
   passport.authenticate('local', (err, user) => {
     if (err || !user) {
-      return res
-        .status(500)
-        .json({
-          message: 'Registration successful, but login failed',
-          error: err,
-        })
+      return res.status(500).json({
+        message: 'Registration successful, but login failed',
+        error: err,
+      })
     }
 
     req.logIn(user, async (err) => {
       if (err) {
-        return res
-          .status(500)
-          .json({
-            message: 'Registration successful, but login failed',
-            error: err,
-          })
+        return res.status(500).json({
+          message: 'Registration successful, but login failed',
+          error: err,
+        })
       }
       const token = generateToken(user)
       try {
@@ -60,13 +56,11 @@ function loginUser(req, res) {
           token,
         })
       } catch (error) {
-        return res
-          .status(500)
-          .json({
-            message:
-              'Registration successful, but unable to retrieve user details',
-            error: error,
-          })
+        return res.status(500).json({
+          message:
+            'Registration successful, but unable to retrieve user details',
+          error: error,
+        })
       }
     })
   })(req, res)
