@@ -211,5 +211,5 @@ module.exports = {
   validateForm,
   validateFormResponse,
   validateUserRegisterSchema,
-  validateUserLoginSchema
+  validateUserLoginSchema,
 }

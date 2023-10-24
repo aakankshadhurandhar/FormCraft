@@ -51,6 +51,6 @@ router.get(
 router.post('/register', controllers.Users.registerUser)
 
 //Login existing user
-router.post('/login',controllers.Users.loginUser)
+router.post('/login', controllers.Users.loginUser)
 
 module.exports = router
