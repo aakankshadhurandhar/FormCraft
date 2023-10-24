@@ -188,7 +188,7 @@ function validateForm(formBody) {
 
   return formPageSchema.validate(formBody)
 }
-function validateUserSchema(userBody) {
+function validateUserRegisterSchema(userBody) {
   const userRegistrationSchema = Joi.object({
     user_name: Joi.string().min(3).max(30).required(),
     password: Joi.string().min(6).required(),
@@ -197,9 +197,19 @@ function validateUserSchema(userBody) {
 
   return userRegistrationSchema.validate(userBody)
 }
+function validateUserLoginSchema(userBody) {
+  const userRegistrationSchema = Joi.object({
+    user_name: Joi.string().min(3).max(30).optional(),
+    password: Joi.string().min(6).required(),
+    email: Joi.string().email().optional(),
+  })
+
+  return userRegistrationSchema.validate(userBody)
+}
 
 module.exports = {
   validateForm,
   validateFormResponse,
-  validateUserSchema,
+  validateUserRegisterSchema,
+  validateUserLoginSchema
 }

@@ -4,8 +4,8 @@ const bcrypt = require('bcrypt')
 const User = require('../models/users')
 
 function initialize() {
-  const authenticateUser = async function (username, password, done) {
-    const user = await User.findOne({ email: username }) // Use 'username' as the field to search for in your database
+  const authenticateUser = async function (email, password, done) {
+    const user = await User.findOne({ email: email })
 
     if (!user) {
       return done(null, false, {
