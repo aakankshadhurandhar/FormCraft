@@ -38,11 +38,9 @@ module.exports.loginUser = (req, res) => {
       return res.status(500).json({ message: 'Internal Server Error' })
     }
     if (!user) {
-      return res
-        .status(401)
-        .json({
-          message: 'Authentication failed - Incorrect email or password',
-        })
+      return res.status(401).json({
+        message: 'Authentication failed - Incorrect email or password',
+      })
     }
 
     req.logIn(user, async (err) => {
