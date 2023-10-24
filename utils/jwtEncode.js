@@ -11,7 +11,6 @@ function generateToken(user) {
     expiresIn: '1h',
   }
 
-
   return jwt.sign(payload, secretKey, options)
 }
 

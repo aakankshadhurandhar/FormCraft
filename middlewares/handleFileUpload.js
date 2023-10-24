@@ -7,7 +7,6 @@ const fileFilter = function (req, file, cb) {
     (input) => input.type === 'file' && input.label == file.fieldname,
   )
 
-
   if (!fileInput) {
     return cb(new Error('File upload not allowed for some form values'), false)
   }
