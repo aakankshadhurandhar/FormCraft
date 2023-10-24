@@ -3,7 +3,11 @@ const Models = require('../models/')
 const handleFileUpload = require('./handleFileUpload')
 const validateToken = require('./validateToken')
 
-// Validate ObjectId parameters
+/**
+ * Validates the specified parameters as MongoDB ObjectIds.
+ * @param  {...string} paramNames - The names of the parameters to validate.
+ * @returns {Function} Middleware function that validates the parameters.
+ */
 const validateParamAsObjectId =
   (...paramNames) =>
   (req, res, next) => {
@@ -17,6 +21,13 @@ const validateParamAsObjectId =
     next()
   }
 
+/**
+ * Fetches the form with the specified ID and attaches it to the request object.
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @param {Function} next - The next middleware function.
+ * @returns {Promise<void>} Resolves when the form is fetched and attached to the request object.
+ */
 const fetchForm = async (req, res, next) => {
   const formID = req.params.formID
   if (!isValidObjectId(formID)) {

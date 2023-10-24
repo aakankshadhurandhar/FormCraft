@@ -1,6 +1,22 @@
 const mongoose = require('mongoose')
+const { DeleteFormDirectory } = require('../services/S3')
 
-// Form inputs Schema
+/**
+ * Mongoose schema for form inputs
+ * @typedef {Object} FormInputSchema
+ * @property {string} type - Type of input (small-text, long-text, number, email, multi-select, radio, file)
+ * @property {string} label - Label for the input
+ * @property {number} [minLength] - Minimum length of input (required for small-text type)
+ * @property {number} [maxLength] - Maximum length of input (required for small-text and long-text types)
+ * @property {number} [minValue] - Minimum value of input (required for number type)
+ * @property {number} [maxValue] - Maximum value of input (required for number type)
+ * @property {Array<Object>} [options] - Options for multi-select and radio types
+ * @property {Array<string>} [fileTypes] - Allowed file types for file type
+ * @property {number} [maxFileSizeinKB] - Maximum file size in KB for file type
+ * @property {number} [maxFilesAllowed] - Maximum number of files allowed for file type
+ * @property {Object} [rules] - Custom validation rules for input
+ */
+
 const formInputSchema = new mongoose.Schema({
   _id: false,
   type: {
@@ -138,7 +154,16 @@ const formInputSchema = new mongoose.Schema({
   },
 })
 
-// Define the Mongoose schema for FormPage
+/**
+ * Mongoose schema for form
+ * @typedef {Object} FormSchema
+ * @property {string} title - Title of the form
+ * @property {string} [description] - Description of the form
+ * @property {Date} [expiry] - Expiry date of the form
+ * @property {Array<FormInputSchema>} inputs - Array of form inputs
+ * @property {Date} createdAt - Timestamp of form creation
+ * @property {Date} updatedAt - Timestamp of last form update
+ */
 const formSchema = new mongoose.Schema(
   {
     title: {
@@ -152,6 +177,19 @@ const formSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+  },
+)
+
+/**
+ * Middleware to delete all responses to a form when the form is deleted
+ */
+formSchema.pre(
+  'deleteOne',
+  { document: true, query: true },
+  async function (next) {
+    await this.model('FormResponse').deleteMany({ formID: this._id })
+    await DeleteFormDirectory(this._id)
+    next()
   },
 )
 
