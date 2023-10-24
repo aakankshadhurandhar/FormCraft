@@ -52,7 +52,6 @@ module.exports.loginUser = (req, res) => {
       }
 
       const token = generateToken(user)
-
       res.json({
         message: 'User logged in successfully',
         token,

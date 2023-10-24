@@ -7,6 +7,7 @@ const {
   validateParamAsObjectId,
   fetchForm,
   handleFileUpload,
+  validateToken,
 } = require('../middlewares')
 
 // Create Form
@@ -15,6 +16,7 @@ router.post('/forms', controllers.Form.Create)
 // Read Form
 router.get(
   '/forms/:formID',
+  validateToken,
   validateParamAsObjectId('formID'),
   fetchForm,
   controllers.Form.Read,
@@ -51,6 +53,6 @@ router.get(
 router.post('/register', controllers.Users.registerUser)
 
 //Login existing user
-router.post('/login', controllers.Users.loginUser)
+router.post('/login',controllers.Users.loginUser)
 
 module.exports = router

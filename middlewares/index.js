@@ -1,6 +1,7 @@
 const { isValidObjectId } = require('mongoose')
 const Models = require('../models/')
 const handleFileUpload = require('./handleFileUpload')
+const validateToken=require('./validateToken')
 
 // Validate ObjectId parameters
 const validateParamAsObjectId =
@@ -38,4 +39,5 @@ module.exports = {
   validateParamAsObjectId,
   fetchForm,
   handleFileUpload,
+  validateToken
 }
