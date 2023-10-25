@@ -2,62 +2,46 @@
 const express = require('express')
 const router = express.Router()
 
-const controllers = require('../controllers')
+const Controllers = require('../controllers')
 const {
-  validateParamAsObjectId,
+  areObjectIDs,
   fetchForm,
   handleFileUpload,
   validateToken,
 } = require('../middlewares')
 
+router.get('/', (req, res) => {
+  res.json({ message: 'OK!' })
+})
+
 // Create Form
-router.post('/forms', controllers.Form.Create)
+router.post('/forms', Controllers.Form.Create)
 
 // Read Form
-router.get(
-  '/forms/:formID',
-  validateToken,
-  validateParamAsObjectId('formID'),
-  fetchForm,
-  controllers.Form.Read,
-)
+router.get('/forms/:formID',fetchForm, Controllers.Form.Read)
 
 //Delete Form
-router.delete('/forms/:formID', fetchForm, controllers.Form.Delete)
+router.delete('/forms/:formID', fetchForm, Controllers.Form.Delete)
+
 //Update Form
-router.put('/forms/:formID', fetchForm, controllers.Form.Update)
+router.put('/forms/:formID', fetchForm, Controllers.Form.Update)
 
 // Submit Form Response
-router.post(
-  '/forms/:formID/responses',
-  fetchForm,
-  handleFileUpload,
-  controllers.FormResponse.Create,
-)
+router.post('/forms/:formID/responses',fetchForm,handleFileUpload,Controllers.FormResponse.Create)
 
 // Read All Form Responses
-router.get(
-  '/forms/:formID/responses',
-  validateParamAsObjectId('formID'),
-  controllers.FormResponse.ReadAll,
-)
+router.get('/forms/:formID/responses',areObjectIDs('formID'),Controllers.FormResponse.ReadAll)
 
 //Read One Form Response
-router.get(
-  '/forms/:formID/responses/:responseId',
-  validateParamAsObjectId('formID', 'responseId'),
-  controllers.FormResponse.Read,
-)
+router.get('/forms/:formID/responses/:responseID',areObjectIDs('formID', 'responseID'),Controllers.FormResponse.Read)
+
 // Delete Form Response
-router.delete(
-  '/forms/:formID/responses/:responseId',
-  validateParamAsObjectId('formID', 'responseId'),
-  controllers.FormResponse.Delete,
+router.delete('/forms/:formID/responses/:responseID',areObjectIDs('formID', 'responseID'),Controllers.FormResponse.Delete
 )
 //Create New User
-router.post('/register', controllers.Users.registerUser)
+router.post('/register', Controllers.Users.registerUser)
 
 //Login existing user
-router.post('/login', controllers.Users.loginUser)
+router.post('/login', Controllers.Users.loginUser)
 
 module.exports = router

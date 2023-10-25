@@ -2,13 +2,14 @@ require('dotenv').config()
 const express = require('express')
 const passport = require('passport')
 const mongoose = require('mongoose')
+const morgan = require('morgan')
 const formRouter = require('./routes/')
+const initializePassport = require('./config/passport')
+
 const app = express()
 const port = process.env.PORT || 3000
-const bodyParser = require('body-parser')
 const mongoString = process.env.DATABASE_URL
-const session = require('express-session')
-const initializePassport = require('./config/passport')
+
 mongoose.connect(mongoString, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -23,21 +24,11 @@ database.once('connected', () => {
 })
 initializePassport(passport)
 
-const secretKey = process.env.PASSPORT_SECRET_KEY
-
-app.use(
-  session({
-    secret: secretKey,
-    resave: false,
-    saveUninitialized: false,
-  }),
-)
-// Middleware
+// Middlewares
 app.use(express.json())
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json())
+app.use(express.urlencoded({ extended: true }))
 app.use(passport.initialize())
-app.use(passport.session())
+app.use(morgan('dev'))
 app.use('/', formRouter)
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`)
