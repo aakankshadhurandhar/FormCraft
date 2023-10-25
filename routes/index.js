@@ -48,7 +48,12 @@ router.get(
   validateParamAsObjectId('formID', 'responseId'),
   controllers.FormResponse.Read,
 )
-
+// Delete Form Response
+router.delete(
+  '/forms/:formID/responses/:responseId',
+  validateParamAsObjectId('formID', 'responseId'),
+  controllers.FormResponse.Delete,
+)
 //Create New User
 router.post('/register', controllers.Users.registerUser)
 
