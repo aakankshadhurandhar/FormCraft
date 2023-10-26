@@ -1,13 +1,13 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
-const User = require('../models/users')
-const { comparePasswords } = require('../utils/passwordValidation')
 const Models = require('../models')
 const JwtStrategy = require('passport-jwt').Strategy
 const ExtractJwt = require('passport-jwt').ExtractJwt
 const secretKey = process.env.JWT_SECRET_KEY
-const Joi = require('joi')
-const { validateUserRegisterSchema } = require('../validators/validations')
+const {
+  validateUserRegisterSchema,
+} = require('../utils/validators/validations')
+
 /**
  * Registers user with user_name,email and password
  * @param {any} req
@@ -18,19 +18,18 @@ const { validateUserRegisterSchema } = require('../validators/validations')
  */
 const registerUser = async (req, email, password, done) => {
   const { error } = validateUserRegisterSchema(req.body)
-
   if (error) {
     return done(error, false)
   }
 
   try {
-    const existingUser = await User.findOne({ email })
+    const existingUser = await Models.Users.findOne({ email })
 
     if (existingUser) {
       return done(null, false, { message: 'Email is already registered' })
     }
 
-    const user = await User.create({
+    const user = await Models.Users.create({
       email,
       password,
       user_name: req.body.user_name,
@@ -59,7 +58,8 @@ const authenticateUser = async (loginID, password, done) => {
     if (!user) {
       return done(null, false, { message: 'Incorrect email or username.' })
     }
-    const isMatch = await comparePasswords(password, user.password)
+    const isMatch = await user.isValidPassword(password)
+
     if (!isMatch) {
       return done(null, false, { message: 'Incorrect password' })
     }

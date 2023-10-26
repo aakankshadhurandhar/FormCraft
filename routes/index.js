@@ -3,12 +3,7 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const Controllers = require('../controllers')
-const {
-  areObjectIDs,
-  fetchForm,
-  handleFileUpload,
-  validateToken,
-} = require('../middlewares')
+const { areObjectIDs, fetchForm, handleFileUpload } = require('../middlewares')
 
 router.get('/', (req, res) => {
   res.json({ message: 'OK!' })

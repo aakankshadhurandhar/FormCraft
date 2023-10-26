@@ -1,5 +1,5 @@
 const { isValidObjectId } = require('mongoose')
-const Models = require('../models/')
+const Models = require('../models')
 const handleFileUpload = require('./handleFileUpload')
 const jwt = require('jsonwebtoken')
 const secretKey = process.env.JWT_SECRET_KEY

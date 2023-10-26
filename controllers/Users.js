@@ -1,8 +1,8 @@
 const passport = require('passport')
-const { hashPassword } = require('../utils/passwordValidation')
-const { validateUserRegisterSchema } = require('../validators/validations')
+const {
+  validateUserRegisterSchema,
+} = require('../utils/validations')
 const { generateToken } = require('../utils/jwtEncode')
-const Models = require('../models')
 
 /**
  * Registers a new user

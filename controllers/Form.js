@@ -1,6 +1,5 @@
 const Models = require('../models')
-const { deleteFormDirectory } = require('../services/S3')
-const { validateForm } = require('../validators/validations')
+const { validateForm } = require('../utils/validations')
 
 /**
  * Creates a new form page.
