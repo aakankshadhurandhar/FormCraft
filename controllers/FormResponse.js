@@ -111,3 +111,88 @@ module.exports.Delete = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' })
   }
 }
+
+module.exports.ExportAll = async (req, res) => {
+  try {
+    const formID = req.params.formID
+    const formResponses = await Models.FormResponse.find({
+      formID: formID,
+    }).exec()
+
+    const ExcelJS = require('exceljs')
+
+    // Create a new Excel workbook and worksheet
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet('Form Response')
+
+    const formResponse = formResponses[0]
+    let headers = []
+    headers.push({ header: 'Response ID', key: 'responseID', width: 50 })
+    let response = formResponse.response
+    for (let key in response) {
+      if (Array.isArray(response[key])) {
+        headers.push({
+          header: key + ' [[filename, path, sizeInKB]]',
+          key: key,
+          width: 50,
+        })
+      } else {
+        headers.push({ header: key, key: key, width: 50 })
+      }
+    }
+    headers.push({ header: 'Created At', key: 'createdAt', width: 50 })
+    headers.push({ header: 'Updated At', key: 'updatedAt', width: 50 })
+    // Add the headers to the worksheet
+    worksheet.columns = headers
+
+    formResponses.forEach((formResponse) => {
+      let row = {}
+      const createdAt = new Date(formResponse.createdAt).toLocaleString(
+        'en-IN',
+        { timeZone: 'Asia/Kolkata' },
+      )
+      const updatedAt = new Date(formResponse.updatedAt).toLocaleString(
+        'en-IN',
+        { timeZone: 'Asia/Kolkata' },
+      )
+      row['createdAt'] = createdAt
+      row['updatedAt'] = updatedAt
+
+      // Add responseID to the row
+      row['responseID'] = formResponse._id.toString()
+
+      let response = formResponse.response
+      for (let key in response) {
+        if (Array.isArray(response[key])) {
+          let files = response[key]
+          let filesArray = files.map((file) => {
+            return [file.filename, file.path, file.sizeInKB]
+          })
+          row[key] = filesArray
+        } else {
+          row[key] = response[key]
+        }
+      }
+
+      // add the row to the worksheet
+      worksheet.addRow(row)
+    })
+    const exportName = `${formResponse._id}`
+    //TODO: Export to CSV
+    // workbook.csv.writeFile(exportName+".csv").then(() => {
+    //   console.log(`CSV file ${exportName} has been created.`)
+    // })
+    workbook.xlsx
+      .writeFile(exportName + '.xlsx')
+      .then(function () {
+        console.log(`Excel file ${exportName} has been created.`)
+        res.json(formResponses)
+      })
+      .catch(function (error) {
+        throw error
+      })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'Internal server error' })
+  }
+}

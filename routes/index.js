@@ -33,12 +33,20 @@ router.post(
   controllers.FormResponse.Create,
 )
 
+router.get(
+  '/forms/:formID/export',
+  validateParamAsObjectId('formID'),
+  controllers.FormResponse.ExportAll,
+)
+
 // Read All Form Responses
 router.get(
   '/forms/:formID/responses',
   validateParamAsObjectId('formID'),
   controllers.FormResponse.ReadAll,
 )
+
+
 
 //Read One Form Response
 router.get(
