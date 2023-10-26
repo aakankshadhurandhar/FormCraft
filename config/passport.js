@@ -3,6 +3,9 @@ const LocalStrategy = require('passport-local').Strategy
 const User = require('../models/users')
 const { comparePasswords } = require('../utils/passwordValidation')
 const Models = require('../models')
+const JwtStrategy = require('passport-jwt').Strategy;
+const ExtractJwt = require('passport-jwt').ExtractJwt;
+const secretKey = process.env.JWT_SECRET_KEY;
 
 /**
  * Authenticates a user with the given login ID and password.
@@ -33,23 +36,32 @@ const authenticateUser = async (loginID, password, done) => {
 }
 
 /**
+ * Verifies a user's JWT and calls the 'done' callback for the JWT strategy.
+ * @param {object} jwtPayload - The payload extracted from the JWT token.
+ * @param {function} done - The callback function to call when authentication is complete.
+ */
+const verifyUserFromJWT = async (jwtPayload, done) => {
+  try {
+
+    return done(null, jwtPayload.email);
+  } catch (error) {
+    return done(error, false);
+  }
+};
+/**
  * Initializes passport with the local strategy.
  */
 function initialize() {
   passport.use(
     new LocalStrategy({ usernameField: 'loginID' }, authenticateUser),
   )
-  passport.serializeUser((user, done) => {
-    done(null, user.id)
-  })
-  passport.deserializeUser(async (id, done) => {
-    try {
-      const user = await User.findById(id)
-      done(null, user)
-    } catch (error) {
-      done(error, null)
-    }
-  })
+  const jwtOptions = {
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    secretOrKey: secretKey,
+  };
+
+  passport.use(new JwtStrategy(jwtOptions, verifyUserFromJWT));
+
 }
 
 module.exports = initialize

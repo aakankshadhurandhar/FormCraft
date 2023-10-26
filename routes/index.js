@@ -1,7 +1,7 @@
 // routes/apiRoutes.js
 const express = require('express')
 const router = express.Router()
-
+const passport = require('passport')
 const Controllers = require('../controllers')
 const {
   areObjectIDs,
@@ -18,7 +18,7 @@ router.get('/', (req, res) => {
 router.post('/forms', Controllers.Form.Create)
 
 // Read Form
-router.get('/forms/:formID',fetchForm, Controllers.Form.Read)
+router.get('/forms/:formID',fetchForm,passport.authenticate('jwt', { session: false }), Controllers.Form.Read)
 
 //Delete Form
 router.delete('/forms/:formID', fetchForm, Controllers.Form.Delete)
