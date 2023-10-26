@@ -1,8 +1,7 @@
 const { default: mongoose } = require('mongoose')
-const Models = require('../models')
 const { UploadToS3 } = require('../services/S3')
-const { validateFormResponse } = require('../validators/validations')
-
+const { validateFormResponse } = require('../utils/validations')
+const Models = require('../models')
 /**
  * Creates a new form response.
  * @param {Object} req - The request object.

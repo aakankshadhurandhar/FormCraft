@@ -1,6 +1,5 @@
 const Models = require('../models')
-const { deleteFormDirectory } = require('../services/S3')
-const { validateForm } = require('../validators/validations')
+const { validateForm } = require('../utils/validations')
 
 /**
  * Creates a new form page.
@@ -31,7 +30,6 @@ module.exports.Create = async (req, res) => {
     const savedForm = await form.save()
     res.status(201).json({ statusCode: 201, savedForm })
   } catch (err) {
-    console.error(err)
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
   }
 }
