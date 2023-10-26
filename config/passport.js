@@ -6,7 +6,7 @@ const Models = require('../models')
 const JwtStrategy = require('passport-jwt').Strategy
 const ExtractJwt = require('passport-jwt').ExtractJwt
 const secretKey = process.env.JWT_SECRET_KEY
-const Joi = require('joi');
+const Joi = require('joi')
 const { validateUserRegisterSchema } = require('../validators/validations')
 /**
  * Registers user with user_name,email and password
@@ -16,25 +16,29 @@ const { validateUserRegisterSchema } = require('../validators/validations')
  * @param {any} done
  * @returns {any}
  */
-const registerUser= async (req, email, password, done) => {
-  const { error } = validateUserRegisterSchema(req.body);
+const registerUser = async (req, email, password, done) => {
+  const { error } = validateUserRegisterSchema(req.body)
 
   if (error) {
-    return done(error, false);
+    return done(error, false)
   }
 
   try {
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email })
 
     if (existingUser) {
-      return done(null, false, { message: 'Email is already registered' });
+      return done(null, false, { message: 'Email is already registered' })
     }
 
-    const user = await User.create({ email, password, user_name: req.body.user_name });
+    const user = await User.create({
+      email,
+      password,
+      user_name: req.body.user_name,
+    })
 
-    return done(null, user);
+    return done(null, user)
   } catch (error) {
-    return done(error);
+    return done(error)
   }
 }
 
@@ -82,7 +86,8 @@ const verifyUserFromJWT = async (jwtPayload, done) => {
  * Initializes passport with the local strategy.
  */
 function initialize() {
-  passport.use('login',
+  passport.use(
+    'login',
     new LocalStrategy({ usernameField: 'loginID' }, authenticateUser),
   )
   const jwtOptions = {
@@ -91,11 +96,17 @@ function initialize() {
   }
 
   passport.use(new JwtStrategy(jwtOptions, verifyUserFromJWT))
-  passport.use('signup', new LocalStrategy({
-    usernameField: 'email',
-    passwordField: 'password',
-    passReqToCallback: true 
-  },registerUser));
+  passport.use(
+    'signup',
+    new LocalStrategy(
+      {
+        usernameField: 'email',
+        passwordField: 'password',
+        passReqToCallback: true,
+      },
+      registerUser,
+    ),
+  )
 }
 
 module.exports = initialize

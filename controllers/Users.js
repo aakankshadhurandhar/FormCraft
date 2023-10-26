@@ -10,38 +10,43 @@ const Models = require('../models')
  * @param {Object} res - The response object
  * @returns {Object} - The response object
  */
-module.exports.registerUser = async (req, res,next) => {
-  
-    let { user_name, email, password } = req.body
-    user_name = user_name.toLowerCase()
-    email = email.toLowerCase()
+module.exports.registerUser = async (req, res, next) => {
+  let { user_name, email, password } = req.body
+  user_name = user_name.toLowerCase()
+  email = email.toLowerCase()
 
-    // Validate user input
-    const { error } = validateUserRegisterSchema({ user_name, email, password })
+  // Validate user input
+  const { error } = validateUserRegisterSchema({ user_name, email, password })
 
-    if (error) {
-      return res.status(400).json({ error: error.details[0].message })
-    }
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message })
+  }
 
-    passport.authenticate('signup', { session: false }, async (err, user) => {
-      try {
-        if (err) {
-          // Handle errors (e.g., duplicate email)
-          return res.status(400).json({ message: 'Error during signup', error: err });
-        }
-  
-        if (!user) {
-          // Handle failed signup (e.g., duplicate email)
-          return res.status(400).json({ message: 'Signup failed, user already exists' });
-        }
-  
-        // User was successfully created
-        return res.status(201).json({ message: 'User registered successfully', user });
-      } catch (error) {
-        // Handle other errors
-        return res.status(500).json({ message: 'Internal server error', error });
+  passport.authenticate('signup', { session: false }, async (err, user) => {
+    try {
+      if (err) {
+        // Handle errors (e.g., duplicate email)
+        return res
+          .status(400)
+          .json({ message: 'Error during signup', error: err })
       }
-    })(req, res,next);
+
+      if (!user) {
+        // Handle failed signup (e.g., duplicate email)
+        return res
+          .status(400)
+          .json({ message: 'Signup failed, user already exists' })
+      }
+
+      // User was successfully created
+      return res
+        .status(201)
+        .json({ message: 'User registered successfully', user })
+    } catch (error) {
+      // Handle other errors
+      return res.status(500).json({ message: 'Internal server error', error })
+    }
+  })(req, res, next)
 }
 
 /**
