@@ -125,13 +125,14 @@ module.exports.ExportAll = async (req, res) => {
       formID: form._id,
     }).exec()
 
-
     const fileBuffer = await createExportFile(form, formResponses, type)
 
     res.set('Content-Type', 'application/octet-stream')
-    res.set('Content-Disposition', `attachment; filename=${form.title}-${Date.now()}.${type}`)
-    res.send(fileBuffer) 
-
+    res.set(
+      'Content-Disposition',
+      `attachment; filename=${form.title}-${Date.now()}.${type}`,
+    )
+    res.send(fileBuffer)
   } catch (error) {
     console.error(error)
     res.status(500).json({ message: 'Internal server error' })
