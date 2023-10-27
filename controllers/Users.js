@@ -1,7 +1,5 @@
 const passport = require('passport')
-const {
-  validateUserRegisterSchema,
-} = require('../utils/validations')
+const { validateUserRegisterSchema } = require('../utils/validations')
 const { generateToken } = require('../utils/jwtEncode')
 
 /**

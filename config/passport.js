@@ -4,9 +4,7 @@ const Models = require('../models')
 const JwtStrategy = require('passport-jwt').Strategy
 const ExtractJwt = require('passport-jwt').ExtractJwt
 const secretKey = process.env.JWT_SECRET_KEY
-const {
-  validateUserRegisterSchema,
-} = require('../utils/validators/validations')
+const { validateUserRegisterSchema } = require('../utils/validations')
 
 /**
  * Registers user with user_name,email and password

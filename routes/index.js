@@ -34,6 +34,12 @@ router.post(
   Controllers.FormResponse.Create,
 )
 
+router.get(
+  '/forms/:formID/export',
+  fetchForm,
+  Controllers.FormResponse.ExportAll,
+)
+
 // Read All Form Responses
 router.get(
   '/forms/:formID/responses',
