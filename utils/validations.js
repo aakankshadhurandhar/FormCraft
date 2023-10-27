@@ -102,7 +102,6 @@ function validateFormResponse(form, formResponse) {
             Joi.object({
               filename: Joi.string().required(),
               path: Joi.string().required(),
-
               sizeInKB: Joi.number().required(),
             }),
           )
@@ -179,11 +178,11 @@ function validateForm(formBody) {
     fileTypes: Joi.array().items(Joi.string()).optional(), // Validate allowed file types
     maxFileSizeinKB: Joi.number().when('type', {
       is: 'file',
-      then: Joi.required(),
+      then: Joi.optional(),
     }),
     maxFilesAllowed: Joi.number().when('type', {
       is: 'file',
-      then: Joi.required(),
+      then: Joi.optional(),
     }),
     rules: Joi.when('type', {
       is: Joi.string().valid('small-text', 'long-text', 'number', 'email'),

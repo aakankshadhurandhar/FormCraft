@@ -127,7 +127,7 @@ const formInputSchema = new mongoose.Schema({
     ],
     default: function () {
       if (this.type === 'file') {
-        return []
+        return ["*"]
       }
       return undefined
     },
@@ -137,12 +137,24 @@ const formInputSchema = new mongoose.Schema({
   },
   maxFileSizeinKB: {
     type: Number,
+    default: function () {
+      if (this.type === 'file') {
+        return 2048
+      }
+      return undefined
+    },
     required: function () {
       return this.type === 'file'
     },
   },
   maxFilesAllowed: {
     type: Number,
+    default: function () {
+      if (this.type === 'file') {
+        return 1
+      }
+      return undefined
+    },
     required: function () {
       return this.type === 'file'
     },
