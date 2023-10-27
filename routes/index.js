@@ -35,7 +35,7 @@ router.post(
 
 router.get(
   '/forms/:formID/export',
-  validateParamAsObjectId('formID'),
+  fetchForm,
   controllers.FormResponse.ExportAll,
 )
 
