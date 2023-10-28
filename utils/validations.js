@@ -53,28 +53,28 @@ function validateFormResponse(form, formResponse) {
     let baseSchema
 
     switch (input.type) {
-      case 'small-text':
-        baseSchema = Joi.string()
-          .min(input.minLength)
-          .max(input.maxLength)
-          .required()
+      case 'small':
+        baseSchema = Joi.string().min(input?.min).max(input?.max).required()
         break
+
       case 'long-text':
-        baseSchema = Joi.string()
-          .min(input.minLength)
-          .max(input.maxLength)
-          .required()
+        baseSchema = Joi.string().min(input?.min).max(input?.max).required()
         break
+
       case 'number':
         baseSchema = Joi.number()
-          .min(input.minValue)
-          .max(input.maxValue)
-          .required()
+        .min(input?.min)
+        .max(input?.max)
+        .required()
         break
       case 'email':
-        baseSchema = Joi.string().email().required()
+        baseSchema = Joi.string()
+        .email()
+        .min(input?.min)
+        .max(input?.max)
+        .required()
         break
-      case 'multi-select':
+      case 'multi':
         baseSchema = Joi.alternatives(
           Joi.array()
             .items(
@@ -112,7 +112,6 @@ function validateFormResponse(form, formResponse) {
         break
     }
 
-    // Add custom validation for regex patterns if defined in 'rules'
     if (input.rules) {
       for (const [ruleName, rulePattern] of Object.entries(input.rules)) {
         const regexPattern = new RegExp(rulePattern)
@@ -147,55 +146,34 @@ function validateForm(formBody) {
   })
 
   const formInputSchema = Joi.object({
-    type: Joi.string()
-      .valid(
-        'small-text',
-        'long-text',
-        'number',
-        'email',
-        'multi-select',
-        'radio',
-        'file',
-      )
-      .required(),
     label: Joi.string().required(),
-    minLength: Joi.number().when('type', {
-      is: 'small-text',
-      then: Joi.optional(),
-    }),
-    maxLength: Joi.number().when('type', {
-      is: Joi.any().valid('small-text', 'long-text'),
-      then: Joi.optional(),
-    }),
-    minValue: Joi.number().when('type', { is: 'number', then: Joi.optional() }),
-    maxValue: Joi.number().when('type', { is: 'number', then: Joi.optional() }),
+    type: Joi.string()
+      .valid('small', 'long', 'number', 'email', 'multi', 'radio', 'file')
+      .required(),
+    min: Joi.number(),
+    max: Joi.number(),
     options: Joi.array()
       .items(inputOptionSchema)
       .when('type', {
-        is: Joi.any().valid('multi-select', 'radio'),
-        then: Joi.required(),
+        is: Joi.any().valid('multi', 'radio'),
+        then: Joi.array().required(),
       }),
-    fileTypes: Joi.array().items(Joi.string()).optional(), // Validate allowed file types
-    maxFileSizeinKB: Joi.number().when('type', {
-      is: 'file',
-      then: Joi.optional(),
-    }),
-    maxFilesAllowed: Joi.number().when('type', {
-      is: 'file',
-      then: Joi.optional(),
-    }),
-    rules: Joi.when('type', {
-      is: Joi.string().valid('small-text', 'long-text', 'number', 'email'),
-      then: Joi.object().custom((obj, helpers) => {
-        for (const [ruleName, rulePattern] of Object.entries(obj)) {
+    fileTypes: Joi.array().items(Joi.string()),
+    maxFileSizeinKB: Joi.number(),
+    maxFilesAllowed: Joi.number(),
+    rules: Joi.object().when('type', {
+      is: Joi.string().valid('small', 'long', 'number', 'email'),
+      then: Joi.object().pattern(
+        Joi.string(),
+        Joi.string().custom((rulePattern, helpers) => {
           if (!isValidRegex(rulePattern)) {
             return helpers.error('any.custom', {
-              message: `${ruleName} is not a valid regex Pattern`,
+              message: `${rulePattern} is not a valid regex pattern`,
             })
           }
-        }
-        return obj
-      }),
+          return rulePattern
+        }),
+      ),
       otherwise: Joi.forbidden(),
     }),
   })
@@ -210,6 +188,7 @@ function validateForm(formBody) {
 
   return formPageSchema.validate(formBody)
 }
+
 function validateUserRegisterSchema(userBody) {
   const userRegistrationSchema = Joi.object({
     user_name: Joi.string().min(3).max(30).required(),
