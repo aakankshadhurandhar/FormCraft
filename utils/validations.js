@@ -202,6 +202,7 @@ function validateForm(formBody) {
 
   // Define a Joi schema for the form page
   const formPageSchema = Joi.object({
+    userId: Joi.string().required(),
     title: Joi.string().min(1).required(),
     description: Joi.string(),
     expiry: Joi.date(),

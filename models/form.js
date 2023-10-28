@@ -178,6 +178,11 @@ const formInputSchema = new mongoose.Schema({
  */
 const formSchema = new mongoose.Schema(
   {
+    userId:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Users',
+      required:true
+    },
     title: {
       type: String,
       required: true,

@@ -20,8 +20,9 @@ module.exports.Create = async (req, res) => {
       })
     }
 
-    const { title, description, inputs } = value
+    const { userId,title, description, inputs } = value
     const form = new Models.FormPage({
+      userId,
       title,
       description,
       inputs,
