@@ -1,6 +1,5 @@
-const mongoose = require('mongoose');
-const formInputSchema = require('./_formInput');
-
+const mongoose = require('mongoose')
+const formInputSchema = require('./_formInput')
 
 /**
  * Mongoose schema for a form.
@@ -23,26 +22,26 @@ const formSchema = new mongoose.Schema(
     description: String,
     expiry: Date,
     inputs: [formInputSchema],
-    // userId: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: 'Users',
-    //   required: true,
-    // },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Users',
+      required: true,
+    },
   },
   {
     timestamps: true,
   },
-);
+)
 
 formSchema.pre(
   'deleteOne',
   { document: true, query: true },
   async function (next) {
-    await this.model('FormResponse').deleteMany({ formID: this._id });
-    next();
+    await this.model('FormResponse').deleteMany({ formID: this._id })
+    next()
   },
-);
+)
 
-const Form = mongoose.model('FormPages', formSchema);
+const Form = mongoose.model('FormPages', formSchema)
 
-module.exports = Form;
+module.exports = Form
