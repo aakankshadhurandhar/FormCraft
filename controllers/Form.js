@@ -11,7 +11,7 @@ const { validateForm } = require('../utils/validations')
 module.exports.Create = async (req, res) => {
   try {
     const { error, value } = validateForm(req.body)
-   
+
     const userID = req.user.userID
     if (error) {
       return res.status(400).json({
