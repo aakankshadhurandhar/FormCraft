@@ -1,5 +1,12 @@
 const passport = require('passport')
 
+/**
+ * middleware for authentication
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ * @returns {any}
+ */
 module.exports = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
     if (err) {
