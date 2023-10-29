@@ -17,6 +17,10 @@ const formResponseSchema = new mongoose.Schema(
       ref: 'Form',
       required: true,
     },
+    public: {
+      type: Boolean,
+      default: false,
+    },
     response: {
       type: Object,
       _id: false,

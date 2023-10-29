@@ -47,11 +47,25 @@ router.get(
   Controllers.FormResponse.ReadAll,
 )
 
+//  Set Multiple Form Responses Public/Private
+router.put(
+  '/forms/:formID/responses',
+  areObjectIDs('formID'),
+  Controllers.FormResponse.SetPublicMany,
+)
+
 //Read One Form Response
 router.get(
   '/forms/:formID/responses/:responseID',
   areObjectIDs('formID', 'responseID'),
   Controllers.FormResponse.Read,
+)
+
+// Set Form Response Public/Private
+router.put(
+  '/forms/:formID/responses/:responseID',
+  areObjectIDs('formID', 'responseID'),
+  Controllers.FormResponse.SetPublicOne,
 )
 
 // Delete Form Response

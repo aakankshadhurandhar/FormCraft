@@ -72,7 +72,10 @@ module.exports.Create = async (req, res) => {
 module.exports.ReadAll = async (req, res) => {
   try {
     const formID = req.params.formID
-    const responses = await Models.FormResponse.find({ formID: formID }).exec()
+    const responses = await Models.FormResponse.find({
+      formID: formID,
+      public: true,
+    }).exec()
     res.json(responses)
   } catch (error) {
     console.error(error)
@@ -91,6 +94,12 @@ module.exports.Read = async (req, res) => {
   try {
     const responseID = req.params.responseId
     const response = await Models.FormResponse.findById(responseID)
+    if (!response) {
+      return res.status(404).json({ message: 'Response not found' })
+    }
+    if (!response.public) {
+      return res.status(400).json({ message: 'Response is not public' })
+    }
     res.json(response)
   } catch (error) {
     console.error(error)
@@ -137,6 +146,51 @@ module.exports.ExportAll = async (req, res) => {
       `attachment; filename=${form.title}-${Date.now()}.${type}`,
     )
     res.send(fileBuffer)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'Internal server error' })
+  }
+}
+
+module.exports.SetPublicOne = async (req, res) => {
+  try {
+    const responseID = req.params.responseId
+    const publicStatus = req.body.public || true
+    if (typeof publicStatus != 'boolean') {
+      return res.status(400).json({ message: 'Invalid public status' })
+    }
+    const response = await Models.FormResponse.findById(responseID)
+    if (!response) {
+      return res.status(404).json({ message: 'Response not found' })
+    }
+    response.public = publicStatus
+    await response.save()
+    if (response.public) {
+      return res.json({ message: 'Response is now public' })
+    }
+    return res.json({ message: 'Response is now private' })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'Internal server error' })
+  }
+}
+
+module.exports.SetPublicMany = async (req, res) => {
+  try {
+    const responseIDs = req.body.responseIDs
+    if (!Array.isArray(responseIDs)) {
+      return res.status(400).json({ message: 'Invalid response IDs' })
+    }
+    const publicStatus = req.body.public || true
+    if (typeof publicStatus != 'boolean') {
+      return res.status(400).json({ message: 'Invalid public status' })
+    }
+
+    const response = await Models.FormResponse.updateMany(
+      { _id: { $in: responseIDs } },
+      { public: publicStatus },
+    )
+    res.json({ message: 'Responses are now public' })
   } catch (error) {
     console.error(error)
     res.status(500).json({ message: 'Internal server error' })

@@ -71,10 +71,7 @@ function validateFormResponse(form, formResponse) {
         baseSchema = Joi.number().min(input?.min).max(input?.max)
         break
       case 'email':
-        baseSchema = Joi.string()
-          .email()
-          .min(input?.min)
-          .max(input?.max)
+        baseSchema = Joi.string().email().min(input?.min).max(input?.max)
         break
       case 'multi':
         baseSchema = Joi.alternatives(
@@ -85,15 +82,14 @@ function validateFormResponse(form, formResponse) {
               ),
             )
             .min(1),
-          Joi.string()
-            .valid(...input.options.map((option) => option.value))
-            
+          Joi.string().valid(...input.options.map((option) => option.value)),
         )
         break
       case 'radio':
-        baseSchema = Joi.string()
-          .valid(...input.options.map((option) => option.value))
-          
+        baseSchema = Joi.string().valid(
+          ...input.options.map((option) => option.value),
+        )
+
         break
       case 'file':
         const maxFileSizeKB = input.maxFileSizeinKB
@@ -106,7 +102,7 @@ function validateFormResponse(form, formResponse) {
             }),
           )
           .custom(fileValidationHelper(maxFileSizeKB, input.min, input.max))
-          
+
         break
       default:
         break
@@ -126,7 +122,7 @@ function validateFormResponse(form, formResponse) {
         })
       }
     }
-   
+
     if (input.required) {
       baseSchema = baseSchema.required()
     }

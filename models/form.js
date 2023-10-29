@@ -27,11 +27,6 @@ const formSchema = new mongoose.Schema(
     },
     expiry: Date,
     inputs: [formInputSchema],
-    userID: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Users',
-      required: true,
-    },
   },
   {
     timestamps: true,
