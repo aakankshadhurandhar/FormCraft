@@ -2,9 +2,8 @@ const Models = require('../models')
 module.exports = async (req, res, next) => {
   if (req.user) {
     try {
-      const userEmail = req.user
-      const userID = await Models.Users.findOne({ email: userEmail })
-      if (req.form.userID.toHexString() === userID._id.toHexString()) {
+      const userID = req.user.userID
+      if (req.form.userID.toHexString() === userID) {
         next()
       } else {
         res.status(401).json({ message: 'Unauthorized' })

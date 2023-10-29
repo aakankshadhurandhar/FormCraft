@@ -11,8 +11,8 @@ const { validateForm } = require('../utils/validations')
 module.exports.Create = async (req, res) => {
   try {
     const { error, value } = validateForm(req.body)
-    const user = await Models.Users.findOne({ email: req.user })
-    const userID = user._id.toHexString()
+   
+    const userID = req.user.userID
     if (error) {
       return res.status(400).json({
         statusCode: 400,
@@ -43,8 +43,7 @@ module.exports.Create = async (req, res) => {
  */
 module.exports.ReadAll = async (req, res) => {
   try {
-    const user = await Models.Users.find({ email: req.user })
-    const userID = user[0]._id.toHexString()
+    const userID = req.user.userID
     const responses = await Models.FormPage.find({ userID: userID })
     res.status(200).json({ statusCode: 200, responses })
   } catch (err) {
