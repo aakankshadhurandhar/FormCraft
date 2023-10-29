@@ -1,17 +1,20 @@
 const Models = require('../models')
 module.exports = async (req, res, next) => {
-  console.log(req)
   if (req.user) {
-    const userEmail = req.user
-    //find user id in user model
-    const userID = await Models.Users.find({ email: userEmail })
-    console.log(req.form.userID.toHexString())
-    console.log(userID[0]._id.toHexString())
-    console.log(req.form.userID.toHexString() == userID[0]._id.toHexString())
+    try {
+      const userEmail = req.user
+      const userID = await Models.Users.findOne({ email: userEmail })
+      if (
+        req.form.userID.toHexString() === userID._id.toHexString()
+      ) {
+        next()
+      } else {
+        res.status(401).json({ message: 'Unauthorized' })
+      }
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' })
+    }
   } else {
-    // Handle cases where req.user is not defined (unauthenticated requests)
+    res.status(401).json({ message: 'Unauthorized' })
   }
-
-  // Continue with your logic
-  next()
 }

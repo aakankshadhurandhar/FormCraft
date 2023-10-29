@@ -19,16 +19,15 @@ router.get(
   '/forms/:formID',
   isJWTVerify,
   fetchForm,
-  isAuthorized,
   Controllers.Form.Read,
 )
 //Read All Forms by a User
-router.get('/forms', Controllers.Form.ReadAll)
+router.get('/forms',isJWTVerify,Controllers.Form.ReadAll)
 //Delete Form
-router.delete('/forms/:formID', fetchForm, Controllers.Form.Delete)
+router.delete('/forms/:formID',isJWTVerify, fetchForm,isAuthorized, Controllers.Form.Delete)
 
 //Update Form
-router.put('/forms/:formID', fetchForm, Controllers.Form.Update)
+router.put('/forms/:formID',isJWTVerify, fetchForm,isAuthorized, Controllers.Form.Update)
 
 // Submit Form Response
 router.post(
