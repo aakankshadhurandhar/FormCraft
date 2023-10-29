@@ -15,7 +15,13 @@ router.get('/', (req, res) => {
 router.post('/forms', Controllers.Form.Create)
 
 // Read Form
-router.get('/forms/:formID', isJWTVerify, fetchForm,isAuthorized, Controllers.Form.Read)
+router.get(
+  '/forms/:formID',
+  isJWTVerify,
+  fetchForm,
+  isAuthorized,
+  Controllers.Form.Read,
+)
 //Read All Forms by a User
 router.get('/forms', Controllers.Form.ReadAll)
 //Delete Form
