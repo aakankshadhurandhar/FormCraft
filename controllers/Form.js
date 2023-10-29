@@ -11,7 +11,8 @@ const { validateForm } = require('../utils/validations')
 module.exports.Create = async (req, res) => {
   try {
     const { error, value } = validateForm(req.body)
-
+    const user = await Models.Users.findOne({ email: req.user })
+    const userID = user._id.toHexString()
     if (error) {
       return res.status(400).json({
         statusCode: 400,
@@ -20,7 +21,7 @@ module.exports.Create = async (req, res) => {
       })
     }
 
-    const { userID, title, description, inputs } = value
+    const { title, description, inputs } = value
     const form = new Models.FormPage({
       userID,
       title,
