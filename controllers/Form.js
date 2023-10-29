@@ -20,10 +20,11 @@ module.exports.Create = async (req, res) => {
       })
     }
 
-    const { title, description, inputs } = value
+    const { title, description, inputs,expiry } = value
     const form = new Models.FormPage({
       title,
       description,
+      expiry,
       inputs,
       userID: '5f9c7a6d8a2d9e0017d5d8d5',
     })
@@ -72,11 +73,12 @@ module.exports.Update = async (req, res) => {
     }
 
     const existingForm = req.form
-    const { title, description, inputs } = value
+    const { title, description, inputs,expiry } = value
 
     existingForm.title = title
     existingForm.description = description
     existingForm.inputs = inputs
+    existingForm.expiry = expiry
 
     const updatedForm = await existingForm.save()
     res.json({

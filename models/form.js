@@ -5,6 +5,7 @@ const formInputSchema = require('./_formInput')
  * @typedef {Object} Form
  * @property {String} title - The title of the form.
  * @property {String} description - The description of the form.
+ * @property {Boolean} published - Whether the form is published or not.
  * @property {Date} expiry - The expiry date of the form.
  * @property {FormInput[]} inputs - The input fields of the form.
  * @property {mongoose.Schema.Types.ObjectId} userId - The ID of the user who created the form.
@@ -20,6 +21,10 @@ const formSchema = new mongoose.Schema(
       minlength: 1,
     },
     description: String,
+    pubilshed: {
+      type: Boolean,
+      default: false,
+    },
     expiry: Date,
     inputs: [formInputSchema],
     userID: {

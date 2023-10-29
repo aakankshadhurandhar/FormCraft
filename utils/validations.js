@@ -186,7 +186,8 @@ function validateForm(formBody) {
   const formPageSchema = Joi.object({
     title: Joi.string().min(1).required(),
     description: Joi.string(),
-    expiry: Joi.date(),
+    published: Joi.boolean().default(false),
+    expiry: Joi.date().min('now'),
     inputs: Joi.array().items(formInputSchema),
   })
 

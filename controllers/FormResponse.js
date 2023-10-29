@@ -16,6 +16,12 @@ const createExportFile = require('../utils/createExportFile')
 module.exports.Create = async (req, res) => {
   try {
     const { form, files } = req
+    if (form.expiry && form.expiry < Date.now()) {
+      return res.status(400).json({ message: 'Form has expired' })
+    }
+    if (!form.published) {
+      return res.status(400).json({ message: 'Form is not public' })
+    }
     const responseID = new mongoose.Types.ObjectId().toHexString()
     let formValues = req.body
 
