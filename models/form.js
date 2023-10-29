@@ -2,14 +2,14 @@ const mongoose = require('mongoose')
 const formInputSchema = require('./_formInput')
 
 /**
- * Mongoose schema for a form.
- * @typedef {Object} FormSchema
- * @property {string} title - The title of the form.
- * @property {string} [description] - The description of the form.
- * @property {Date} [expiry] - The expiry date of the form.
- * @property {Array.<formInputSchema>} inputs - The inputs of the form.
- * @property {Date} createdAt - The timestamp when the form was created.
- * @property {Date} updatedAt - The timestamp when the form was last updated.
+ * @typedef {Object} Form
+ * @property {String} title - The title of the form.
+ * @property {String} description - The description of the form.
+ * @property {Date} expiry - The expiry date of the form.
+ * @property {FormInput[]} inputs - The input fields of the form.
+ * @property {mongoose.Schema.Types.ObjectId} userId - The ID of the user who created the form.
+ * @property {Date} createdAt - The date when the form was created.
+ * @property {Date} updatedAt - The date when the form was last updated.
  */
 
 const formSchema = new mongoose.Schema(
@@ -22,7 +22,7 @@ const formSchema = new mongoose.Schema(
     description: String,
     expiry: Date,
     inputs: [formInputSchema],
-    userId: {
+    userID: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Users',
       required: true,

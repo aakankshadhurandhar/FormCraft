@@ -163,7 +163,6 @@ function validateForm(formBody) {
       }),
     fileTypes: Joi.array().items(Joi.string()),
     maxFileSizeinKB: Joi.number(),
-    maxFilesAllowed: Joi.number(),
     rules: Joi.object().when('type', {
       is: Joi.string().valid('small', 'long', 'number', 'email'),
       then: Joi.object().pattern(

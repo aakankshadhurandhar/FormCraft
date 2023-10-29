@@ -1,9 +1,5 @@
 const mongoose = require('mongoose')
 
-/**
- * The base schema for all form inputs.
- * @type {FormInputSchema}
- */
 const formInputSchema = new mongoose.Schema(
   {
     _id: false,
@@ -31,10 +27,6 @@ const basicTextInputSchema = {
   },
 }
 
-/**
- * Discriminators for different types of form inputs.
- * @type {Object.<string, mongoose.Schema>}
- */
 const inputDiscriminators = {
   small: new mongoose.Schema({
     ...basicTextInputSchema,
@@ -80,15 +72,11 @@ const inputDiscriminators = {
     },
     max: {
       type: Number,
-      default: 100,
+      default: 1,
     },
     fileTypes: {
       type: [String],
       default: ['*'],
-    },
-    maxFilesAllowed: {
-      type: Number,
-      default: 1,
     },
     maxFileSizeinKB: {
       type: Number,

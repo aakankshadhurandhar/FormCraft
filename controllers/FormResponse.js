@@ -19,7 +19,7 @@ module.exports.Create = async (req, res) => {
     const responseID = new mongoose.Types.ObjectId().toHexString()
     let formValues = req.body
 
-    for (let i = 0; i < files.length; i++) {
+    for (let i = 0; i < files?.length; i++) {
       files[i].key = files[i].path.replace(
         'uploads',
         `uploads/${form._id}/${responseID}`,
@@ -48,9 +48,7 @@ module.exports.Create = async (req, res) => {
       formID: form._id,
       response: value,
     })
-
     const savedResponse = await formResponse.save()
-
     res.status(201).json(savedResponse)
   } catch (err) {
     console.error(err)
