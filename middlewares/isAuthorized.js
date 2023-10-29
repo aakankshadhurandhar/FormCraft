@@ -4,9 +4,7 @@ module.exports = async (req, res, next) => {
     try {
       const userEmail = req.user
       const userID = await Models.Users.findOne({ email: userEmail })
-      if (
-        req.form.userID.toHexString() === userID._id.toHexString()
-      ) {
+      if (req.form.userID.toHexString() === userID._id.toHexString()) {
         next()
       } else {
         res.status(401).json({ message: 'Unauthorized' })
