@@ -12,7 +12,7 @@ router.get('/', (req, res) => {
 })
 
 // Create Form
-router.post('/forms',isJWTVerify, Controllers.Form.Create)
+router.post('/forms', isJWTVerify, Controllers.Form.Create)
 
 // Read Form
 router.get('/forms/:formID', isJWTVerify, fetchForm, Controllers.Form.Read)
