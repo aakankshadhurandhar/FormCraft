@@ -178,7 +178,7 @@ const formInputSchema = new mongoose.Schema({
  */
 const formSchema = new mongoose.Schema(
   {
-    userId: {
+    userID: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Users',
       required: true,

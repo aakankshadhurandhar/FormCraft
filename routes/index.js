@@ -4,6 +4,7 @@ const router = express.Router()
 const passport = require('passport')
 const Controllers = require('../controllers')
 const { areObjectIDs, fetchForm, handleFileUpload } = require('../middlewares')
+const isAuthorized = require('../middlewares/isAuthorized')
 
 router.get('/', (req, res) => {
   res.json({ message: 'OK!' })
@@ -13,13 +14,9 @@ router.get('/', (req, res) => {
 router.post('/forms', Controllers.Form.Create)
 
 // Read Form
-router.get(
-  '/forms/:formID',
-  fetchForm,
-  passport.authenticate('jwt', { session: false }),
-  Controllers.Form.Read,
-)
-
+router.get('/forms/:formID', isAuthorized, fetchForm, Controllers.Form.Read)
+//Read All Forms by a User
+router.get('/forms', Controllers.Form.ReadAll)
 //Delete Form
 router.delete('/forms/:formID', fetchForm, Controllers.Form.Delete)
 
