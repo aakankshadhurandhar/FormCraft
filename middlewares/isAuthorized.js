@@ -11,8 +11,8 @@ const jwtOptions = {
 }
 
 passport.use(
-  new JwtStrategy(jwtOptions, async (jwtPayload,req, done) => {
-    console.log(req);
+  new JwtStrategy(jwtOptions, async (jwtPayload, req, done) => {
+    console.log(req)
     try {
       if (!jwtPayload) {
         return done(null, false, { message: 'Token missing', statusCode: 401 })
@@ -34,5 +34,5 @@ passport.use(
 
 // Export the authentication middleware
 module.exports = (req, res, next) => {
-    passport.authenticate('jwt', { session: false })(req, res, next);
-  };
+  passport.authenticate('jwt', { session: false })(req, res, next)
+}
