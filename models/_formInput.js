@@ -7,6 +7,10 @@ const formInputSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    required: {
+      type: Boolean,
+      default: false,
+    },
   },
   { discriminatorKey: 'type' },
 )

@@ -60,22 +60,21 @@ function validateFormResponse(form, formResponse) {
 
     switch (input.type) {
       case 'small':
-        baseSchema = Joi.string().min(input?.min).max(input?.max).required()
+        baseSchema = Joi.string().min(input?.min).max(input?.max)
         break
 
       case 'long':
-        baseSchema = Joi.string().min(input?.min).max(input?.max).required()
+        baseSchema = Joi.string().min(input?.min).max(input?.max)
         break
 
       case 'number':
-        baseSchema = Joi.number().min(input?.min).max(input?.max).required()
+        baseSchema = Joi.number().min(input?.min).max(input?.max)
         break
       case 'email':
         baseSchema = Joi.string()
           .email()
           .min(input?.min)
           .max(input?.max)
-          .required()
         break
       case 'multi':
         baseSchema = Joi.alternatives(
@@ -85,17 +84,16 @@ function validateFormResponse(form, formResponse) {
                 ...input.options.map((option) => option.value),
               ),
             )
-            .min(1)
-            .required(),
+            .min(1),
           Joi.string()
             .valid(...input.options.map((option) => option.value))
-            .required(),
+            
         )
         break
       case 'radio':
         baseSchema = Joi.string()
           .valid(...input.options.map((option) => option.value))
-          .required()
+          
         break
       case 'file':
         const maxFileSizeKB = input.maxFileSizeinKB
@@ -108,7 +106,7 @@ function validateFormResponse(form, formResponse) {
             }),
           )
           .custom(fileValidationHelper(maxFileSizeKB, input.min, input.max))
-          .required()
+          
         break
       default:
         break
@@ -128,7 +126,10 @@ function validateFormResponse(form, formResponse) {
         })
       }
     }
-
+   
+    if (input.required) {
+      baseSchema = baseSchema.required()
+    }
     inputSchema[inputLabel] = baseSchema
   })
 
@@ -153,6 +154,7 @@ function validateForm(formBody) {
     type: Joi.string()
       .valid('small', 'long', 'number', 'email', 'multi', 'radio', 'file')
       .required(),
+    required: Joi.boolean().default(false),
     min: Joi.number(),
     max: Joi.number(),
     options: Joi.array()
