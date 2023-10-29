@@ -44,11 +44,11 @@ module.exports.Create = async (req, res) => {
 module.exports.ReadAll = async (req, res) => {
   try {
     const user = await Models.Users.find({ email: req.user })
-    const userID=user[0]._id.toHexString()
+    const userID = user[0]._id.toHexString()
     const responses = await Models.FormPage.find({ userID: userID })
     res.status(200).json({ statusCode: 200, responses })
   } catch (err) {
-    console.log(err);
+    console.log(err)
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
   }
 }

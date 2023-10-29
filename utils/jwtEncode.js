@@ -5,7 +5,7 @@ function generateToken(user) {
   const payload = {
     user_name: user.user_name,
     email: user.email,
-    userID: user._id.toHexString()
+    userID: user._id.toHexString(),
   }
 
   const options = {
