@@ -1,38 +1,18 @@
-const passport = require('passport')
-const JwtStrategy = require('passport-jwt').Strategy
-const ExtractJwt = require('passport-jwt').ExtractJwt
-const Models = require('../models/index') // Import your models
-const secretKey = process.env.JWT_SECRET_KEY // Replace with your secret key
+const Models = require('../models')
+module.exports = async(req, res, next) => {
+    console.log(req);
+    if (req.user) {
+      const userEmail = req.user; 
+      //find user id in user model
+      const userID = await Models.Users.find({email: userEmail})
+      console.log(req.form.userID.toHexString());
+      console.log(userID[0]._id.toHexString());
+      console.log(req.form.userID.toHexString()==userID[0]._id.toHexString());
 
-// Configure the JWT strategy
-const jwtOptions = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: secretKey,
-}
-
-passport.use(
-  new JwtStrategy(jwtOptions, async (jwtPayload, req, done) => {
-    console.log(req)
-    try {
-      if (!jwtPayload) {
-        return done(null, false, { message: 'Token missing', statusCode: 401 })
-      }
-      const user = await Models.Users.findOne({ email: jwtPayload.email })
-
-      if (!user) {
-        return done(null, false)
-      }
-      return done(null, user)
-    } catch (error) {
-      return done(error, false, {
-        statusCode: 401,
-        message: 'Authentication error',
-      })
+    } else {
+      // Handle cases where req.user is not defined (unauthenticated requests)
     }
-  }),
-)
-
-// Export the authentication middleware
-module.exports = (req, res, next) => {
-  passport.authenticate('jwt', { session: false })(req, res, next)
-}
+  
+    // Continue with your logic
+    next();
+  };
