@@ -4,27 +4,37 @@ const router = express.Router()
 const passport = require('passport')
 const Controllers = require('../controllers')
 const { areObjectIDs, fetchForm, handleFileUpload } = require('../middlewares')
+const isJWTVerify = require('../middlewares/isJWTVerify')
+const isAuthorized = require('../middlewares/isAuthorized')
 
 router.get('/', (req, res) => {
   res.json({ message: 'OK!' })
 })
 
 // Create Form
-router.post('/forms', Controllers.Form.Create)
+router.post('/forms', isJWTVerify, Controllers.Form.Create)
 
 // Read Form
-router.get(
+router.get('/forms/:formID', isJWTVerify, fetchForm, Controllers.Form.Read)
+//Read All Forms by a User
+router.get('/forms', isJWTVerify, Controllers.Form.ReadAll)
+//Delete Form
+router.delete(
   '/forms/:formID',
+  isJWTVerify,
   fetchForm,
-  passport.authenticate('jwt', { session: false }),
-  Controllers.Form.Read,
+  isAuthorized,
+  Controllers.Form.Delete,
 )
 
-//Delete Form
-router.delete('/forms/:formID', fetchForm, Controllers.Form.Delete)
-
 //Update Form
-router.put('/forms/:formID', fetchForm, Controllers.Form.Update)
+router.put(
+  '/forms/:formID',
+  isJWTVerify,
+  fetchForm,
+  isAuthorized,
+  Controllers.Form.Update,
+)
 
 // Submit Form Response
 router.post(

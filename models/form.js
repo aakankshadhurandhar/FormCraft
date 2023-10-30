@@ -127,7 +127,7 @@ const formInputSchema = new mongoose.Schema({
     ],
     default: function () {
       if (this.type === 'file') {
-        return ["*"]
+        return ['*']
       }
       return undefined
     },
@@ -178,6 +178,11 @@ const formInputSchema = new mongoose.Schema({
  */
 const formSchema = new mongoose.Schema(
   {
+    userID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Users',
+      required: true,
+    },
     title: {
       type: String,
       required: true,

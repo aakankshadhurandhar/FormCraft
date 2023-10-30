@@ -34,8 +34,11 @@ const fileFilter = function (req, file, cb) {
     return cb(new Error('File upload not allowed for some form values'), false)
   }
   // if fileTypes contains "*", all file types are allowed
-     
-  if (!fileInput.fileTypes.includes('*') && !fileInput.fileTypes.includes(file.mimetype)) {
+
+  if (
+    !fileInput.fileTypes.includes('*') &&
+    !fileInput.fileTypes.includes(file.mimetype)
+  ) {
     return cb(new Error('File type not allowed '), false)
   }
 
