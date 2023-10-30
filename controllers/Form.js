@@ -46,7 +46,9 @@ module.exports.Read = async (req, res) => {
 
     return res.status(401).json({ message: 'Unauthorized' })
   } catch (err) {
-    res.status(500).json({ statusCode: 500, message: 'Internal server error' ,err})
+    res
+      .status(500)
+      .json({ statusCode: 500, message: 'Internal server error', err })
   }
 }
 
