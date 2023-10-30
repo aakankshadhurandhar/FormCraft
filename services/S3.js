@@ -55,7 +55,6 @@ module.exports.DeleteFilesFromS3 = async (files) => {
       await Promise.all(deletePromises)
     }
   } catch (err) {
-    console.error(err)
     throw err
   }
 }
@@ -109,7 +108,6 @@ const uploadToS3 = (file) => {
       } else {
         fs.unlink(file.path, (err) => {
           if (err) {
-            console.error(err)
             return
           }
         })
@@ -132,7 +130,6 @@ module.exports.UploadToS3 = async (files) => {
       return s3Urls
     }
   } catch (err) {
-    console.error(err)
     throw err
   }
 }

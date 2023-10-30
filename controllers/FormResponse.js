@@ -57,7 +57,6 @@ module.exports.Create = async (req, res) => {
     const savedResponse = await formResponse.save()
     res.status(201).json(savedResponse)
   } catch (err) {
-    console.error(err)
     res.status(500).json({ message: 'Internal server error' })
   }
 }
@@ -78,7 +77,6 @@ module.exports.ReadAll = async (req, res) => {
     }).exec()
     res.json(responses)
   } catch (error) {
-    console.error(error)
     res.status(500).json({ message: 'Internal server error' })
   }
 }
@@ -102,7 +100,6 @@ module.exports.Read = async (req, res) => {
     }
     res.json(response)
   } catch (error) {
-    console.error(error)
     res.status(500).json({ message: 'Internal server error' })
   }
 }
@@ -121,7 +118,6 @@ module.exports.Delete = async (req, res) => {
     await response.deleteOne()
     res.json({ message: 'Form response deleted successfully' })
   } catch (error) {
-    console.error(error)
     res.status(500).json({ message: 'Internal server error' })
   }
 }
@@ -147,7 +143,6 @@ module.exports.ExportAll = async (req, res) => {
     )
     res.send(fileBuffer)
   } catch (error) {
-    console.error(error)
     res.status(500).json({ message: 'Internal server error' })
   }
 }

@@ -42,7 +42,6 @@ const fetchForm = async (req, res, next) => {
     req.form = form
     next()
   } catch (err) {
-    console.error(err)
     return res.status(500).json({ message: 'Internal server error' })
   }
 }

@@ -15,6 +15,11 @@ const formInputSchema = require('./_formInput')
 
 const formSchema = new mongoose.Schema(
   {
+    userID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Users',
+      required: true,
+    },
     title: {
       type: String,
       required: true,

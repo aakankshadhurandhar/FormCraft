@@ -12,6 +12,7 @@ module.exports.Create = async (req, res) => {
   try {
     const { error, value } = validateForm(req.body)
 
+    const userID = req.user.userID
     if (error) {
       return res.status(400).json({
         statusCode: 400,
@@ -22,6 +23,7 @@ module.exports.Create = async (req, res) => {
 
     const { title, description, inputs, expiry } = value
     const form = new Models.FormPage({
+      userID,
       title,
       description,
       expiry,
@@ -34,7 +36,22 @@ module.exports.Create = async (req, res) => {
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
   }
 }
-
+/**
+ * Read all forms made by a user
+ * @param {Object} req- The request object.
+ * @param {Object} res- The response object.
+ * @returns {Object}  The saved form page by a user
+ */
+module.exports.ReadAll = async (req, res) => {
+  try {
+    const userID = req.user.userID
+    const responses = await Models.FormPage.find({ userID: userID })
+    res.status(200).json({ statusCode: 200, responses })
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ statusCode: 500, message: 'Internal server error' })
+  }
+}
 /**
  * Retrieves a form page.
  *
@@ -47,7 +64,6 @@ module.exports.Read = async (req, res) => {
     const form = req.form
     res.status(200).json(form)
   } catch (err) {
-    console.error(err)
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
   }
 }
@@ -86,7 +102,6 @@ module.exports.Update = async (req, res) => {
       updatedForm,
     })
   } catch (err) {
-    console.error(err)
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
   }
 }
@@ -104,7 +119,6 @@ module.exports.Delete = async (req, res) => {
     await form.deleteOne()
     res.status(200).json({ message: 'Resource deleted successfully' })
   } catch (err) {
-    console.error(err)
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
   }
 }
