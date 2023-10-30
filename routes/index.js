@@ -33,6 +33,12 @@ router.delete('/forms/:formID', formOwnerOnly, Controllers.Form.Delete)
 //Update Form
 router.put('/forms/:formID', formOwnerOnly, Controllers.Form.Update)
 
+router.get(
+  '/forms/:formID/export',
+  formOwnerOnly,
+  Controllers.FormResponse.ExportAll,
+)
+
 // Submit Form Response
 router.post(
   '/forms/:formID/responses',
@@ -41,11 +47,6 @@ router.post(
   Controllers.FormResponse.Create,
 )
 
-router.get(
-  '/forms/:formID/export',
-  formOwnerOnly,
-  Controllers.FormResponse.ExportAll,
-)
 
 // Read All Form Responses
 router.get(

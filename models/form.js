@@ -26,7 +26,7 @@ const formSchema = new mongoose.Schema(
       minlength: 1,
     },
     description: String,
-    pubilshed: {
+    published: {
       type: Boolean,
       default: false,
     },

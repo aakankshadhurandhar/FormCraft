@@ -68,7 +68,7 @@ module.exports.ReadAll = async (req, res) => {
 
 module.exports.Read = async (req, res) => {
   try {
-    const responseID = req.params.responseId
+    const responseID = req.params.responseID
     const response = await Models.FormResponse.findById(responseID)
 
     if (!response) {
@@ -76,7 +76,7 @@ module.exports.Read = async (req, res) => {
     }
 
     const form = await Models.FormPage.findById(response.formID)
-    if (req.user && req.user._id == form.userID) {
+    if (req.user?.userID == form.userID) {
       return res.json(response)
     }
 
@@ -91,7 +91,7 @@ module.exports.Read = async (req, res) => {
 
 module.exports.Delete = async (req, res) => {
   try {
-    const responseID = req.params.responseId
+    const responseID = req.params.responseID
     const response = await Models.FormResponse.findById(responseID)
     await response.deleteOne()
     res.json({ message: 'Form response deleted successfully' })
@@ -127,7 +127,7 @@ module.exports.ExportAll = async (req, res) => {
 
 module.exports.SetPublicOne = async (req, res) => {
   try {
-    const responseID = req.params.responseId
+    const responseID = req.params.responseID
     const publicStatus = req.body.public || true
     if (typeof publicStatus != 'boolean') {
       return res.status(400).json({ message: 'Invalid public status' })

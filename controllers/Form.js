@@ -40,14 +40,13 @@ module.exports.ReadAll = async (req, res) => {
 module.exports.Read = async (req, res) => {
   try {
     const form = req.form
-
-    if (form.published || form.userID.toHexString() === req.user.userID) {
+    if (form.published || form.userID.toHexString() === req.user?.userID) {
       return res.status(200).json(form)
     }
 
     return res.status(401).json({ message: 'Unauthorized' })
   } catch (err) {
-    res.status(500).json({ statusCode: 500, message: 'Internal server error' })
+    res.status(500).json({ statusCode: 500, message: 'Internal server error' ,err})
   }
 }
 

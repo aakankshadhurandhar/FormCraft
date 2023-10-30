@@ -45,7 +45,7 @@ const inputDiscriminators = {
     ...basicTextInputSchema,
     max: {
       type: Number,
-      default: 1000000000,
+      default: 1e20,
     },
   }),
   multi: new mongoose.Schema({
