@@ -4,24 +4,17 @@ const { validateFormResponse } = require('../utils/validations')
 const Models = require('../models')
 const createExportFile = require('../utils/createExportFile')
 
-/**
- * Creates a new form response.
- * @param {Object} req - The request object.
- * @param {Object} req.body - The form response data.
- * @param {Object} req.form - The form object.
- * @param {Array} req.files - The uploaded files.
- * @param {Object} res - The response object.
- * @returns {Object} The saved form response.
- */
 module.exports.Create = async (req, res) => {
   try {
     const { form, files } = req
+
     if (form.expiry && form.expiry < Date.now()) {
       return res.status(400).json({ message: 'Form has expired' })
     }
     if (!form.published) {
       return res.status(400).json({ message: 'Form is not public' })
     }
+
     const responseID = new mongoose.Types.ObjectId().toHexString()
     let formValues = req.body
 
@@ -61,19 +54,11 @@ module.exports.Create = async (req, res) => {
   }
 }
 
-/**
- * Retrieves all form responses for a given form.
- * @param {Object} req - The request object.
- * @param {string} req.params.formID - The ID of the form.
- * @param {Object} res - The response object.
- * @returns {Array} The form responses for the given form.
- */
 module.exports.ReadAll = async (req, res) => {
   try {
     const formID = req.params.formID
     const responses = await Models.FormResponse.find({
       formID: formID,
-      public: true,
     }).exec()
     res.json(responses)
   } catch (error) {
@@ -81,20 +66,20 @@ module.exports.ReadAll = async (req, res) => {
   }
 }
 
-/**
- * Retrieves a single form response by ID.
- * @param {Object} req - The request object.
- * @param {string} req.params.responseId - The ID of the form response.
- * @param {Object} res - The response object.
- * @returns {Object} The form response with the given ID.
- */
 module.exports.Read = async (req, res) => {
   try {
     const responseID = req.params.responseId
     const response = await Models.FormResponse.findById(responseID)
+
     if (!response) {
       return res.status(404).json({ message: 'Response not found' })
     }
+
+    const form = await Models.FormPage.findById(response.formID)
+    if (req.user && req.user._id == form.userID) {
+      return res.json(response)
+    }
+
     if (!response.public) {
       return res.status(400).json({ message: 'Response is not public' })
     }
@@ -104,13 +89,6 @@ module.exports.Read = async (req, res) => {
   }
 }
 
-/**
- * Deletes a form response by ID.
- * @param {Object} req - The request object.
- * @param {string} req.params.responseId - The ID of the form response.
- * @param {Object} res - The response object.
- * @returns {Object} A success message.
- */
 module.exports.Delete = async (req, res) => {
   try {
     const responseID = req.params.responseId

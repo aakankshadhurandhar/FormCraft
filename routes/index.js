@@ -3,38 +3,35 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const Controllers = require('../controllers')
-const { areObjectIDs, fetchForm, handleFileUpload } = require('../middlewares')
-const isJWTVerify = require('../middlewares/isJWTVerify')
-const isAuthorized = require('../middlewares/isAuthorized')
+const {
+  areObjectIDs,
+  fetchForm,
+  handleFileUpload,
+  isAuthenticated,
+  readJWT,
+  formOwnerOnly,
+} = require('../middlewares')
+
+router.use(readJWT)
 
 router.get('/', (req, res) => {
   res.json({ message: 'OK!' })
 })
 
 // Create Form
-router.post('/forms', isJWTVerify, Controllers.Form.Create)
+router.post('/forms', isAuthenticated, Controllers.Form.Create)
 
 // Read Form
-router.get('/forms/:formID', isJWTVerify, fetchForm, Controllers.Form.Read)
+router.get('/forms/:formID', fetchForm, Controllers.Form.Read)
+
 //Read All Forms by a User
-router.get('/forms', isJWTVerify, Controllers.Form.ReadAll)
+router.get('/forms', isAuthenticated, Controllers.Form.ReadAll)
+
 //Delete Form
-router.delete(
-  '/forms/:formID',
-  isJWTVerify,
-  fetchForm,
-  isAuthorized,
-  Controllers.Form.Delete,
-)
+router.delete('/forms/:formID', formOwnerOnly, Controllers.Form.Delete)
 
 //Update Form
-router.put(
-  '/forms/:formID',
-  isJWTVerify,
-  fetchForm,
-  isAuthorized,
-  Controllers.Form.Update,
-)
+router.put('/forms/:formID', formOwnerOnly, Controllers.Form.Update)
 
 // Submit Form Response
 router.post(
@@ -46,21 +43,21 @@ router.post(
 
 router.get(
   '/forms/:formID/export',
-  fetchForm,
+  formOwnerOnly,
   Controllers.FormResponse.ExportAll,
 )
 
 // Read All Form Responses
 router.get(
   '/forms/:formID/responses',
-  areObjectIDs('formID'),
+  formOwnerOnly,
   Controllers.FormResponse.ReadAll,
 )
 
 //  Set Multiple Form Responses Public/Private
 router.put(
   '/forms/:formID/responses',
-  areObjectIDs('formID'),
+  formOwnerOnly,
   Controllers.FormResponse.SetPublicMany,
 )
 
@@ -74,16 +71,19 @@ router.get(
 // Set Form Response Public/Private
 router.put(
   '/forms/:formID/responses/:responseID',
-  areObjectIDs('formID', 'responseID'),
+  areObjectIDs('responseID'),
+  fetchForm,
   Controllers.FormResponse.SetPublicOne,
 )
 
 // Delete Form Response
 router.delete(
   '/forms/:formID/responses/:responseID',
-  areObjectIDs('formID', 'responseID'),
+  areObjectIDs('responseID'),
+  formOwnerOnly,
   Controllers.FormResponse.Delete,
 )
+
 //Create New User
 router.post('/register', Controllers.Users.registerUser)
 
