@@ -37,16 +37,26 @@ module.exports.ReadAll = async (req, res) => {
   }
 }
 
+/**
+ * Reads the form data and returns the form object if it is published or if the form userID matches the userID of the logged-in user.
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Promise<void>} - The form object without the userID field, or a JSON object with a "message" field set to "Unauthorized" if the conditions are not met.
+ */
 module.exports.Read = async (req, res) => {
   try {
     const form = req.form
+
     if (form.published || form.userID.toHexString() === req.user?.userID) {
-      return res.status(200).json(form)
+      const formWithoutUserID = { ...form.toObject() }
+      delete formWithoutUserID.userID
+      return res.status(200).json(formWithoutUserID)
     }
 
     return res.status(401).json({ message: 'Unauthorized' })
   } catch (err) {
-    res
+    return res
       .status(500)
       .json({ statusCode: 500, message: 'Internal server error', err })
   }
