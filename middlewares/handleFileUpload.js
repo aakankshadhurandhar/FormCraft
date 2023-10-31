@@ -2,6 +2,7 @@ const multer = require('multer')
 const fs = require('fs')
 const { default: ShortUniqueId } = require('short-unique-id')
 const uid = new ShortUniqueId({ length: 5 })
+const MAX_FILE_SIZE_IN_MB = 10
 
 /**
  * Returns the extension of a file based on its original name.
@@ -41,8 +42,11 @@ const fileFilter = function (req, file, cb) {
   ) {
     return cb(new Error('File type not allowed '), false)
   }
-
-  if (file.size > fileInput.maxFileSizeinKB * 1024) {
+  // if file is greater than allowd max size in form or general max size
+  if (
+    file.size > fileInput.maxFileSizeinKB * 1024 ||
+    file.size > MAX_FILE_SIZE_IN_MB * 1024 * 1024
+  ) {
     return cb(new Error('File size exceeds limit'), false)
   }
 
