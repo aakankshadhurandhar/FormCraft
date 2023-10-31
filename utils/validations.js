@@ -160,7 +160,8 @@ function validateForm(formBody) {
         then: Joi.array().required(),
       }),
     fileTypes: Joi.array().items(Joi.string()),
-    maxFileSizeinKB: Joi.number(),
+    //if maxFileSizeinKB is greater than 10MB, use 10MB only.
+    maxFileSizeinKB: Joi.number().max(10 * 1024),
     rules: Joi.object().when('type', {
       is: Joi.string().valid('small', 'long', 'number', 'email'),
       then: Joi.object().pattern(
