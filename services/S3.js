@@ -96,6 +96,8 @@ const uploadToS3 = (file) => {
     const params = {
       Bucket: bucketName,
       Key: file.key,
+      //Set Content-Disposition to attachment to rename file on download
+      ContentDisposition: `attachment; filename=${file.originalname}`,
       Body: fs.createReadStream(file.path),
     }
 

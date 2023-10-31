@@ -20,7 +20,7 @@ function isValidRegex(pattern) {
  * @param {number} maxFilesAllowed - The maximum number of files allowed
  * @returns {function} - Returns a validation function that takes an array of files and returns an error if the total file size or number of files exceeds the specified limits
  */
-const fileValidationHelper = (maxFileSizeKB, maxFilesAllowed) => {
+const fileValidationHelper = (maxFileSizeKB, min, max) => {
   return (files, helpers) => {
     const totalSizeKB = files.reduce((total, file) => total + file.sizeInKB, 0)
 
@@ -29,9 +29,15 @@ const fileValidationHelper = (maxFileSizeKB, maxFilesAllowed) => {
         message: `Total file size exceeds ${maxFileSizeKB} KB`,
       })
     }
-    if (maxFilesAllowed < files.length) {
+    if (max < files.length) {
       return helpers.error('any.custom', {
         message: `File Count exceeds maximum files allowed (${maxFilesAllowed}) `,
+      })
+    }
+
+    if (min > files.length) {
+      return helpers.error('any.custom', {
+        message: `File Count is less than minimum files allowed (${min}) `,
       })
     }
     return files
@@ -53,28 +59,21 @@ function validateFormResponse(form, formResponse) {
     let baseSchema
 
     switch (input.type) {
-      case 'small-text':
-        baseSchema = Joi.string()
-          .min(input.minLength)
-          .max(input.maxLength)
-          .required()
+      case 'small':
+        baseSchema = Joi.string().min(input?.min).max(input?.max)
         break
-      case 'long-text':
-        baseSchema = Joi.string()
-          .min(input.minLength)
-          .max(input.maxLength)
-          .required()
+
+      case 'long':
+        baseSchema = Joi.string().min(input?.min).max(input?.max)
         break
+
       case 'number':
-        baseSchema = Joi.number()
-          .min(input.minValue)
-          .max(input.maxValue)
-          .required()
+        baseSchema = Joi.number().min(input?.min).max(input?.max)
         break
       case 'email':
-        baseSchema = Joi.string().email().required()
+        baseSchema = Joi.string().email().min(input?.min).max(input?.max)
         break
-      case 'multi-select':
+      case 'multi':
         baseSchema = Joi.alternatives(
           Joi.array()
             .items(
@@ -82,21 +81,18 @@ function validateFormResponse(form, formResponse) {
                 ...input.options.map((option) => option.value),
               ),
             )
-            .min(1) // Require at least one selection if it's an array
-            .required(),
-          Joi.string()
-            .valid(...input.options.map((option) => option.value))
-            .required(),
+            .min(1),
+          Joi.string().valid(...input.options.map((option) => option.value)),
         )
         break
       case 'radio':
-        baseSchema = Joi.string()
-          .valid(...input.options.map((option) => option.value))
-          .required()
+        baseSchema = Joi.string().valid(
+          ...input.options.map((option) => option.value),
+        )
+
         break
       case 'file':
         const maxFileSizeKB = input.maxFileSizeinKB
-        const maxFilesAllowed = input.maxFilesAllowed
         baseSchema = Joi.array()
           .items(
             Joi.object({
@@ -105,14 +101,13 @@ function validateFormResponse(form, formResponse) {
               sizeInKB: Joi.number().required(),
             }),
           )
-          .custom(fileValidationHelper(maxFileSizeKB, maxFilesAllowed))
-          .required()
+          .custom(fileValidationHelper(maxFileSizeKB, input.min, input.max))
+
         break
       default:
         break
     }
 
-    // Add custom validation for regex patterns if defined in 'rules'
     if (input.rules) {
       for (const [ruleName, rulePattern] of Object.entries(input.rules)) {
         const regexPattern = new RegExp(rulePattern)
@@ -128,6 +123,9 @@ function validateFormResponse(form, formResponse) {
       }
     }
 
+    if (input.required) {
+      baseSchema = baseSchema.required()
+    }
     inputSchema[inputLabel] = baseSchema
   })
 
@@ -143,59 +141,39 @@ function validateFormResponse(form, formResponse) {
 function validateForm(formBody) {
   const inputOptionSchema = Joi.object({
     label: Joi.string().required(),
-    value: Joi.string().required(),
+    // if value is not provided, use the label as the value
+    value: Joi.string().default(Joi.ref('label')),
   })
 
   const formInputSchema = Joi.object({
-    type: Joi.string()
-      .valid(
-        'small-text',
-        'long-text',
-        'number',
-        'email',
-        'multi-select',
-        'radio',
-        'file',
-      )
-      .required(),
     label: Joi.string().required(),
-    minLength: Joi.number().when('type', {
-      is: 'small-text',
-      then: Joi.optional(),
-    }),
-    maxLength: Joi.number().when('type', {
-      is: Joi.any().valid('small-text', 'long-text'),
-      then: Joi.optional(),
-    }),
-    minValue: Joi.number().when('type', { is: 'number', then: Joi.optional() }),
-    maxValue: Joi.number().when('type', { is: 'number', then: Joi.optional() }),
+    type: Joi.string()
+      .valid('small', 'long', 'number', 'email', 'multi', 'radio', 'file')
+      .required(),
+    required: Joi.boolean().default(false),
+    min: Joi.number(),
+    max: Joi.number(),
     options: Joi.array()
       .items(inputOptionSchema)
       .when('type', {
-        is: Joi.any().valid('multi-select', 'radio'),
-        then: Joi.required(),
+        is: Joi.any().valid('multi', 'radio'),
+        then: Joi.array().required(),
       }),
-    fileTypes: Joi.array().items(Joi.string()).optional(), // Validate allowed file types
-    maxFileSizeinKB: Joi.number().when('type', {
-      is: 'file',
-      then: Joi.optional(),
-    }),
-    maxFilesAllowed: Joi.number().when('type', {
-      is: 'file',
-      then: Joi.optional(),
-    }),
-    rules: Joi.when('type', {
-      is: Joi.string().valid('small-text', 'long-text', 'number', 'email'),
-      then: Joi.object().custom((obj, helpers) => {
-        for (const [ruleName, rulePattern] of Object.entries(obj)) {
+    fileTypes: Joi.array().items(Joi.string()),
+    maxFileSizeinKB: Joi.number(),
+    rules: Joi.object().when('type', {
+      is: Joi.string().valid('small', 'long', 'number', 'email'),
+      then: Joi.object().pattern(
+        Joi.string(),
+        Joi.string().custom((rulePattern, helpers) => {
           if (!isValidRegex(rulePattern)) {
             return helpers.error('any.custom', {
-              message: `${ruleName} is not a valid regex Pattern`,
+              message: `${rulePattern} is not a valid regex pattern`,
             })
           }
-        }
-        return obj
-      }),
+          return rulePattern
+        }),
+      ),
       otherwise: Joi.forbidden(),
     }),
   })
@@ -204,12 +182,14 @@ function validateForm(formBody) {
   const formPageSchema = Joi.object({
     title: Joi.string().min(1).required(),
     description: Joi.string(),
-    expiry: Joi.date(),
+    published: Joi.boolean().default(false),
+    expiry: Joi.date().min('now'),
     inputs: Joi.array().items(formInputSchema),
   })
 
   return formPageSchema.validate(formBody)
 }
+
 function validateUserRegisterSchema(userBody) {
   const userRegistrationSchema = Joi.object({
     user_name: Joi.string().min(3).max(30).required(),

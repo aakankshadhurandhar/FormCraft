@@ -1,13 +1,6 @@
 const Models = require('../models')
 const { validateForm } = require('../utils/validations')
 
-/**
- * Creates a new form page.
- *
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @returns {Object} The saved form page.
- */
 module.exports.Create = async (req, res) => {
   try {
     const { error, value } = validateForm(req.body)
@@ -21,12 +14,9 @@ module.exports.Create = async (req, res) => {
       })
     }
 
-    const { title, description, inputs } = value
     const form = new Models.FormPage({
       userID,
-      title,
-      description,
-      inputs,
+      ...value,
     })
 
     const savedForm = await form.save()
@@ -35,12 +25,7 @@ module.exports.Create = async (req, res) => {
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
   }
 }
-/**
- * Read all forms made by a user
- * @param {Object} req- The request object.
- * @param {Object} res- The response object.
- * @returns {Object}  The saved form page by a user
- */
+
 module.exports.ReadAll = async (req, res) => {
   try {
     const userID = req.user.userID
@@ -51,29 +36,32 @@ module.exports.ReadAll = async (req, res) => {
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
   }
 }
+
 /**
- * Retrieves a form page.
+ * Reads the form data and returns the form object if it is published or if the form userID matches the userID of the logged-in user.
  *
  * @param {Object} req - The request object.
  * @param {Object} res - The response object.
- * @returns {Object} The form page.
+ * @returns {Promise<void>} - The form object without the userID field, or a JSON object with a "message" field set to "Unauthorized" if the conditions are not met.
  */
 module.exports.Read = async (req, res) => {
   try {
     const form = req.form
-    res.status(200).json(form)
+
+    if (form.published || form.userID.toHexString() === req.user?.userID) {
+      const formWithoutUserID = { ...form.toObject() }
+      delete formWithoutUserID.userID
+      return res.status(200).json(formWithoutUserID)
+    }
+
+    return res.status(401).json({ message: 'Unauthorized' })
   } catch (err) {
-    res.status(500).json({ statusCode: 500, message: 'Internal server error' })
+    return res
+      .status(500)
+      .json({ statusCode: 500, message: 'Internal server error', err })
   }
 }
 
-/**
- * Updates an existing form page.
- *
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @returns {Object} The updated form page.
- */
 module.exports.Update = async (req, res) => {
   try {
     const { error, value } = validateForm(req.body)
@@ -87,11 +75,14 @@ module.exports.Update = async (req, res) => {
     }
 
     const existingForm = req.form
-    const { title, description, inputs } = value
+
+    const { title, description, inputs, expiry, published } = value
 
     existingForm.title = title
     existingForm.description = description
     existingForm.inputs = inputs
+    existingForm.expiry = expiry
+    existingForm.published = published
 
     const updatedForm = await existingForm.save()
     res.json({
@@ -104,13 +95,6 @@ module.exports.Update = async (req, res) => {
   }
 }
 
-/**
- * Deletes a form page.
- *
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @returns {Object} A success message.
- */
 module.exports.Delete = async (req, res) => {
   try {
     let form = req.form

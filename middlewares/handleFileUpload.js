@@ -50,42 +50,14 @@ const fileFilter = function (req, file, cb) {
 }
 
 const storage = multer.diskStorage({
-  /**
-   * Sets the destination folder for uploaded files.
-   *
-   * @param {Object} req - The request object.
-   * @param {Object} file - The file object.
-   * @param {Function} cb - The callback function.
-   * @returns {Function} The callback function with the upload path.
-   */
-  destination: function (req, file, cb) {
-    const uploadPath = `uploads/`
-    fs.mkdirSync(uploadPath, { recursive: true })
-    cb(null, uploadPath)
-  },
-  /**
-   * Sets the filename for uploaded files.
-   *
-   * @param {Object} req - The request object.
-   * @param {Object} file - The file object.
-   * @param {Function} cb - The callback function.
-   * @returns {Function} The callback function with the modified filename.
-   */
+  destination: 'uploads/',
   filename: function (req, file, cb) {
     const modifiedName = uid.rnd() + '.' + getExtension(file.originalname)
     cb(null, modifiedName)
   },
 })
 
-/**
- * Sets up the multer middleware for handling file uploads.
- *
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @param {Function} next - The next middleware function.
- * @returns {Function} The next middleware function or an error response.
- */
-const upload = multer({ storage: storage, fileFilter })
+const upload = multer({ storage, fileFilter })
 
 const handleFileUpload = (req, res, next) => {
   upload.any()(req, res, (err) => {
