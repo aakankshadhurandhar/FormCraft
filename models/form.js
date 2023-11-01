@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const formInputSchema = require('./_formInput')
+const { DeleteFormDirectory } = require('../services/S3')
 
 /**
  * @typedef {Object} Form
@@ -43,6 +44,7 @@ formSchema.pre(
   { document: true, query: true },
   async function (next) {
     await this.model('FormResponse').deleteMany({ formID: this._id })
+    DeleteFormDirectory(this._id)
     next()
   },
 )
