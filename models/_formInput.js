@@ -91,6 +91,28 @@ const inputDiscriminators = {
       default: 2048,
     },
   }),
+  date: new mongoose.Schema({
+    _id: false,
+    min: {
+      type: String,
+      default: undefined,
+    },
+    max: {
+      type: String,
+      default: undefined,
+    },
+  }),
+  time: new mongoose.Schema({
+    _id: false,
+    min: {
+      type: String,
+      default: undefined,
+    },
+    max: {
+      type: String,
+      default: undefined,
+    },
+  }),
   none: new mongoose.Schema({
     _id: false,
     label: {

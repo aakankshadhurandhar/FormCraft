@@ -1,4 +1,4 @@
-const Joi = require('joi')
+const Joi = require('joi').extend(require('@joi/date'))
 
 /**
  * Checks if a given pattern is a valid regular expression
@@ -60,7 +60,6 @@ function validateFormResponse(form, formResponse) {
 
     // Create a base schema for the input type
     let baseSchema
-
     switch (input.type) {
       case 'small':
         baseSchema = Joi.string().min(input?.min).max(input?.max)
@@ -76,6 +75,51 @@ function validateFormResponse(form, formResponse) {
       case 'email':
         baseSchema = Joi.string().email().min(input?.min).max(input?.max)
         break
+      case 'date':
+        baseSchema = Joi.date()
+          .format('YYYY-MM-DD')
+          .utc()
+          .custom((value, helpers) => {
+            const minDate = input.min ? new Date(input.min) : null
+            const maxDate = input.max ? new Date(input.max) : null
+            if (minDate && value < minDate) {
+              return helpers.error('date.min', {
+                message: `Date must be greater than or equal to ${input.min}`,
+              })
+            }
+
+            if (maxDate && value > maxDate) {
+              return helpers.error('date.max', {
+                message: `Date must be less than or equal to ${input.max}`,
+              })
+            }
+            return value.toISOString().split('T')[0]
+          })
+        break
+      case 'time':
+        baseSchema = Joi.date()
+          .format('HH:mm') // Specify the time format (24-hour)
+          .utc()
+          .custom((value, helpers) => {
+            const minTime = input.min
+            const maxTime = input.max
+            const valueTime = value.toISOString().split('T')[1].split('.')[0]
+
+            if (minTime && valueTime < minTime) {
+              return helpers.error('time.min', {
+                message: `Time must be greater than or equal to ${input.min}`,
+              })
+            }
+
+            if (maxTime && valueTime > maxTime) {
+              return helpers.error('time.max', {
+                message: `Time must be less than or equal to ${input.max}`,
+              })
+            }
+            return value.toISOString().split('T')[1].split('.')[0]
+          })
+        break
+
       case 'multi':
         baseSchema = Joi.alternatives(
           Joi.array()
@@ -167,8 +211,40 @@ function validateForm(formBody) {
       .required(),
     description: Joi.string().max(500),
     required: Joi.boolean().default(false),
-    min: Joi.number(),
-    max: Joi.number(),
+    min: Joi.when('type', {
+      is: 'date',
+      then: Joi.date()
+        .format('YYYY-MM-DD')
+        .utc()
+        .custom((value, helpers) => {
+          return value.toISOString().split('T')[0]
+        }),
+      is: 'time',
+      then: Joi.date()
+        .format('HH:mm')
+        .utc()
+        .custom((value, helpers) => {
+          return value.toISOString().split('T')[0]
+        }),
+      otherwise: Joi.number(),
+    }),
+    max: Joi.when('type', {
+      is: 'date',
+      then: Joi.date()
+        .format('YYYY-MM-DD')
+        .utc()
+        .custom((value, helpers) => {
+          return value.toISOString().split('T')[0]
+        }),
+      is: 'time',
+      then: Joi.date()
+        .format('HH:mm')
+        .utc()
+        .custom((value, helpers) => {
+          return value.toISOString().split('T')[0]
+        }),
+      otherwise: Joi.number(),
+    }),
     options: Joi.array()
       .items(
         Joi.object({
