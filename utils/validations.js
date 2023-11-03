@@ -53,6 +53,9 @@ const fileValidationHelper = (maxFileSizeKB, min, max) => {
 function validateFormResponse(form, formResponse) {
   const inputSchema = {}
   form.inputs.forEach((input) => {
+    if (input.type === 'none') {
+      return
+    }
     const inputLabel = input.label
 
     // Create a base schema for the input type
@@ -183,14 +186,15 @@ function validateFormResponse(form, formResponse) {
  * @returns {object} - Returns an object with an error property if the form schema is invalid, otherwise returns the validated form schema
  */
 function validateForm(formBody) {
-  const inputOptionSchema = Joi.object({
-    label: Joi.string().required(),
-    // if value is not provided, use the label as the value
-    value: Joi.string().default(Joi.ref('label')),
-  })
-
   const formInputSchema = Joi.object({
-    label: Joi.string().required(),
+    //Not required for 'none' type
+    label: Joi.string()
+      .max(100)
+      .when('type', {
+        is: Joi.any().valid('none'),
+        then: Joi.string().optional(),
+        otherwise: Joi.string().required(),
+      }),
     type: Joi.string()
       .valid(
         'small',
@@ -202,8 +206,10 @@ function validateForm(formBody) {
         'file',
         'date',
         'time',
+        'none',
       )
       .required(),
+    description: Joi.string().max(500),
     required: Joi.boolean().default(false),
     min: Joi.when('type', {
       is: 'date',
@@ -240,7 +246,12 @@ function validateForm(formBody) {
       otherwise: Joi.number(),
     }),
     options: Joi.array()
-      .items(inputOptionSchema)
+      .items(
+        Joi.object({
+          label: Joi.string().required(),
+          value: Joi.string().default(Joi.ref('label')),
+        }),
+      )
       .when('type', {
         is: Joi.any().valid('multi', 'radio'),
         then: Joi.array().required(),
@@ -268,7 +279,7 @@ function validateForm(formBody) {
   // Define a Joi schema for the form page
   const formPageSchema = Joi.object({
     title: Joi.string().min(1).required(),
-    description: Joi.string(),
+    description: Joi.string().max(2000),
     published: Joi.boolean().default(false),
     expiry: Joi.date().min('now'),
     inputs: Joi.array().items(formInputSchema),

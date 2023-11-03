@@ -11,6 +11,10 @@ const formInputSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    description: {
+      type: String,
+      default: undefined,
+    },
   },
   { discriminatorKey: 'type' },
 )
@@ -105,6 +109,13 @@ const inputDiscriminators = {
       default: undefined,
     },
     max: {
+      type: String,
+      default: undefined,
+    },
+  }),
+  none: new mongoose.Schema({
+    _id: false,
+    label: {
       type: String,
       default: undefined,
     },

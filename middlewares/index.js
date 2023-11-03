@@ -64,23 +64,16 @@ const readJWT = (req, res, next) => {
   }
 }
 
-// isFormOwner should call isAuthenticated and fetchForm before it
-
-const formOwnerOnly = async (req, res, next) => {
-  try {
-    await isAuthenticated(req, res, async () => {
-      await fetchForm(req, res, async () => {
-        if (!req.user || req.form.userID.toHexString() !== req.user.userID) {
-          return res.status(401).json({ message: 'Unauthorized' })
-        }
-
-        next()
-      })
-    })
-  } catch (err) {
-    res.status(500).json({ message: 'Internal server error' })
+const formOwnerOnly = (function () {
+  const fn = (req, res, next) => {
+    if (!req.user || req.form.userID.toHexString() !== req.user.userID) {
+      return res.status(401).json({ message: 'Unauthorized' })
+    }
+    next()
   }
-}
+
+  return [isAuthenticated, fetchForm, fn]
+})()
 
 module.exports = {
   areObjectIDs,
