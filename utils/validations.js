@@ -93,6 +93,30 @@ function validateFormResponse(form, formResponse) {
             return value.toISOString().split('T')[0]
           })
         break
+      case 'time':
+        baseSchema = Joi.date()
+          .format('HH:mm:ss') // Specify the time format (24-hour with seconds)
+          .utc()
+          .custom((value, helpers) => {
+            const minTime = input.min
+            const maxTime = input.max
+            const valueTime = value.toISOString().split('T')[1].split('.')[0]
+
+            if (minTime && valueTime < minTime) {
+              return helpers.error('time.min', {
+                message: `Time must be greater than or equal to ${input.min}`,
+              })
+            }
+
+            if (maxTime && valueTime > maxTime) {
+              return helpers.error('time.max', {
+                message: `Time must be less than or equal to ${input.max}`,
+              })
+            }
+            return value.toISOString().split('T')[1].split('.')[0]
+          })
+        break
+
       case 'multi':
         baseSchema = Joi.alternatives(
           Joi.array()
@@ -177,6 +201,7 @@ function validateForm(formBody) {
         'radio',
         'file',
         'date',
+        'time',
       )
       .required(),
     required: Joi.boolean().default(false),
@@ -188,12 +213,26 @@ function validateForm(formBody) {
         .custom((value, helpers) => {
           return value.toISOString().split('T')[0]
         }),
+      is: 'time',
+      then: Joi.date()
+        .format('HH:mm:ss')
+        .utc()
+        .custom((value, helpers) => {
+          return value.toISOString().split('T')[0]
+        }),
       otherwise: Joi.number(),
     }),
     max: Joi.when('type', {
       is: 'date',
       then: Joi.date()
         .format('YYYY-MM-DD')
+        .utc()
+        .custom((value, helpers) => {
+          return value.toISOString().split('T')[0]
+        }),
+      is: 'time',
+      then: Joi.date()
+        .format('HH:mm:ss')
         .utc()
         .custom((value, helpers) => {
           return value.toISOString().split('T')[0]

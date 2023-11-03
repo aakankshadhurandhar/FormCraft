@@ -38,7 +38,6 @@ module.exports.Create = async (req, res) => {
 
     let { error, value } = validateFormResponse(form, formValues)
     if (error) {
-      console.log(error)
       return res.status(400).json({ error })
     }
 
@@ -51,7 +50,6 @@ module.exports.Create = async (req, res) => {
     const savedResponse = await formResponse.save()
     res.status(201).json(savedResponse)
   } catch (err) {
-    console.log(err)
     res.status(500).json({ message: 'Internal server error' })
   }
 }

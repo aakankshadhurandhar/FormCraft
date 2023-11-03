@@ -98,6 +98,17 @@ const inputDiscriminators = {
       default: undefined,
     },
   }),
+  time: new mongoose.Schema({
+    _id: false,
+    min: {
+      type: String,
+      default: undefined,
+    },
+    max: {
+      type: String,
+      default: undefined,
+    },
+  }),
 }
 
 // Add discriminators to the formInputSchema
