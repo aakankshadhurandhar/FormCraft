@@ -73,8 +73,6 @@ function validateFormResponse(form, formResponse) {
         baseSchema = Joi.string().email().min(input?.min).max(input?.max)
         break
       case 'date':
-        // Date would be recieved in YYYY-MM-DD format and will be saved like it only
-        console.log(input)
         baseSchema = Joi.date()
           .format('YYYY-MM-DD')
           .utc()
@@ -83,17 +81,13 @@ function validateFormResponse(form, formResponse) {
             const maxDate = input.max ? new Date(input.max) : null
             if (minDate && value < minDate) {
               return helpers.error('date.min', {
-                message: `Date must be greater than or equal to ${
-                  minDate.toISOString().split('T')[0]
-                }`,
+                message: `Date must be greater than or equal to ${input.min}`,
               })
             }
 
             if (maxDate && value > maxDate) {
               return helpers.error('date.max', {
-                message: `Date must be less than or equal to ${
-                  maxDate.toISOString().split('T')[0]
-                }`,
+                message: `Date must be less than or equal to ${input.max}`,
               })
             }
             return value.toISOString().split('T')[0]
@@ -188,12 +182,22 @@ function validateForm(formBody) {
     required: Joi.boolean().default(false),
     min: Joi.when('type', {
       is: 'date',
-      then: Joi.date(),
+      then: Joi.date()
+        .format('YYYY-MM-DD')
+        .utc()
+        .custom((value, helpers) => {
+          return value.toISOString().split('T')[0]
+        }),
       otherwise: Joi.number(),
     }),
     max: Joi.when('type', {
       is: 'date',
-      then: Joi.date(),
+      then: Joi.date()
+        .format('YYYY-MM-DD')
+        .utc()
+        .custom((value, helpers) => {
+          return value.toISOString().split('T')[0]
+        }),
       otherwise: Joi.number(),
     }),
     options: Joi.array()
