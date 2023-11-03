@@ -89,7 +89,14 @@ const inputDiscriminators = {
   }),
   date: new mongoose.Schema({
     _id: false,
-    //TODO: Add min and max date
+    min: {
+      type: Date,
+      default: undefined,
+    },
+    max: {
+      type: Date,
+      default: undefined,
+    },
   }),
 }
 
