@@ -91,6 +91,13 @@ const inputDiscriminators = {
       default: 2048,
     },
   }),
+  none: new mongoose.Schema({
+    _id: false,
+    label: {
+      type: String,
+      default: undefined,
+    },
+  }),
 }
 
 // Add discriminators to the formInputSchema
