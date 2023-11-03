@@ -11,6 +11,10 @@ const formInputSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    description: {
+      type: String,
+      default: undefined,
+    },
   },
   { discriminatorKey: 'type' },
 )

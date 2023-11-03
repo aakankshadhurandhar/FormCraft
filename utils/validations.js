@@ -146,10 +146,11 @@ function validateForm(formBody) {
   })
 
   const formInputSchema = Joi.object({
-    label: Joi.string().required(),
+    label: Joi.string().required().max(100),
     type: Joi.string()
       .valid('small', 'long', 'number', 'email', 'multi', 'radio', 'file')
       .required(),
+    description: Joi.string().max(500),
     required: Joi.boolean().default(false),
     min: Joi.number(),
     max: Joi.number(),
@@ -182,7 +183,7 @@ function validateForm(formBody) {
   // Define a Joi schema for the form page
   const formPageSchema = Joi.object({
     title: Joi.string().min(1).required(),
-    description: Joi.string(),
+    description: Joi.string().max(2000),
     published: Joi.boolean().default(false),
     expiry: Joi.date().min('now'),
     inputs: Joi.array().items(formInputSchema),
