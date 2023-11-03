@@ -95,7 +95,7 @@ function validateFormResponse(form, formResponse) {
         break
       case 'time':
         baseSchema = Joi.date()
-          .format('HH:mm:ss') // Specify the time format (24-hour with seconds)
+          .format('HH:mm') // Specify the time format (24-hour)
           .utc()
           .custom((value, helpers) => {
             const minTime = input.min
@@ -215,7 +215,7 @@ function validateForm(formBody) {
         }),
       is: 'time',
       then: Joi.date()
-        .format('HH:mm:ss')
+        .format('HH:mm')
         .utc()
         .custom((value, helpers) => {
           return value.toISOString().split('T')[0]
@@ -232,7 +232,7 @@ function validateForm(formBody) {
         }),
       is: 'time',
       then: Joi.date()
-        .format('HH:mm:ss')
+        .format('HH:mm')
         .utc()
         .custom((value, helpers) => {
           return value.toISOString().split('T')[0]
