@@ -57,7 +57,6 @@ function validateFormResponse(form, formResponse) {
 
     // Create a base schema for the input type
     let baseSchema
-
     switch (input.type) {
       case 'small':
         baseSchema = Joi.string().min(input?.min).max(input?.max)
@@ -73,6 +72,10 @@ function validateFormResponse(form, formResponse) {
       case 'email':
         baseSchema = Joi.string().email().min(input?.min).max(input?.max)
         break
+      case 'date':
+        baseSchema = Joi.date().iso()
+        break
+
       case 'multi':
         baseSchema = Joi.alternatives(
           Joi.array()
@@ -148,7 +151,16 @@ function validateForm(formBody) {
   const formInputSchema = Joi.object({
     label: Joi.string().required(),
     type: Joi.string()
-      .valid('small', 'long', 'number', 'email', 'multi', 'radio', 'file')
+      .valid(
+        'small',
+        'long',
+        'number',
+        'email',
+        'multi',
+        'radio',
+        'file',
+        'date',
+      )
       .required(),
     required: Joi.boolean().default(false),
     min: Joi.number(),

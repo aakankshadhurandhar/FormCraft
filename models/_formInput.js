@@ -30,6 +30,17 @@ const basicTextInputSchema = {
     default: undefined,
   },
 }
+const dateInputSchema = new mongoose.Schema({
+  _id: false,
+  label: {
+    type: Date,
+    required: true,
+  },
+  required: {
+    type: Boolean,
+    default: false,
+  },
+})
 
 const inputDiscriminators = {
   small: new mongoose.Schema({
@@ -87,6 +98,7 @@ const inputDiscriminators = {
       default: 2048,
     },
   }),
+  date: dateInputSchema,
 }
 
 // Add discriminators to the formInputSchema
