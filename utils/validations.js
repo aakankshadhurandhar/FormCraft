@@ -1,4 +1,4 @@
-const Joi = require('joi')
+const Joi = require('joi').extend(require('@joi/date'))
 
 /**
  * Checks if a given pattern is a valid regular expression
@@ -73,9 +73,14 @@ function validateFormResponse(form, formResponse) {
         baseSchema = Joi.string().email().min(input?.min).max(input?.max)
         break
       case 'date':
-        baseSchema = Joi.date().iso()
+        // Date would be recieved in YYYY-MM-DD format and will be saved like it only
+        baseSchema = Joi.date()
+          .format('YYYY-MM-DD')
+          .utc()
+          .custom((value, helpers) => {
+            return value.toISOString().split('T')[0]
+          })
         break
-
       case 'multi':
         baseSchema = Joi.alternatives(
           Joi.array()
