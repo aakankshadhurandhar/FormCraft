@@ -21,6 +21,11 @@ const formSchema = new mongoose.Schema(
       ref: 'Users',
       required: true,
     },
+    // list of user.user_names of users with whom the form is shared not _id
+    sharedWith: {
+      type: [String],
+      default: [],
+    },
     title: {
       type: String,
       required: true,
@@ -52,6 +57,15 @@ formSchema.pre(
     next()
   },
 )
+
+// strip sensitive fields from form object
+formSchema.methods.toJSON = function () {
+  const form = this
+  const strippedForm = { ...form.toObject() }
+  delete strippedForm.userID
+  delete strippedForm.sharedWith
+  return strippedForm
+}
 
 const Form = mongoose.model('FormPages', formSchema)
 

@@ -44,12 +44,6 @@ const fileValidationHelper = (maxFileSizeKB, min, max) => {
   }
 }
 
-/**
- * Validates a form response against a given form schema
- * @param {object} form - The form schema to validate against
- * @param {object} formResponse - The form response to validate
- * @returns {object} - Returns an object with an error property if the form response is invalid, otherwise returns the validated form response
- */
 function validateFormResponse(form, formResponse) {
   const inputSchema = {}
   form.inputs.forEach((input) => {
@@ -180,14 +174,8 @@ function validateFormResponse(form, formResponse) {
   return formSchema.validate(formResponse)
 }
 
-/**
- * Validates a form schema
- * @param {object} formBody - The form schema to validate
- * @returns {object} - Returns an object with an error property if the form schema is invalid, otherwise returns the validated form schema
- */
 function validateForm(formBody) {
   const formInputSchema = Joi.object({
-    //Not required for 'none' type
     label: Joi.string()
       .max(100)
       .when('type', {
@@ -280,6 +268,7 @@ function validateForm(formBody) {
   const formPageSchema = Joi.object({
     title: Joi.string().min(1).required(),
     description: Joi.string().max(2000),
+    sharedWith: Joi.array().items(Joi.string()).default([]),
     published: Joi.boolean().default(false),
     expiry: Joi.date().min('now'),
     inputs: Joi.array().items(formInputSchema),

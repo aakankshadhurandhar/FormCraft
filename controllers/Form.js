@@ -46,11 +46,13 @@ module.exports.ReadAll = async (req, res) => {
 module.exports.Read = async (req, res) => {
   try {
     const form = req.form
-
-    if (form.published || form.userID.toHexString() === req.user?.userID) {
-      const formWithoutUserID = { ...form.toObject() }
-      delete formWithoutUserID.userID
-      return res.status(200).json(formWithoutUserID)
+    console.log(form)
+    if (
+      form.published ||
+      form.userID.toHexString() === req.user.userID ||
+      form.sharedWith.includes(req.user.user_name)
+    ) {
+      return res.status(200).json(form)
     }
 
     return res.status(401).json({ message: 'Unauthorized' })
@@ -91,6 +93,51 @@ module.exports.Update = async (req, res) => {
     })
   } catch (err) {
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
+  }
+}
+
+// Share Form with other users
+module.exports.Share = async (req, res) => {
+  try {
+    const form = req.form
+    const { sharedWith } = req.body
+    if (!sharedWith) {
+      return res.status(400).json({
+        statusCode: 400,
+        message: 'sharedWith field is required',
+      })
+    }
+    // sharedWith is an array of user_names, check if all the user_names are valid
+    // if not, return 400 and the invalid user_names
+    // Also make sure that the user is not sharing the form with himself/herself.
+    const users = await Models.Users.find({ user_name: { $in: sharedWith } })
+    const validUserNames = users.map((user) => user.user_name)
+
+    const invalidUserNames = sharedWith.filter(
+      (user_name) => !validUserNames.includes(user_name),
+    )
+    if (invalidUserNames.length > 0) {
+      return res.status(400).json({
+        statusCode: 400,
+        message: 'Invalid user_names',
+        invalidUserNames,
+      })
+    }
+    if (sharedWith.includes(req.user.user_name)) {
+      return res.status(400).json({
+        statusCode: 400,
+        message: 'You cannot share the form with yourself',
+      })
+    }
+
+    form.sharedWith = sharedWith
+    const updatedForm = await form.save()
+    res.status(200).json({ statusCode: 200, updatedForm })
+  } catch (err) {
+    throw err
+    res
+      .status(500)
+      .json({ statusCode: 500, message: 'Internal server error', err })
   }
 }
 

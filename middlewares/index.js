@@ -66,10 +66,29 @@ const readJWT = (req, res, next) => {
 
 const formOwnerOnly = (function () {
   const fn = (req, res, next) => {
-    if (!req.user || req.form.userID.toHexString() !== req.user.userID) {
+    if (req.form.userID.toHexString() !== req.user?.userID) {
       return res.status(401).json({ message: 'Unauthorized' })
     }
     next()
+  }
+
+  return [isAuthenticated, fetchForm, fn]
+})()
+
+const hasFormAccess = (function () {
+  const fn = (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not logged in' })
+    }
+
+    const form = req.form
+    if (
+      form.userID.toHexString() === req.user?.userID ||
+      form.sharedWith.includes(req.user?.user_name)
+    ) {
+      return next()
+    }
+    return res.status(401).json({ message: 'Unauthorized', form })
   }
 
   return [isAuthenticated, fetchForm, fn]
@@ -82,4 +101,5 @@ module.exports = {
   isAuthenticated,
   formOwnerOnly,
   readJWT,
+  hasFormAccess,
 }

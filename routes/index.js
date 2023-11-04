@@ -10,6 +10,7 @@ const {
   isAuthenticated,
   readJWT,
   formOwnerOnly,
+  hasFormAccess,
 } = require('../middlewares')
 
 router.use(readJWT)
@@ -31,11 +32,14 @@ router.get('/forms', isAuthenticated, Controllers.Form.ReadAll)
 router.delete('/forms/:formID', formOwnerOnly, Controllers.Form.Delete)
 
 //Update Form
-router.put('/forms/:formID', formOwnerOnly, Controllers.Form.Update)
+router.put('/forms/:formID', hasFormAccess, Controllers.Form.Update)
+
+//Share Form
+router.put('/forms/:formID/share', formOwnerOnly, Controllers.Form.Share)
 
 router.get(
   '/forms/:formID/export',
-  formOwnerOnly,
+  hasFormAccess,
   Controllers.FormResponse.ExportAll,
 )
 
@@ -50,14 +54,14 @@ router.post(
 // Read All Form Responses
 router.get(
   '/forms/:formID/responses',
-  formOwnerOnly,
+  hasFormAccess,
   Controllers.FormResponse.ReadAll,
 )
 
 //  Set Multiple Form Responses Public/Private
 router.put(
   '/forms/:formID/responses',
-  formOwnerOnly,
+  hasFormAccess,
   Controllers.FormResponse.SetPublicMany,
 )
 
@@ -72,7 +76,7 @@ router.get(
 router.put(
   '/forms/:formID/responses/:responseID',
   areObjectIDs('responseID'),
-  fetchForm,
+  hasFormAccess,
   Controllers.FormResponse.SetPublicOne,
 )
 

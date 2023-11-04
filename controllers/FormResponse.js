@@ -76,7 +76,10 @@ module.exports.Read = async (req, res) => {
     }
 
     const form = await Models.FormPage.findById(response.formID)
-    if (req.user?.userID == form.userID) {
+    if (
+      req.user?.userID == form.userID ||
+      form.sharedWith.includes(req.user?.user_name)
+    ) {
       return res.json(response)
     }
 
