@@ -50,7 +50,7 @@ module.exports.Read = async (req, res) => {
     if (
       form.published ||
       form.userID.toHexString() === req.user.userID ||
-      form.sharedWith.includes(req.user.user_name)
+      form.sharedWith.includes(req.user.userID)
     ) {
       return res.status(200).json(form)
     }
@@ -110,6 +110,7 @@ module.exports.Share = async (req, res) => {
     // sharedWith is an array of user_names, check if all the user_names are valid
     // if not, return 400 and the invalid user_names
     // Also make sure that the user is not sharing the form with himself/herself.
+    // form.sharedWith will save the associated user._id of the users with whom the form is shared
     const users = await Models.Users.find({ user_name: { $in: sharedWith } })
     const validUserNames = users.map((user) => user.user_name)
 
@@ -130,7 +131,7 @@ module.exports.Share = async (req, res) => {
       })
     }
 
-    form.sharedWith = sharedWith
+    form.sharedWith = users.map((user) => user._id)
     const updatedForm = await form.save()
     res.status(200).json({ statusCode: 200, updatedForm })
   } catch (err) {

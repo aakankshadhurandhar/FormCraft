@@ -84,7 +84,7 @@ const hasFormAccess = (function () {
     const form = req.form
     if (
       form.userID.toHexString() === req.user?.userID ||
-      form.sharedWith.includes(req.user?.user_name)
+      form.sharedWith.includes(req.user?.userID)
     ) {
       return next()
     }

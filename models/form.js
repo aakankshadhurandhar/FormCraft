@@ -21,11 +21,13 @@ const formSchema = new mongoose.Schema(
       ref: 'Users',
       required: true,
     },
-    // list of user.user_names of users with whom the form is shared not _id
-    sharedWith: {
-      type: [String],
-      default: [],
-    },
+    // list of user._id of users with whom the form is shared
+    sharedWith: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Users',
+      },
+    ],
     title: {
       type: String,
       required: true,
