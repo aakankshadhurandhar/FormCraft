@@ -11,6 +11,7 @@ const {
   readJWT,
   formOwnerOnly,
   hasFormAccess,
+  checkFormAccess,
 } = require('../middlewares')
 
 router.use(readJWT)
@@ -23,7 +24,7 @@ router.get('/', (req, res) => {
 router.post('/forms', isAuthenticated, Controllers.Form.Create)
 
 // Read Form
-router.get('/forms/:formID', fetchForm, Controllers.Form.Read)
+router.get('/forms/:formID', checkFormAccess('public'), Controllers.Form.Read)
 
 //Read All Forms by a User
 router.get('/forms', isAuthenticated, Controllers.Form.ReadAll)

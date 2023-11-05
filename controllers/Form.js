@@ -36,31 +36,15 @@ module.exports.ReadAll = async (req, res) => {
   }
 }
 
-/**
- * Reads the form data and returns the form object if it is published or if the form userID matches the userID of the logged-in user.
- *
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- * @returns {Promise<void>} - The form object without the userID field, or a JSON object with a "message" field set to "Unauthorized" if the conditions are not met.
- */
 module.exports.Read = async (req, res) => {
   try {
     const form = req.form
-    if (
-      form.userID.toHexString() === req.user?.userID ||
-      form.sharedWith.includes(req.user?.userID)
-    ) {
-      return res.status(200).json(form)
-    }
-    if (form.published) {
-      return res.status(200).json(form.strip())
-    }
 
-    return res.status(401).json({ message: 'Unauthorized' })
+    return res.status(200).json(form.stripFor(req.userRole))
   } catch (err) {
     return res
       .status(500)
-      .json({ statusCode: 500, message: 'Internal server error', err })
+      .json({ statusCode: 500, message: 'Internal server error' })
   }
 }
 
@@ -102,21 +86,20 @@ module.exports.Share = async (req, res) => {
   try {
     const form = req.form
     const { sharedWith } = req.body
-    if (!sharedWith) {
-      return res.status(400).json({
-        statusCode: 400,
-        message: 'sharedWith field is required',
-      })
-    }
-    // sharedWith is an array of user_names, check if all the user_names are valid
-    // if not, return 400 and the invalid user_names
-    // Also make sure that the user is not sharing the form with himself/herself.
-    // form.sharedWith will save the associated user._id of the users with whom the form is shared
-    const users = await Models.Users.find({ user_name: { $in: sharedWith } })
-    const validUserNames = users.map((user) => user.user_name)
 
+    // check if the user is not trying to share the form with himself
+    if (sharedWith.find((user) => user.user_name === req.user.user_name)) {
+      return res
+        .status(400)
+        .json({ statusCode: 400, message: 'Cannot share form with yourself' })
+    }
+
+    const users = await Models.Users.find({
+      user_name: { $in: sharedWith.map((user) => user.user_name) },
+    })
+    const validUserNames = users.map((user) => user.user_name)
     const invalidUserNames = sharedWith.filter(
-      (user_name) => !validUserNames.includes(user_name),
+      (user) => !validUserNames.includes(user.user_name),
     )
     if (invalidUserNames.length > 0) {
       return res.status(400).json({
@@ -125,21 +108,18 @@ module.exports.Share = async (req, res) => {
         invalidUserNames,
       })
     }
-    if (sharedWith.includes(req.user.user_name)) {
-      return res.status(400).json({
-        statusCode: 400,
-        message: 'You cannot share the form with yourself',
-      })
-    }
 
-    form.sharedWith = users.map((user) => user._id)
+    //form.sharedWith expects an array of objects with user._id and role
+    const updatedSharedWith = sharedWith.map((user) => ({
+      userID: users.find((u) => u.user_name === user.user_name)._id,
+      role: user.role,
+    }))
+    form.sharedWith = updatedSharedWith
+
     const updatedForm = await form.save()
     res.status(200).json({ statusCode: 200, updatedForm })
   } catch (err) {
-    throw err
-    res
-      .status(500)
-      .json({ statusCode: 500, message: 'Internal server error', err })
+    res.status(500).json({ statusCode: 500, message: 'Internal server error' })
   }
 }
 
