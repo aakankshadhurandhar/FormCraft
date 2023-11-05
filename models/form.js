@@ -61,11 +61,14 @@ formSchema.pre(
 )
 
 // strip sensitive fields from form object
-formSchema.methods.toJSON = function () {
+formSchema.methods.strip = function () {
   const form = this
   const strippedForm = { ...form.toObject() }
   delete strippedForm.userID
   delete strippedForm.sharedWith
+  delete strippedForm.__v
+  delete strippedForm.createdAt
+  delete strippedForm.updatedAt
   return strippedForm
 }
 

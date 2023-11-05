@@ -46,13 +46,14 @@ module.exports.ReadAll = async (req, res) => {
 module.exports.Read = async (req, res) => {
   try {
     const form = req.form
-    console.log(form)
     if (
-      form.published ||
-      form.userID.toHexString() === req.user.userID ||
-      form.sharedWith.includes(req.user.userID)
+      form.userID.toHexString() === req.user?.userID ||
+      form.sharedWith.includes(req.user?.userID)
     ) {
       return res.status(200).json(form)
+    }
+    if (form.published) {
+      return res.status(200).json(form.strip())
     }
 
     return res.status(401).json({ message: 'Unauthorized' })
