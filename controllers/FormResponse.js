@@ -68,20 +68,11 @@ module.exports.ReadAll = async (req, res) => {
 
 module.exports.Read = async (req, res) => {
   try {
+    const form = req.form
     const responseID = req.params.responseID
     const response = await Models.FormResponse.findById(responseID)
-
-    if (!response) {
+    if (!response || response.formID != form._id) {
       return res.status(404).json({ message: 'Response not found' })
-    }
-
-    const form = await Models.FormPage.findById(response.formID)
-    if (req.user?.userID == form.userID) {
-      return res.json(response)
-    }
-
-    if (!response.public) {
-      return res.status(400).json({ message: 'Response is not public' })
     }
     res.json(response)
   } catch (error) {

@@ -31,9 +31,14 @@ usersSchema.pre('save', async function (next) {
   next()
 })
 usersSchema.methods.isValidPassword = async function (password) {
-  const user = this
-  const compare = await bcrypt.compare(password, user.password)
-
-  return compare
+  return bcrypt.compare(password, this.password)
 }
+
+// strip password from user object
+usersSchema.methods.toJSON = function () {
+  const user = this.toObject()
+  delete user.password
+  return user
+}
+
 module.exports = mongoose.model('Users', usersSchema)

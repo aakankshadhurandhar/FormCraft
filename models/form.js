@@ -21,6 +21,24 @@ const formSchema = new mongoose.Schema(
       ref: 'Users',
       required: true,
     },
+
+    // Define role-based access for shared users
+    sharedWith: [
+      {
+        userID: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Users',
+          required: true,
+        },
+        role: {
+          type: String,
+          enum: ['viewer', 'editor', 'admin'],
+          required: true,
+          default: 'viewer',
+        },
+        _id: false,
+      },
+    ],
     title: {
       type: String,
       required: true,
@@ -52,6 +70,26 @@ formSchema.pre(
     next()
   },
 )
+
+// strip sensitive fields from form object based on user role
+formSchema.methods.stripFor = function (userRole) {
+  const fieldsToStrip = {
+    viewer: ['userID', 'sharedWith', 'createdAt', 'updatedAt', '__v'],
+    editor: ['sharedWith', 'updatedAt', '__v'],
+    admin: [],
+    owner: [],
+  }
+
+  const strippedFormData = { ...this.toObject() }
+
+  if (fieldsToStrip[userRole]) {
+    for (const field of fieldsToStrip[userRole]) {
+      delete strippedFormData[field]
+    }
+  }
+
+  return strippedFormData
+}
 
 const Form = mongoose.model('FormPages', formSchema)
 
