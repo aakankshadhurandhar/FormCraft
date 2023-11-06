@@ -70,7 +70,7 @@ const readJWT = (req, res, next) => {
   const token = req.headers.authorization
 
   if (token) {
-    passport.authenticate('jwt', { session: false }, (err, user) => {
+    passport.authenticate('mine', { session: false }, (err, user) => {
       if (err || !user) {
         return res.status(401).json({ message: 'Invalid token' })
       }

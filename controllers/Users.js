@@ -68,3 +68,9 @@ module.exports.loginUser = (req, res) => {
     res.json({ message: 'User logged in successfully', token })
   })(req, res)
 }
+
+// logoutUser
+
+module.exports.logoutUser = (req, res) => {
+  res.json({ message: 'User logged out successfully' })
+}

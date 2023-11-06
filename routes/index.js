@@ -106,4 +106,7 @@ router.post('/register', Controllers.Users.registerUser)
 //Login existing user
 router.post('/login', Controllers.Users.loginUser)
 
+//Logout user
+router.post('/logout', Controllers.Users.logoutUser)
+
 module.exports = router

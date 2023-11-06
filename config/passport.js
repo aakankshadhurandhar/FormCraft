@@ -93,7 +93,7 @@ function initialize() {
     secretOrKey: secretKey,
   }
 
-  passport.use(new JwtStrategy(jwtOptions, verifyUserFromJWT))
+  passport.use('jwt', new JwtStrategy(jwtOptions, verifyUserFromJWT))
   passport.use(
     'signup',
     new LocalStrategy(
