@@ -38,6 +38,26 @@ const fetchForm = async (req, res, next) => {
   }
 }
 
+const fetchResponse = async (req, res, next) => {
+  const responseID = req.params.responseID
+  if (!isValidObjectId(responseID)) {
+    return res.status(400).json({ message: `Invalid responseID` })
+  }
+
+  try {
+    const response = await Models.FormResponse.findById(responseID)
+
+    if (!response) {
+      return res.status(404).json({ message: 'Response not found' })
+    }
+
+    req.response = response
+    next()
+  } catch (err) {
+    return res.status(500).json({ message: 'Internal server error' })
+  }
+}
+
 //A middleware to check if the user is logged in
 const isAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
@@ -140,6 +160,7 @@ const checkFormAccess = function (requiredRole) {
 module.exports = {
   areObjectIDs,
   fetchForm,
+  fetchResponse,
   handleFileUpload,
   isAuthenticated,
   formOwnerOnly,

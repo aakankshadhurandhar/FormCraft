@@ -30,17 +30,26 @@ router.get('/forms/:formID', checkFormAccess('public'), Controllers.Form.Read)
 router.get('/forms', isAuthenticated, Controllers.Form.ReadAll)
 
 //Delete Form
-router.delete('/forms/:formID', formOwnerOnly, Controllers.Form.Delete)
+router.delete(
+  '/forms/:formID',
+  checkFormAccess('owner'),
+  Controllers.Form.Delete,
+)
 
 //Update Form
-router.put('/forms/:formID', hasFormAccess, Controllers.Form.Update)
+router.put('/forms/:formID', checkFormAccess('editor'), Controllers.Form.Update)
 
 //Share Form
-router.put('/forms/:formID/share', formOwnerOnly, Controllers.Form.Share)
+router.put(
+  '/forms/:formID/share',
+  checkFormAccess('owner'),
+  Controllers.Form.Share,
+)
 
+// Export Form Responses as CSV
 router.get(
   '/forms/:formID/export',
-  hasFormAccess,
+  checkFormAccess('admin'),
   Controllers.FormResponse.ExportAll,
 )
 
@@ -55,39 +64,41 @@ router.post(
 // Read All Form Responses
 router.get(
   '/forms/:formID/responses',
-  hasFormAccess,
+  checkFormAccess('editor'),
   Controllers.FormResponse.ReadAll,
-)
-
-//  Set Multiple Form Responses Public/Private
-router.put(
-  '/forms/:formID/responses',
-  hasFormAccess,
-  Controllers.FormResponse.SetPublicMany,
 )
 
 //Read One Form Response
 router.get(
   '/forms/:formID/responses/:responseID',
   areObjectIDs('formID', 'responseID'),
+  checkFormAccess('editor'),
   Controllers.FormResponse.Read,
-)
-
-// Set Form Response Public/Private
-router.put(
-  '/forms/:formID/responses/:responseID',
-  areObjectIDs('responseID'),
-  hasFormAccess,
-  Controllers.FormResponse.SetPublicOne,
 )
 
 // Delete Form Response
 router.delete(
   '/forms/:formID/responses/:responseID',
   areObjectIDs('responseID'),
-  formOwnerOnly,
+  checkFormAccess('admin'),
   Controllers.FormResponse.Delete,
 )
+
+// TODO: reconsider the following routes
+//  Set Multiple Form Responses Public/Private
+// router.put(
+//   '/forms/:formID/responses',
+//   checkFormAccess('owner'),
+//   Controllers.FormResponse.SetPublicMany,
+// )
+//
+// Set Form Response Public/Private
+// router.put(
+//   '/forms/:formID/responses/:responseID',
+//   areObjectIDs('responseID'),
+//   checkFormAccess('admin'),
+//   Controllers.FormResponse.SetPublicOne,
+// )
 
 //Create New User
 router.post('/register', Controllers.Users.registerUser)
