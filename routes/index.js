@@ -107,6 +107,6 @@ router.post('/register', Controllers.Users.registerUser)
 router.post('/login', Controllers.Users.loginUser)
 
 //Logout user
-router.post('/logout', Controllers.Users.logoutUser)
+router.post('/logout', isAuthenticated, Controllers.Users.logoutUser)
 
 module.exports = router
