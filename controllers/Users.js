@@ -1,6 +1,7 @@
 const passport = require('passport')
 const { validateUserRegisterSchema } = require('../utils/validations')
 const { generateToken } = require('../utils/jwtEncode')
+const redis = require('../services/redis')
 
 /**
  * Registers a new user
@@ -67,4 +68,16 @@ module.exports.loginUser = (req, res) => {
     const token = generateToken(user)
     res.json({ message: 'User logged in successfully', token })
   })(req, res)
+}
+
+// logoutUser
+
+module.exports.logoutUser = (req, res) => {
+  // get the token from the header
+  const token = req.headers.authorization
+
+  //add it to the redis blacklist
+  redis.set(token, 'blacklisted', 'EX', 60 * 60 * 24 * 7).then(() => {
+    res.json({ message: 'User logged out successfully' })
+  })
 }

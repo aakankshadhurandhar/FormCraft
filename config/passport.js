@@ -5,6 +5,7 @@ const JwtStrategy = require('passport-jwt').Strategy
 const ExtractJwt = require('passport-jwt').ExtractJwt
 const secretKey = process.env.JWT_SECRET_KEY
 const { validateUserRegisterSchema } = require('../utils/validations')
+const redis = require('../services/redis')
 
 /**
  * Registers user with user_name,email and password
@@ -73,8 +74,17 @@ const authenticateUser = async (loginID, password, done) => {
  * @param {object} jwtPayload - The payload extracted from the JWT token.
  * @param {function} done - The callback function to call when authentication is complete.
  */
-const verifyUserFromJWT = async (jwtPayload, done) => {
+const verifyUserFromJWT = async (req, jwtPayload, done) => {
   try {
+    // Extract token from header
+    const token = req.headers.authorization
+
+    //Check if token is stored in redis as blacklisted, if it is, return false
+    const tokenExists = await redis.exists(token)
+    if (tokenExists) {
+      return done(null, false, { message: 'Expired token' })
+    }
+
     return done(null, jwtPayload)
   } catch (error) {
     return done(error, false)
@@ -91,6 +101,7 @@ function initialize() {
   const jwtOptions = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     secretOrKey: secretKey,
+    passReqToCallback: true,
   }
 
   passport.use(new JwtStrategy(jwtOptions, verifyUserFromJWT))
