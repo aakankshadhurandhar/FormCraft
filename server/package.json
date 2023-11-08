@@ -8,8 +8,7 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "format": "prettier --write \"**/*.js\"",
-    "format:check": "prettier --check \"src/**/*.js\"",
-    "prepare": "husky install"
+    "format:check": "prettier --check \"src/**/*.js\""
   },
   "author": "",
   "license": "ISC",
