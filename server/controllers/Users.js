@@ -3,12 +3,7 @@ const { validateUserRegisterSchema } = require('../utils/validations')
 const { generateToken } = require('../utils/jwtEncode')
 const redis = require('../services/redis')
 
-/**
- * Registers a new user
- * @param {Object} req - The request object
- * @param {Object} res - The response object
- * @returns {Object} - The response object
- */
+// Registers a new user
 module.exports.registerUser = async (req, res, next) => {
   let { user_name, email, password } = req.body
   user_name = user_name.toLowerCase()
@@ -16,7 +11,6 @@ module.exports.registerUser = async (req, res, next) => {
 
   // Validate user input
   const { error } = validateUserRegisterSchema({ user_name, email, password })
-
   if (error) {
     return res.status(400).json({ error: error.details[0].message })
   }
@@ -48,12 +42,7 @@ module.exports.registerUser = async (req, res, next) => {
   })(req, res, next)
 }
 
-/**
- * Logs in a user
- * @param {Object} req - The request object
- * @param {Object} res - The response object
- * @returns {Object} - The response object
- */
+// Logs in a user
 module.exports.loginUser = (req, res) => {
   passport.authenticate('login', { session: false }, (err, user, info) => {
     if (err) {
@@ -71,7 +60,6 @@ module.exports.loginUser = (req, res) => {
 }
 
 // logoutUser
-
 module.exports.logoutUser = (req, res) => {
   // get the token from the header
   const token = req.headers.authorization
@@ -79,5 +67,7 @@ module.exports.logoutUser = (req, res) => {
   //add it to the redis blacklist
   redis.set(token, 'blacklisted', 'EX', 60 * 60 * 24 * 7).then(() => {
     res.json({ message: 'User logged out successfully' })
+  }).catch((err) => {
+    res.status(500).json({ message: 'Internal server error', err })
   })
 }

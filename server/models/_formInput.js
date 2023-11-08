@@ -1,5 +1,11 @@
-const mongoose = require('mongoose')
-
+/**
+ * Mongoose schema for form input.
+ *
+ * @typedef {Object} FormInputSchema
+ * @property {boolean} required - Whether the input is required or not.
+ * @property {string} label - The label for the input.
+ * @property {string} [description] - The description for the input.
+ */
 const formInputSchema = new mongoose.Schema(
   {
     _id: false,
@@ -35,6 +41,21 @@ const basicTextInputSchema = {
   },
 }
 
+/**
+ * Discriminators for different types of form inputs.
+ * @typedef {Object} InputDiscriminators
+ * @property {mongoose.Schema} small - Schema for small text input.
+ * @property {mongoose.Schema} long - Schema for long text input.
+ * @property {mongoose.Schema} email - Schema for email input.
+ * @property {mongoose.Schema} number - Schema for number input.
+ * @property {mongoose.Schema} multi - Schema for multi-select input.
+ * @property {mongoose.Schema} radio - Schema for radio button input.
+ * @property {mongoose.Schema} file - Schema for file upload input.
+ * @property {mongoose.Schema} date - Schema for date input.
+ * @property {mongoose.Schema} time - Schema for time input.
+ * @property {mongoose.Schema} none - Schema for no input.
+ * @description Discriminators for different types of form inputs.
+ */
 const inputDiscriminators = {
   small: new mongoose.Schema({
     ...basicTextInputSchema,
@@ -127,4 +148,10 @@ Object.keys(inputDiscriminators).forEach((type) => {
   formInputSchema.discriminator(type, inputDiscriminators[type])
 })
 
+
+/**
+ * @description This module exports a Mongoose schema for form input and discriminators for different types of form inputs.
+ * @module _formInput
+ * @type {import('mongoose').Schema}
+ */
 module.exports = formInputSchema
