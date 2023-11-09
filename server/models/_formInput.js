@@ -1,3 +1,4 @@
+const mongoose = require('mongoose')
 /**
  * Mongoose schema for form input.
  *

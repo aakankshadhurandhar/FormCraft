@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const formInputSchema = require('./_formInput')
-const { DeleteFormDirectory } = require('../services/S3')
+const { DeleteFormDirectoryFromS3: DeleteFormDirectory } = require('../services/S3')
 
 /**
  * Represents a form in the system.

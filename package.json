@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "server": "cd ./server && npm run dev",
+    "client": "cd ./client && npm run dev"
+  },
   "devDependencies": {
     "prettier": "^3.0.3"
   }

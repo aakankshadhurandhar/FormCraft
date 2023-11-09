@@ -1,3 +1,10 @@
+/**
+ * Creates an export file in either xlsx or csv format containing form responses.
+ * @param {Object} form - The form object.
+ * @param {Array} formResponses - An array of form response objects.
+ * @param {string} [type='xlsx'] - The type of file to export. Can be 'xlsx' or 'csv'.
+ * @returns {Promise<Buffer>} - A promise that resolves to a buffer containing the exported file.
+ */
 async function createExportFile(form, formResponses, type = 'xlsx') {
   const ExcelJS = require('exceljs')
   const workbook = new ExcelJS.Workbook()

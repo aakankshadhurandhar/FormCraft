@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const { DeleteFilesFromS3 } = require('../services/S3')
+const { DeleteFilesFromS3: DeleteFilesFromS3 } = require('../services/S3')
 
 /**
  * Mongoose schema for form responses.
