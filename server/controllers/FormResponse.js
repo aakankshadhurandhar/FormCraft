@@ -1,13 +1,15 @@
 const { default: mongoose } = require('mongoose')
-const { UploadToS3 } = require('../services/S3')
+const {  UploadToS3 } = require('../services/S3')
 const { validateFormResponse } = require('../utils/validations')
 const Models = require('../models')
 const createExportFile = require('../utils/createExportFile')
 
+// Submit a response to a form
 module.exports.Create = async (req, res) => {
   try {
     const { form, files } = req
 
+    // if form is not published or expired, return error
     if (form.expiry && form.expiry < Date.now()) {
       return res.status(400).json({ message: 'Form has expired' })
     }
@@ -18,6 +20,7 @@ module.exports.Create = async (req, res) => {
     const responseID = new mongoose.Types.ObjectId().toHexString()
     let formValues = req.body
 
+    // Add a key to each file object for S3
     for (let i = 0; i < files?.length; i++) {
       files[i].key = files[i].path.replace(
         'uploads',
@@ -30,18 +33,22 @@ module.exports.Create = async (req, res) => {
         path: 'https://formcraft-responses.s3.ap-south-1.amazonaws.com/' + key,
         sizeInKB: size / 1000,
       }
+      
       if (formValues[fieldname] == undefined) {
         formValues[fieldname] = []
       }
       formValues[fieldname].push(fileDetails)
     }
 
+
     let { error, value } = validateFormResponse(form, formValues)
     if (error) {
       return res.status(400).json({ error })
     }
 
+    // Upload files to S3 in background
     UploadToS3(files)
+    
     const formResponse = new Models.FormResponse({
       _id: responseID,
       formID: form._id,
@@ -54,6 +61,7 @@ module.exports.Create = async (req, res) => {
   }
 }
 
+// Read all responses to a form
 module.exports.ReadAll = async (req, res) => {
   try {
     const formID = req.params.formID
@@ -66,6 +74,7 @@ module.exports.ReadAll = async (req, res) => {
   }
 }
 
+// Read a single response to a form
 module.exports.Read = async (req, res) => {
   try {
     const form = req.form
@@ -80,6 +89,7 @@ module.exports.Read = async (req, res) => {
   }
 }
 
+// Update a response to a form
 module.exports.Delete = async (req, res) => {
   try {
     const responseID = req.params.responseID
@@ -91,6 +101,7 @@ module.exports.Delete = async (req, res) => {
   }
 }
 
+// Update a response to a form
 module.exports.ExportAll = async (req, res) => {
   try {
     const type = req.query.type || 'xlsx'
@@ -116,6 +127,8 @@ module.exports.ExportAll = async (req, res) => {
   }
 }
 
+
+// Set a response to public or private
 module.exports.SetPublicOne = async (req, res) => {
   try {
     const responseID = req.params.responseID
@@ -139,6 +152,7 @@ module.exports.SetPublicOne = async (req, res) => {
   }
 }
 
+// Set many responses to public or private
 module.exports.SetPublicMany = async (req, res) => {
   try {
     const responseIDs = req.body.responseIDs

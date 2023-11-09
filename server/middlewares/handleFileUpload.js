@@ -8,6 +8,7 @@ const MAX_FILE_SIZE_IN_MB = 10
  * Returns the extension of a file based on its original name.
  *
  * @param {string} originalname - The original name of the file.
+ * @description This function returns the extension of a file based on its original name.
  * @returns {string} The extension of the file.
  */
 function getExtension(originalname) {
@@ -18,12 +19,12 @@ function getExtension(originalname) {
 }
 
 /**
- * Checks if a file is allowed to be uploaded based on the form schema.
+ * A middleware funciton checks if a file is allowed to be uploaded based on the form schema.
  *
  * @param {Object} req - The request object.
  * @param {Object} file - The file object.
  * @param {Function} cb - The callback function.
- * @returns {Function} The callback function with an error or true.
+ * @description This middleware funciton checks if a file is allowed to be uploaded based on the form schema. If the file is not allowed, an error is passed to the callback function.
  */
 const fileFilter = function (req, file, cb) {
   const formSchema = req.form
@@ -61,8 +62,17 @@ const storage = multer.diskStorage({
   },
 })
 
+
 const upload = multer({ storage, fileFilter })
 
+
+/**
+ * Middleware function to handle file uploads using multer.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ * @param {Function} next - Express next middleware function.
+ * @description This middleware function handles file uploads using multer. If the file upload fails, an error response is sent.
+ */
 const handleFileUpload = (req, res, next) => {
   upload.any()(req, res, (err) => {
     if (err) {

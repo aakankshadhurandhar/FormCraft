@@ -14,6 +14,7 @@ const bucketName = process.env.S3_BUCKET_NAME
  * Returns the key of a file in S3
  * @param {string} url - The url of the file in S3
  * @returns {string} - The key of the file
+ * @description The key of a file is the path of the file in the S3 bucket
  */
 function getKey(url) {
   const S3URL = 'https://formcraft-responses.s3.ap-south-1.amazonaws.com/'
@@ -21,8 +22,9 @@ function getKey(url) {
 }
 
 /**
- * Deletes a file from S3
+ * Deletes a object with a key from S3
  * @param {string} key - The key of the file to delete
+ * @description Deletes a object with a key from S3
  * @returns {Promise<void>} - A promise that resolves when the file is deleted
  */
 const deleteObjectFromS3 = (key) => {
@@ -44,6 +46,7 @@ const deleteObjectFromS3 = (key) => {
 /**
  * Deletes multiple files from S3
  * @param {Array} files - An array of files to delete
+ * @description Deletes multiple files from S3
  * @returns {Promise<void>} - A promise that resolves when all files are deleted
  */
 module.exports.DeleteFilesFromS3 = async (files) => {
@@ -62,9 +65,10 @@ module.exports.DeleteFilesFromS3 = async (files) => {
 /**
  * Deletes a directory and all its contents from S3
  * @param {string} formID - The ID of the form whose directory is to be deleted
+ * @description Deletes a directory and all its contents from S3
  * @returns {Promise<void>} - A promise that resolves when the directory is deleted
  */
-module.exports.DeleteFormDirectory = async (formID) => {
+module.exports.DeleteFormDirectoryFromS3 = async (formID) => {
   const params = {
     Bucket: bucketName,
     Prefix: `uploads/${formID}/`,
@@ -89,9 +93,10 @@ module.exports.DeleteFormDirectory = async (formID) => {
 /**
  * Uploads a file to S3
  * @param {Object} file - The file to upload
+ * @description Uploads a file to S3
  * @returns {Promise<string>} - A promise that resolves with the S3 URL of the uploaded file
  */
-const uploadToS3 = (file) => {
+const uploadOne = (file) => {
   return new Promise((resolve, reject) => {
     const params = {
       Bucket: bucketName,
@@ -120,12 +125,13 @@ const uploadToS3 = (file) => {
 /**
  * Uploads multiple files to S3
  * @param {Array} files - An array of files to upload
+ * @description Uploads multiple files to S3
  * @returns {Promise<Array>} - A promise that resolves with an array of S3 URLs of the uploaded files
  */
 module.exports.UploadToS3 = async (files) => {
   try {
     if (files) {
-      const uploadPromises = files.map((file) => uploadToS3(file))
+      const uploadPromises = files.map((file) => uploadOne(file))
       const s3Urls = await Promise.all(uploadPromises)
       return s3Urls
     }

@@ -1,8 +1,9 @@
 const mongoose = require('mongoose')
 const formInputSchema = require('./_formInput')
-const { DeleteFormDirectory } = require('../services/S3')
+const { DeleteFormDirectoryFromS3: DeleteFormDirectory } = require('../services/S3')
 
 /**
+ * Represents a form in the system.
  * @typedef {Object} Form
  * @property {String} title - The title of the form.
  * @property {String} description - The description of the form.
@@ -14,6 +15,10 @@ const { DeleteFormDirectory } = require('../services/S3')
  * @property {Date} updatedAt - The date when the form was last updated.
  */
 
+/**
+ * Mongoose schema for a form.
+ * @type {mongoose.Schema}
+ */
 const formSchema = new mongoose.Schema(
   {
     userID: {
@@ -61,6 +66,9 @@ const formSchema = new mongoose.Schema(
   },
 )
 
+/**
+ * Middleware function to delete form responses and form directory when a form is deleted.
+ */
 formSchema.pre(
   'deleteOne',
   { document: true, query: true },
@@ -71,7 +79,12 @@ formSchema.pre(
   },
 )
 
-// strip sensitive fields from form object based on user role
+/**
+ * Method to strip sensitive fields from form object based on user role.
+ * @param {String} userRole - The role of the user accessing the form.
+ * @returns {Object} - The form object with sensitive fields stripped.
+ * @description This method strips sensitive fields from the form object based on the user role. The user role is passed as a parameter to the method. The method returns the form object with sensitive fields stripped.
+ */
 formSchema.methods.stripFor = function (userRole) {
   const fieldsToStrip = {
     viewer: ['userID', 'sharedWith', 'createdAt', 'updatedAt', '__v'],
@@ -91,6 +104,12 @@ formSchema.methods.stripFor = function (userRole) {
   return strippedFormData
 }
 
+/**
+ * Mongoose model for a form.
+ * @type {mongoose.Model<Form>}
+ * @exports Form
+ * @description This is the Mongoose model for a form. It is based on the formSchema.
+ */
 const Form = mongoose.model('FormPages', formSchema)
 
 module.exports = Form

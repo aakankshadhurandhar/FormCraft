@@ -3,6 +3,7 @@ const Joi = require('joi').extend(require('@joi/date'))
 /**
  * Checks if a given pattern is a valid regular expression
  * @param {string} pattern - The pattern to validate
+ * @description Checks if a given pattern is a valid regular expression
  * @returns {boolean} - Returns true if the pattern is a valid regular expression, false otherwise
  */
 function isValidRegex(pattern) {
@@ -18,6 +19,7 @@ function isValidRegex(pattern) {
  * Returns a validation function for file uploads
  * @param {number} maxFileSizeKB - The maximum file size allowed in kilobytes
  * @param {number} maxFilesAllowed - The maximum number of files allowed
+ * @description Returns a validation function for file uploads
  * @returns {function} - Returns a validation function that takes an array of files and returns an error if the total file size or number of files exceeds the specified limits
  */
 const fileValidationHelper = (maxFileSizeKB, min, max) => {
@@ -44,6 +46,14 @@ const fileValidationHelper = (maxFileSizeKB, min, max) => {
   }
 }
 
+/**
+ * Validates a form response against its input schema.
+ *
+ * @param {object} form - The form object containing input schema.
+ * @param {object} formResponse - The form response object to be validated.
+ * @description Validates a form response against its input schema.
+ * @returns {object} - The validation result object.
+ */
 function validateFormResponse(form, formResponse) {
   const inputSchema = {}
   form.inputs.forEach((input) => {
@@ -174,6 +184,12 @@ function validateFormResponse(form, formResponse) {
   return formSchema.validate(formResponse)
 }
 
+/**
+ * Validates a form page object against a Joi schema.
+ * @param {Object} formBody - The form page object to validate.
+ * @description Validates a form page object against a Joi schema.
+ * @returns {Object} - The validated form page object.
+ */
 function validateForm(formBody) {
   const formInputSchema = Joi.object({
     label: Joi.string()
@@ -277,6 +293,13 @@ function validateForm(formBody) {
   return formPageSchema.validate(formBody)
 }
 
+/**
+ * Validates the user registration schema.
+ *
+ * @param {Object} userBody - The user registration data to be validated.
+ * @description Validates the user registration schema.
+ * @returns {Object} The validation result.
+ */
 function validateUserRegisterSchema(userBody) {
   const userRegistrationSchema = Joi.object({
     user_name: Joi.string().min(3).max(30).required(),
@@ -286,6 +309,13 @@ function validateUserRegisterSchema(userBody) {
 
   return userRegistrationSchema.validate(userBody)
 }
+
+/**
+ * Validates the user login schema.
+ * @param {object} userBody - The user login schema to be validated.
+ * @description Validates the user login schema.
+ * @returns {object} The validation result.
+ */
 function validateUserLoginSchema(userBody) {
   const userRegistrationSchema = Joi.object({
     user_name: Joi.string().min(3).max(30).optional(),

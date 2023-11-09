@@ -1,6 +1,7 @@
 const Models = require('../models')
 const { validateForm } = require('../utils/validations')
 
+// Create a new form for a user
 module.exports.Create = async (req, res) => {
   try {
     const { error, value } = validateForm(req.body)
@@ -26,6 +27,7 @@ module.exports.Create = async (req, res) => {
   }
 }
 
+// Read all forms for a user
 module.exports.ReadAll = async (req, res) => {
   try {
     const userID = req.user.userID
@@ -36,6 +38,7 @@ module.exports.ReadAll = async (req, res) => {
   }
 }
 
+// Read a single form for a user
 module.exports.Read = async (req, res) => {
   try {
     const form = req.form
@@ -48,6 +51,7 @@ module.exports.Read = async (req, res) => {
   }
 }
 
+// Update a form for a user
 module.exports.Update = async (req, res) => {
   try {
     const { error, value } = validateForm(req.body)
@@ -81,7 +85,7 @@ module.exports.Update = async (req, res) => {
   }
 }
 
-// Share Form with other users
+// Share a form with other users
 module.exports.Share = async (req, res) => {
   try {
     const form = req.form
@@ -94,10 +98,22 @@ module.exports.Share = async (req, res) => {
         .json({ statusCode: 400, message: 'Cannot share form with yourself' })
     }
 
+    // check if the user is not trying to share the form with the same user twice
+    const uniqueUserNames = [...new Set(sharedWith.map((user) => user.user_name))]
+    if (uniqueUserNames.length !== sharedWith.length) {
+
+      return res.status(400).json({
+        statusCode: 400,
+        message: 'Cannot share form with the same user twice',
+      })
+    }
+
+    // find the users with the given user_names
     const users = await Models.Users.find({
       user_name: { $in: sharedWith.map((user) => user.user_name) },
     })
     const validUserNames = users.map((user) => user.user_name)
+
     const invalidUserNames = sharedWith.filter(
       (user) => !validUserNames.includes(user.user_name),
     )
@@ -109,7 +125,6 @@ module.exports.Share = async (req, res) => {
       })
     }
 
-    //form.sharedWith expects an array of objects with user._id and role
     const updatedSharedWith = sharedWith.map((user) => ({
       userID: users.find((u) => u.user_name === user.user_name)._id,
       role: user.role,
@@ -123,6 +138,7 @@ module.exports.Share = async (req, res) => {
   }
 }
 
+// Delete a form for a users
 module.exports.Delete = async (req, res) => {
   try {
     let form = req.form
