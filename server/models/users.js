@@ -64,13 +64,14 @@ userSchema.methods.generateToken = function () {
   return jwtEncode.generateToken(payload)
 }
 
-userSchema.pre('deleteOne', { document: true, query: false }, async function (
-  next,
-) {
-  // Delete all forms created by the user
-  await mongoose.model('Forms').deleteMany({ owner: this._id })
-  next()
-})
-
+userSchema.pre(
+  'deleteOne',
+  { document: true, query: false },
+  async function (next) {
+    // Delete all forms created by the user
+    await mongoose.model('Forms').deleteMany({ owner: this._id })
+    next()
+  },
+)
 
 module.exports = mongoose.model('Users', userSchema)

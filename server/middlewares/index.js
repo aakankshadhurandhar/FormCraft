@@ -1,6 +1,5 @@
 const { isValidObjectId } = require('mongoose')
 const Models = require('../models')
-const handleFileUpload = require('./handleFileUpload')
 const passport = require('passport')
 
 /**
@@ -122,7 +121,6 @@ const readJWT = (req, res, next) => {
   }
 }
 
-
 /**
  * Middleware that checks if the user has access to a form based on their role.
  * @param {string} requiredRole - The minimum role required to access the form.
@@ -185,7 +183,6 @@ module.exports = {
   areObjectIDs,
   fetchForm,
   fetchResponse,
-  handleFileUpload,
   isAuthenticated,
   readJWT,
   checkFormAccess,

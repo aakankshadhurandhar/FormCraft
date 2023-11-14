@@ -65,9 +65,12 @@ module.exports.logoutUser = (req, res) => {
   const token = req.headers.authorization
 
   //add it to the redis blacklist
-  redis.set(token, 'blacklisted', 'EX', 60 * 60 * 24 * 7).then(() => {
-    res.json({ message: 'User logged out successfully' })
-  }).catch((err) => {
-    res.status(500).json({ message: 'Internal server error', err })
-  })
+  redis
+    .set(token, 'blacklisted', 'EX', 60 * 60 * 24 * 7)
+    .then(() => {
+      res.json({ message: 'User logged out successfully' })
+    })
+    .catch((err) => {
+      res.status(500).json({ message: 'Internal server error', err })
+    })
 }

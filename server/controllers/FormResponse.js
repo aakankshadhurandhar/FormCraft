@@ -1,5 +1,5 @@
 const { default: mongoose } = require('mongoose')
-const {  UploadToS3 } = require('../services/S3')
+const { UploadToS3 } = require('../services/S3')
 const { validateFormResponse } = require('../utils/validations')
 const Models = require('../models')
 const createExportFile = require('../utils/createExportFile')
@@ -33,13 +33,12 @@ module.exports.Create = async (req, res) => {
         path: 'https://formcraft-responses.s3.ap-south-1.amazonaws.com/' + key,
         sizeInKB: size / 1000,
       }
-      
+
       if (formValues[fieldname] == undefined) {
         formValues[fieldname] = []
       }
       formValues[fieldname].push(fileDetails)
     }
-
 
     let { error, value } = validateFormResponse(form, formValues)
     if (error) {
@@ -48,7 +47,7 @@ module.exports.Create = async (req, res) => {
 
     // Upload files to S3 in background
     UploadToS3(files)
-    
+
     const formResponse = new Models.FormResponse({
       _id: responseID,
       form: form._id,
@@ -126,7 +125,6 @@ module.exports.ExportAll = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' })
   }
 }
-
 
 // Set a response to public or private
 module.exports.SetPublicOne = async (req, res) => {

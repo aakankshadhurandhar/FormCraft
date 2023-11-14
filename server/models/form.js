@@ -1,6 +1,8 @@
 const mongoose = require('mongoose')
 const formInputSchema = require('./_formInput')
-const { DeleteFormDirectoryFromS3: DeleteFormDirectory } = require('../services/S3')
+const {
+  DeleteResponseFilesFromS3: DeleteFormDirectory,
+} = require('../services/S3')
 
 /**
  * Represents a form in the system.
@@ -58,6 +60,10 @@ const formSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    background: {
+      type: String,
+      default: undefined,
+    },
     expiry: Date,
     inputs: [formInputSchema],
   },
@@ -79,14 +85,18 @@ formSchema.pre(
   },
 )
 
-formSchema.pre('deleteMany',  { document: true, query: true }, async function (next) {
-  const formIDs = await this.model('FormPages').find(this.getFilter(), '_id')
-  await this.model('FormResponse').deleteMany({ form: { $in: formIDs } })
-  for (const formID of formIDs) {
-    DeleteFormDirectory(formID)
-  }
-  next()
-})
+formSchema.pre(
+  'deleteMany',
+  { document: true, query: true },
+  async function (next) {
+    const formIDs = await this.model('FormPages').find(this.getFilter(), '_id')
+    await this.model('FormResponse').deleteMany({ form: { $in: formIDs } })
+    for (const formID of formIDs) {
+      DeleteFormDirectory(formID)
+    }
+    next()
+  },
+)
 
 /**
  * Method to strip sensitive fields from form object based on user role.

@@ -1,4 +1,5 @@
 const Models = require('../models')
+const { UploadToS3 } = require('../services/S3')
 const { validateForm } = require('../utils/validations')
 
 // Create a new form for a user
@@ -85,6 +86,30 @@ module.exports.Update = async (req, res) => {
   }
 }
 
+// Upload a "background" image for a form
+module.exports.UploadBackground = async (req, res) => {
+  try {
+    const form = req.form
+    const file = req.file
+
+    if (!file) {
+      return res.status(400).json({ statusCode: 400, message: 'No file found' })
+    }
+
+    file.key = `/background/${form._id}/${file.filename}`
+    // Upload to S3
+    UploadToS3([file])
+    // store the S3 URL in the form
+    form.background =
+      'https://formcraft-responses.s3.ap-south-1.amazonaws.com/' + file.key
+    const updatedForm = await form.save()
+    res.status(200).json({ statusCode: 200, updatedForm })
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ statusCode: 500, message: 'Internal server error' })
+  }
+}
+
 // Share a form with other users
 module.exports.Share = async (req, res) => {
   try {
@@ -99,9 +124,10 @@ module.exports.Share = async (req, res) => {
     }
 
     // check if the user is not trying to share the form with the same user twice
-    const uniqueUserNames = [...new Set(sharedWith.map((user) => user.username))]
+    const uniqueUserNames = [
+      ...new Set(sharedWith.map((user) => user.username)),
+    ]
     if (uniqueUserNames.length !== sharedWith.length) {
-
       return res.status(400).json({
         statusCode: 400,
         message: 'Cannot share form with the same user twice',
