@@ -1,5 +1,5 @@
 const Models = require('../models')
-const { UploadToS3 } = require('../services/S3')
+const { UploadToS3, DeleteFilesFromS3 } = require('../services/S3')
 const { validateForm } = require('../utils/validations')
 
 // Create a new form for a user
@@ -96,10 +96,12 @@ module.exports.UploadBackground = async (req, res) => {
       return res.status(400).json({ statusCode: 400, message: 'No file found' })
     }
 
+    if (form.background) {
+      DeleteFilesFromS3([{ path: form.background }])
+    }
+
     file.key = `/background/${form._id}/${file.filename}`
-    // Upload to S3
     UploadToS3([file])
-    // store the S3 URL in the form
     form.background =
       'https://formcraft-responses.s3.ap-south-1.amazonaws.com/' + file.key
     const updatedForm = await form.save()

@@ -65,7 +65,7 @@ module.exports.DeleteFilesFromS3 = async (files) => {
 module.exports.DeleteResponseFilesFromS3 = async (formID) => {
   try {
     // form uploads are in /uploads/formID
-    await DeleteDirectory(`/uploads/${formID}`)
+    await this.DeleteDirectory(`/uploads/${formID}`)
   } catch (err) {
     throw err
   }
@@ -77,7 +77,7 @@ module.exports.DeleteResponseFilesFromS3 = async (formID) => {
  * @description Deletes a directory and all its contents from S3
  * @returns {Promise<void>} - A promise that resolves when the directory is deleted
  */
-const DeleteDirectory = async (path) => {
+module.exports.DeleteDirectory = async (path) => {
   const params = {
     Bucket: bucketName,
     Prefix: path,
