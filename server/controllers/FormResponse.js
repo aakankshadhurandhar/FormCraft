@@ -51,7 +51,7 @@ module.exports.Create = async (req, res) => {
     
     const formResponse = new Models.FormResponse({
       _id: responseID,
-      formID: form._id,
+      form: form._id,
       response: value,
     })
     const savedResponse = await formResponse.save()
@@ -66,7 +66,7 @@ module.exports.ReadAll = async (req, res) => {
   try {
     const formID = req.params.formID
     const responses = await Models.FormResponse.find({
-      formID: formID,
+      form: formID,
     }).exec()
     res.json(responses)
   } catch (error) {
@@ -80,7 +80,7 @@ module.exports.Read = async (req, res) => {
     const form = req.form
     const responseID = req.params.responseID
     const response = await Models.FormResponse.findById(responseID)
-    if (!response || response.formID != form._id) {
+    if (!response || response.form != form._id) {
       return res.status(404).json({ message: 'Response not found' })
     }
     res.json(response)
@@ -111,7 +111,7 @@ module.exports.ExportAll = async (req, res) => {
 
     const form = req.form
     const formResponses = await Models.FormResponse.find({
-      formID: form._id,
+      form: form._id,
     }).exec()
 
     const fileBuffer = await createExportFile(form, formResponses, type)

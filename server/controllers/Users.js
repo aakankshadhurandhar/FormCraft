@@ -5,12 +5,12 @@ const redis = require('../services/redis')
 
 // Registers a new user
 module.exports.registerUser = async (req, res, next) => {
-  let { user_name, email, password } = req.body
-  user_name = user_name.toLowerCase()
+  let { username, email, password } = req.body
+  username = username.toLowerCase()
   email = email.toLowerCase()
 
   // Validate user input
-  const { error } = validateUserRegisterSchema({ user_name, email, password })
+  const { error } = validateUserRegisterSchema({ username, email, password })
   if (error) {
     return res.status(400).json({ error: error.details[0].message })
   }
@@ -54,7 +54,7 @@ module.exports.loginUser = (req, res) => {
         .json({ message: 'Incorrect loginID or password', info })
     }
 
-    const token = generateToken(user)
+    const token = user.generateToken()
     res.json({ message: 'User logged in successfully', token })
   })(req, res)
 }

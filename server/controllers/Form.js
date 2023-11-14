@@ -6,7 +6,7 @@ module.exports.Create = async (req, res) => {
   try {
     const { error, value } = validateForm(req.body)
 
-    const userID = req.user.userID
+    const userID = req.user.id
     if (error) {
       return res.status(400).json({
         statusCode: 400,
@@ -16,7 +16,7 @@ module.exports.Create = async (req, res) => {
     }
 
     const form = new Models.FormPage({
-      userID,
+      owner: userID,
       ...value,
     })
 
@@ -30,8 +30,8 @@ module.exports.Create = async (req, res) => {
 // Read all forms for a user
 module.exports.ReadAll = async (req, res) => {
   try {
-    const userID = req.user.userID
-    const responses = await Models.FormPage.find({ userID: userID })
+    const userID = req.user.id
+    const responses = await Models.FormPage.find({ owner: userID })
     res.status(200).json({ statusCode: 200, responses })
   } catch (err) {
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
@@ -92,14 +92,14 @@ module.exports.Share = async (req, res) => {
     const { sharedWith } = req.body
 
     // check if the user is not trying to share the form with himself
-    if (sharedWith.find((user) => user.user_name === req.user.user_name)) {
+    if (sharedWith.find((user) => user.username === req.user.username)) {
       return res
         .status(400)
         .json({ statusCode: 400, message: 'Cannot share form with yourself' })
     }
 
     // check if the user is not trying to share the form with the same user twice
-    const uniqueUserNames = [...new Set(sharedWith.map((user) => user.user_name))]
+    const uniqueUserNames = [...new Set(sharedWith.map((user) => user.username))]
     if (uniqueUserNames.length !== sharedWith.length) {
 
       return res.status(400).json({
@@ -108,25 +108,25 @@ module.exports.Share = async (req, res) => {
       })
     }
 
-    // find the users with the given user_names
+    // find the users with the given usernames
     const users = await Models.Users.find({
-      user_name: { $in: sharedWith.map((user) => user.user_name) },
+      username: { $in: sharedWith.map((user) => user.username) },
     })
-    const validUserNames = users.map((user) => user.user_name)
+    const validUserNames = users.map((user) => user.username)
 
     const invalidUserNames = sharedWith.filter(
-      (user) => !validUserNames.includes(user.user_name),
+      (user) => !validUserNames.includes(user.username),
     )
     if (invalidUserNames.length > 0) {
       return res.status(400).json({
         statusCode: 400,
-        message: 'Invalid user_names',
+        message: 'Invalid usernames',
         invalidUserNames,
       })
     }
 
     const updatedSharedWith = sharedWith.map((user) => ({
-      userID: users.find((u) => u.user_name === user.user_name)._id,
+      user: users.find((u) => u.username === user.username)._id,
       role: user.role,
     }))
     form.sharedWith = updatedSharedWith

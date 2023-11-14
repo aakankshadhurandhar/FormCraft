@@ -21,7 +21,7 @@ const { DeleteFormDirectoryFromS3: DeleteFormDirectory } = require('../services/
  */
 const formSchema = new mongoose.Schema(
   {
-    userID: {
+    owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Users',
       required: true,
@@ -30,7 +30,7 @@ const formSchema = new mongoose.Schema(
     // Define role-based access for shared users
     sharedWith: [
       {
-        userID: {
+        user: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'Users',
           required: true,
@@ -73,11 +73,20 @@ formSchema.pre(
   'deleteOne',
   { document: true, query: true },
   async function (next) {
-    await this.model('FormResponse').deleteMany({ formID: this._id })
+    await this.model('FormResponse').deleteMany({ form: this._id })
     DeleteFormDirectory(this._id)
     next()
   },
 )
+
+formSchema.pre('deleteMany',  { document: true, query: true }, async function (next) {
+  const formIDs = await this.model('FormPages').find(this.getFilter(), '_id')
+  await this.model('FormResponse').deleteMany({ form: { $in: formIDs } })
+  for (const formID of formIDs) {
+    DeleteFormDirectory(formID)
+  }
+  next()
+})
 
 /**
  * Method to strip sensitive fields from form object based on user role.
@@ -87,7 +96,7 @@ formSchema.pre(
  */
 formSchema.methods.stripFor = function (userRole) {
   const fieldsToStrip = {
-    viewer: ['userID', 'sharedWith', 'createdAt', 'updatedAt', '__v'],
+    viewer: ['owner', 'sharedWith', 'createdAt', 'updatedAt', '__v'],
     editor: ['sharedWith', 'updatedAt', '__v'],
     admin: [],
     owner: [],
