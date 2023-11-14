@@ -1,11 +1,11 @@
-import axios from "axios";
-import { isFunction } from "lodash";
+import axios from 'axios';
+import { isFunction } from 'lodash';
 
 // TODO: add Toast element
 
 const pathExtractor = (request_path, params) => {
-  const request_type = request_path.slice(0, request_path.indexOf("/"));
-  const psuedo_path = request_path.slice(request_path.indexOf("/") + 1);
+  const request_type = request_path.slice(0, request_path.indexOf('/'));
+  const psuedo_path = request_path.slice(request_path.indexOf('/') + 1);
   var path = psuedo_path;
   for (const key in params) {
     path = psuedo_path.replaceAll(key, params[key]);
@@ -25,7 +25,7 @@ const pathExtractor = (request_path, params) => {
  * @return  {function}          action creator function to make API call and dispatching the response.
  */
 
-function actionFactory ({
+function actionFactory({
   api,
   actionBase,
   excludeHeader,
@@ -59,19 +59,19 @@ function actionFactory ({
         json: JSON.stringify(p),
       },
     });
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     const { request_type, path } = pathExtractor(api, p);
     const headers = {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     };
-    if ( !excludeHeader) {
+    if (!excludeHeader) {
       headers.Authorization = `Bearer ${token}`; // Add the Authorization header with the token if it exists and excludeHeader is false
     }
     const respPromise = axios({
       method: request_type,
       url: path,
       data: p.body,
-      headers:headers,
+      headers: headers,
       params: p.params,
     });
 
@@ -94,11 +94,11 @@ function actionFactory ({
           payload: err.message,
         });
 
-        if (typeof failureToast === "boolean" && failureToast) {
+        if (typeof failureToast === 'boolean' && failureToast) {
           // TODO: show some failureToast
         }
 
-        if (typeof failureToast === "string") {
+        if (typeof failureToast === 'string') {
           // TODO: show some failureToast
         }
 
