@@ -7,16 +7,13 @@ const secretKey = process.env.JWT_SECRET_KEY
  * @description Generates a JSON Web Token (JWT) for the given user.
  * @returns {string} - The generated JWT.
  */
-function generateToken(user) {
-  const payload = {
-    user_name: user.user_name,
-    email: user.email,
-    userID: user._id.toHexString(),
+function generateToken(payload, options) {
+  if (!payload) {
+    throw new Error('payload is required')
   }
 
-  const options = {
-    expiresIn: '1h',
-  }
+  // Default options
+  options = options || { expiresIn: '1h' }
 
   return jwt.sign(payload, secretKey, options)
 }

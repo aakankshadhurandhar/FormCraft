@@ -12,7 +12,7 @@ const { DeleteFilesFromS3: DeleteFilesFromS3 } = require('../services/S3')
  */
 const formResponseSchema = new mongoose.Schema(
   {
-    formID: {
+    form: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Form',
       required: true,

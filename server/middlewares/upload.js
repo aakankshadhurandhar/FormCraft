@@ -62,9 +62,7 @@ const storage = multer.diskStorage({
   },
 })
 
-
 const upload = multer({ storage, fileFilter })
-
 
 /**
  * Middleware function to handle file uploads using multer.
@@ -73,7 +71,7 @@ const upload = multer({ storage, fileFilter })
  * @param {Function} next - Express next middleware function.
  * @description This middleware function handles file uploads using multer. If the file upload fails, an error response is sent.
  */
-const handleFileUpload = (req, res, next) => {
+const FormResponse = (req, res, next) => {
   upload.any()(req, res, (err) => {
     if (err) {
       return res.status(400).json({ error: err.message })
@@ -82,4 +80,27 @@ const handleFileUpload = (req, res, next) => {
   })
 }
 
-module.exports = handleFileUpload
+// file filter for background image
+const backgroundFileFilter = function (req, file, cb) {
+  // Size should be max 1 mb
+  if (file.size > 1024 * 1024) {
+    cb(new Error('File size exceeds limit'), false)
+  }
+  if (file.mimetype.includes('image')) {
+    cb(null, true)
+  } else {
+    cb(new Error('File type not allowed'), false)
+  }
+}
+
+const backgroundUpload = multer({ storage, fileFilter: backgroundFileFilter })
+const backgroundImage = (req, res, next) => {
+  backgroundUpload.single('background')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message })
+    }
+    next()
+  })
+}
+
+module.exports = { FormResponse, backgroundImage }

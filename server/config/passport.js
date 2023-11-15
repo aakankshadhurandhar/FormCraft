@@ -31,7 +31,7 @@ const registerUser = async (req, email, password, done) => {
     const user = await Models.Users.create({
       email,
       password,
-      user_name: req.body.user_name,
+      username: req.body.username,
     })
 
     return done(null, user)
@@ -50,9 +50,13 @@ const registerUser = async (req, email, password, done) => {
 const authenticateUser = async (loginID, password, done) => {
   try {
     loginID = loginID.toLowerCase()
-    const user = await Models.Users.findOne({
-      $or: [{ email: loginID }, { user_name: loginID }],
-    })
+    let user
+    // check if loginID is email or username
+    if (loginID.includes('@')) {
+      user = await Models.Users.findOne({ email: loginID })
+    } else {
+      user = await Models.Users.findOne({ username: loginID })
+    }
 
     if (!user) {
       return done(null, false, { message: 'Incorrect email or username.' })
