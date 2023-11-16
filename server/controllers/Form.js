@@ -22,6 +22,8 @@ module.exports.Create = async (req, res) => {
     })
 
     const savedForm = await form.save()
+    // save in redis
+    redis.setEX(savedForm._id,JSON.stringify(savedForm),'EX',600)
     res.status(201).json({ statusCode: 201, savedForm })
   } catch (err) {
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
@@ -76,6 +78,7 @@ module.exports.Update = async (req, res) => {
     existingForm.published = published
 
     const updatedForm = await existingForm.save()
+    redis.setEX(updatedForm._id,JSON.stringify(updatedForm),'EX',600)
     res.json({
       statusCode: 200,
       message: 'Form updated successfully',
@@ -105,6 +108,7 @@ module.exports.UploadBackground = async (req, res) => {
     form.background =
       'https://formcraft-responses.s3.ap-south-1.amazonaws.com/' + file.key
     const updatedForm = await form.save()
+    redis.setEX(updatedForm._id,JSON.stringify(updatedForm),'EX',600)
     res.status(200).json({ statusCode: 200, updatedForm })
   } catch (err) {
     console.log(err)
@@ -160,6 +164,7 @@ module.exports.Share = async (req, res) => {
     form.sharedWith = updatedSharedWith
 
     const updatedForm = await form.save()
+    redis.setEX(updatedForm._id,JSON.stringify(updatedForm),'EX',600)
     res.status(200).json({ statusCode: 200, updatedForm })
   } catch (err) {
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
@@ -171,6 +176,7 @@ module.exports.Delete = async (req, res) => {
   try {
     let form = req.form
     await form.deleteOne()
+    redis.del(form._id)
     res.status(200).json({ message: 'Resource deleted successfully' })
   } catch (err) {
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })

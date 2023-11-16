@@ -126,6 +126,13 @@ formSchema.methods.stripFor = function (userRole) {
   return strippedFormData
 }
 
+
+// Function to build a form object with json data
+formSchema.statics.fromJSON = function (data) {
+  const form = new Form(data)
+  return form
+}
+
 /**
  * Mongoose model for a form.
  * @type {mongoose.Model<Form>}

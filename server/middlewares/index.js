@@ -1,6 +1,7 @@
 const { isValidObjectId } = require('mongoose')
 const Models = require('../models')
 const passport = require('passport')
+const redis  = require('../services/redis')
 
 /**
  * Middleware that checks if the specified parameters in the request contain valid MongoDB ObjectIDs.
@@ -36,12 +37,22 @@ const fetchForm = async (req, res, next) => {
   }
 
   try {
+
+    // check in redis
+    const formJSONString= await redis.getEX(formID,'EX',600)
+
+    if(formJSONString){
+      req.form = Models.Form.fromJSON(JSON.parse(formJSONString))
+      return next()
+    }
+
     const form = await Models.FormPage.findById(formID)
 
     if (!form) {
       return res.status(404).json({ message: 'Form not found' })
     }
-
+    // Save in redis
+    redis.setEX(formID,JSON.stringify(form),'EX',600)
     req.form = form
     next()
   } catch (err) {
