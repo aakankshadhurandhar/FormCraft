@@ -127,11 +127,6 @@ formSchema.methods.stripFor = function (userRole) {
 }
 
 
-// Function to build a form object with json data
-formSchema.statics.fromJSON = function (data) {
-  const form = new Form(data)
-  return form
-}
 
 /**
  * Mongoose model for a form.

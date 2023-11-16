@@ -39,23 +39,24 @@ const fetchForm = async (req, res, next) => {
   try {
 
     // check in redis
-    const formJSONString= await redis.getEX(formID,'EX',600)
+    const formJSONString= await redis.getex(formID,'EX',600)
 
     if(formJSONString){
-      req.form = Models.Form.fromJSON(JSON.parse(formJSONString))
+      req.form = new Models.FormPage(JSON.parse(formJSONString))
       return next()
     }
-
+    console.log('not found in redis')
     const form = await Models.FormPage.findById(formID)
 
     if (!form) {
       return res.status(404).json({ message: 'Form not found' })
     }
     // Save in redis
-    redis.setEX(formID,JSON.stringify(form),'EX',600)
+    redis.setex(formID,600,JSON.stringify(form))
     req.form = form
     next()
   } catch (err) {
+    console.log(err)
     return res.status(500).json({ message: 'Internal server error' })
   }
 }
