@@ -67,6 +67,10 @@ const formSchema = new mongoose.Schema(
     },
     expiry: Date,
     inputs: [formInputSchema],
+    steps: {
+      type: [Number],
+      default: undefined,
+    }, // Array containing the indices that split steps
   },
   {
     timestamps: true,
