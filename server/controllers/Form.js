@@ -36,7 +36,7 @@ module.exports.ReadAll = async (req, res) => {
     const myForms = await Models.FormPage.find({ owner: userID }).populate(
       'owner',
       'username _id',
-    )
+    ).populate('sharedWith.user', 'username _id')
     const sharedForms = await Models.FormPage.find({
       'sharedWith.user': userID,
     })
@@ -55,7 +55,7 @@ module.exports.Read = async (req, res) => {
   try {
     const form = req.form
 
-    return res.status(200).json(form.stripFor(req.userRole))
+    return res.status(200).json({form:form.stripFor(req.userRole), a: form.toObject()})
   } catch (err) {
     return res
       .status(500)

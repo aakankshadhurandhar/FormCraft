@@ -134,9 +134,9 @@ formSchema.methods.stripFor = function (userRole) {
 
   // Remove sharedWith field
   strippedFormData.sharedWith = strippedFormData.sharedWith.map(
-    (sharedWith) => {
-      const { _id, ...rest } = sharedWith
-      return rest
+    (userDetails) => {
+      userDetails.user = userDetails.user.username
+      return userDetails
     },
   )
 
@@ -152,12 +152,13 @@ formSchema.methods.toJSON = function () {
 
   // Remove owner field
   delete formObject.owner._id
-
   // Remove sharedWith field
-  formObject.sharedWith = formObject.sharedWith.map((sharedWith) => {
-    const { _id, ...rest } = sharedWith
-    return rest
-  })
+  formObject.sharedWith = formObject.sharedWith.map(
+    (userDetails) => {
+      userDetails.user = userDetails.user.username
+      return userDetails
+    },
+  )
 
   return formObject
 }
