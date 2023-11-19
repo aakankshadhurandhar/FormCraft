@@ -111,6 +111,7 @@ formSchema.pre(
  * @returns {Object} - The form object with sensitive fields stripped.
  * @description This method strips sensitive fields from the form object based on the user role. The user role is passed as a parameter to the method. The method returns the form object with sensitive fields stripped.
  */
+
 formSchema.methods.stripFor = function (userRole) {
   const fieldsToStrip = {
     viewer: ['owner', 'sharedWith', 'createdAt', 'updatedAt', '__v'],
@@ -126,8 +127,39 @@ formSchema.methods.stripFor = function (userRole) {
       delete strippedFormData[field]
     }
   }
+// when i get a form , i'll populate the owner and sharedWith fields with username and _id but when i send a form, i'll only send the username and want to remove the _id field
+
+  // Remove owner field
+  delete strippedFormData.owner._id
+
+  // Remove sharedWith field
+  strippedFormData.sharedWith = strippedFormData.sharedWith.map(
+    (sharedWith) => {
+      const { _id, ...rest } = sharedWith
+      return rest
+    },
+  )
 
   return strippedFormData
+}
+
+
+
+formSchema.methods.toJSON = function () {
+  const form = this
+  const formObject = form.toObject()
+
+
+  // Remove owner field
+  delete formObject.owner._id
+
+  // Remove sharedWith field
+  formObject.sharedWith = formObject.sharedWith.map((sharedWith) => {
+    const { _id, ...rest } = sharedWith
+    return rest
+  })
+
+  return formObject
 }
 
 /**

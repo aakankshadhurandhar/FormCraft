@@ -334,7 +334,7 @@ function validateForm(formBody) {
  */
 function validateUserRegisterSchema(userBody) {
   const userRegistrationSchema = Joi.object({
-    user_name: Joi.string().min(3).max(30).required(),
+    username: Joi.string().min(3).max(30).required(),
     password: Joi.string().min(6).required(),
     email: Joi.string().email().required(),
   })
@@ -350,7 +350,7 @@ function validateUserRegisterSchema(userBody) {
  */
 function validateUserLoginSchema(userBody) {
   const userRegistrationSchema = Joi.object({
-    user_name: Joi.string().min(3).max(30).optional(),
+    username: Joi.string().min(3).max(30).optional(),
     password: Joi.string().min(6).required(),
     email: Joi.string().email().optional(),
   })

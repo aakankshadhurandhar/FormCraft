@@ -21,7 +21,7 @@ module.exports.Create = async (req, res) => {
       ...value,
     })
 
-    const savedForm = await form.save()
+    let savedForm = (await form.save()).toObject()
     res.status(201).json({ statusCode: 201, savedForm })
   } catch (err) {
     console.log(err)
@@ -33,8 +33,18 @@ module.exports.Create = async (req, res) => {
 module.exports.ReadAll = async (req, res) => {
   try {
     const userID = req.user.id
-    const responses = await Models.FormPage.find({ owner: userID })
-    res.status(200).json({ statusCode: 200, responses })
+    const myForms = await Models.FormPage.find({ owner: userID }).populate(
+      'owner',
+      'username _id',
+    )
+    const sharedForms = await Models.FormPage.find({
+      'sharedWith.user': userID,
+    })
+      .populate('owner', 'username _id')
+      .populate('sharedWith.user', 'username _id')
+    res
+      .status(200)
+      .json({ statusCode: 200, response: { myForms, sharedForms } })
   } catch (err) {
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
   }
@@ -119,47 +129,32 @@ module.exports.Share = async (req, res) => {
     const form = req.form
     const { sharedWith } = req.body
 
-    // check if the user is not trying to share the form with himself
-    if (sharedWith.find((user) => user.username === req.user.username)) {
+    // Create a set of unique usernames
+    const usernames = [...new Set(sharedWith.map((user) => user.username))]
+    const roles = sharedWith.map((user) => user.role)
+
+    // Check if the user is not trying to share the form with himself
+    if (usernames.includes(req.user.username)) {
       return res
         .status(400)
         .json({ statusCode: 400, message: 'Cannot share form with yourself' })
     }
 
-    // check if the user is not trying to share the form with the same user twice
-    const uniqueUserNames = [
-      ...new Set(sharedWith.map((user) => user.username)),
-    ]
-    if (uniqueUserNames.length !== sharedWith.length) {
-      return res.status(400).json({
-        statusCode: 400,
-        message: 'Cannot share form with the same user twice',
-      })
+    const users = await Models.Users.find({ username: { $in: usernames } }, '_id username')
+    
+    if (users.length !== usernames.length) {
+      return res.status(400).json({ statusCode: 400, message: 'Invalid usernames' })
     }
+    const userMap = users.reduce((map, user) => {
+      map[user.username] = user._id
+      return map
+    }, {})
 
-    // find the users with the given usernames
-    const users = await Models.Users.find({
-      username: { $in: sharedWith.map((user) => user.username) },
-    })
-    const validUserNames = users.map((user) => user.username)
-
-    const invalidUserNames = sharedWith.filter(
-      (user) => !validUserNames.includes(user.username),
-    )
-    if (invalidUserNames.length > 0) {
-      return res.status(400).json({
-        statusCode: 400,
-        message: 'Invalid usernames',
-        invalidUserNames,
-      })
-    }
-
-    const updatedSharedWith = sharedWith.map((user) => ({
-      user: users.find((u) => u.username === user.username)._id,
-      role: user.role,
+    form.sharedWith = usernames.map((username, index) => ({
+      user: userMap[username],
+      role: roles[index]
     }))
-    form.sharedWith = updatedSharedWith
-
+    
     const updatedForm = await form.save()
     res.status(200).json({ statusCode: 200, updatedForm })
   } catch (err) {

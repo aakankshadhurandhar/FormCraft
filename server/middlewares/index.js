@@ -36,7 +36,10 @@ const fetchForm = async (req, res, next) => {
   }
 
   try {
+    //Populate owner and sharedWith with username and _id
     const form = await Models.FormPage.findById(formID)
+      .populate('owner', 'username _id')
+      .populate('sharedWith.user', 'username _id')
 
     if (!form) {
       return res.status(404).json({ message: 'Form not found' })
@@ -144,14 +147,15 @@ const checkFormAccess = function (requiredRole) {
     let userRole = 'public' // Default role is public
 
     if (user) {
+
       // If user is the owner of the form
-      if (form.owner.toHexString() === user.id) {
+      if (form.owner.username === user.username) {
         userRole = 'owner'
       }
       // Find user role in sharedWith array or keep the current role
       userRole =
         form.sharedWith.find(
-          (sharedUser) => sharedUser.user.toHexString() === user.id,
+          (sharedUser) => sharedUser.user.username === user.username,
         )?.role || userRole
     }
 
