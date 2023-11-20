@@ -120,45 +120,31 @@ formSchema.methods.stripFor = function (userRole) {
     owner: [],
   }
 
-  const strippedFormData = { ...this.toObject() }
+  let strippedFormData = this.toJSON();
 
   if (fieldsToStrip[userRole]) {
     for (const field of fieldsToStrip[userRole]) {
       delete strippedFormData[field]
     }
   }
-// when i get a form , i'll populate the owner and sharedWith fields with username and _id but when i send a form, i'll only send the username and want to remove the _id field
-
-  // Remove owner field
-  delete strippedFormData.owner._id
-
-  // Remove sharedWith field
-  strippedFormData.sharedWith = strippedFormData.sharedWith.map(
-    (userDetails) => {
-      userDetails.user = userDetails.user.username
-      return userDetails
-    },
-  )
 
   return strippedFormData
 }
-
-
 
 formSchema.methods.toJSON = function () {
   const form = this
   const formObject = form.toObject()
 
-
   // Remove owner field
-  delete formObject.owner._id
+  if (formObject.owner?.username) {
+    formObject.owner = formObject.owner.username
+  }
+
   // Remove sharedWith field
-  formObject.sharedWith = formObject.sharedWith.map(
-    (userDetails) => {
-      userDetails.user = userDetails.user.username
-      return userDetails
-    },
-  )
+  formObject.sharedWith = formObject.sharedWith.map((userDetails) => {
+    userDetails.user = userDetails.user.username
+    return userDetails
+  })
 
   return formObject
 }

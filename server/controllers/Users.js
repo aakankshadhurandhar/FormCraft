@@ -6,7 +6,7 @@ const redis = require('../services/redis')
 // Registers a new user
 module.exports.registerUser = async (req, res, next) => {
   let { username, email, password } = req.body
-  console.log(req.body)
+
   username = username.toLowerCase()
   email = email.toLowerCase()
 

@@ -45,8 +45,8 @@ const createForm = async (token, userNumber, formNumber) => {
 
     const response = await fetchRequest(`${baseURL}/forms`, 'POST', formDetails, token);
     const responseData = await response.json();
-    // check response code
-    if (responseData.statusCode == 200) {
+    // check response code in range 200-299
+    if (responseData.statusCode >= 200 && responseData.statusCode < 300) {
       console.log(`Form ${formNumber} created successfully for user${userNumber}`);
     }else{
       console.log(`Form ${formNumber} not created for user${userNumber}`);

@@ -55,7 +55,7 @@ module.exports.Read = async (req, res) => {
   try {
     const form = req.form
 
-    return res.status(200).json({form:form.stripFor(req.userRole), a: form.toObject()})
+    return res.status(200).json(form.stripFor(req.userRole))
   } catch (err) {
     return res
       .status(500)
@@ -146,7 +146,7 @@ module.exports.Share = async (req, res) => {
       return res.status(400).json({ statusCode: 400, message: 'Invalid usernames' })
     }
     const userMap = users.reduce((map, user) => {
-      map[user.username] = user._id
+      map[user.username] = user
       return map
     }, {})
 
@@ -154,10 +154,12 @@ module.exports.Share = async (req, res) => {
       user: userMap[username],
       role: roles[index]
     }))
-    
-    const updatedForm = await form.save()
+
+    const updatedForm = (await form.save())
+
     res.status(200).json({ statusCode: 200, updatedForm })
   } catch (err) {
+    console.log(err)
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
   }
 }
