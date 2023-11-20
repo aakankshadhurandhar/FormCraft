@@ -70,7 +70,12 @@ userSchema.pre(
   { document: true, query: false },
   async function (next) {
     // Delete all forms created by the user
+    const formIDs = await this.model('Forms').find(this.getFilter(), '_id')
     await mongoose.model('Forms').deleteMany({ owner: this._id })
+    // Invalidate form cache
+    for (const formID of formIDs) {
+      redis.del(formID)
+    }
     next()
   },
 )

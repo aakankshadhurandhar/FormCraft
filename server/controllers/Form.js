@@ -1,6 +1,7 @@
 const Models = require('../models')
 const { UploadToS3, DeleteFilesFromS3 } = require('../services/S3')
 const { validateForm } = require('../utils/validations')
+const redis = require('../services/redis')
 
 // Create a new form for a user
 module.exports.Create = async (req, res) => {
@@ -21,7 +22,9 @@ module.exports.Create = async (req, res) => {
       ...value,
     })
 
-    let savedForm = (await form.save()).toObject()
+    const savedForm = await form.save()
+    // save in redis
+    redis.setex(savedForm._id,600,JSON.stringify(savedForm))
     res.status(201).json({ statusCode: 201, savedForm })
   } catch (err) {
     console.log(err)
@@ -57,6 +60,7 @@ module.exports.Read = async (req, res) => {
 
     return res.status(200).json(form.stripFor(req.userRole))
   } catch (err) {
+    console.log(err)
     return res
       .status(500)
       .json({ statusCode: 500, message: 'Internal server error' })
@@ -87,6 +91,7 @@ module.exports.Update = async (req, res) => {
     existingForm.published = published
 
     const updatedForm = await existingForm.save()
+    redis.setEX(updatedForm._id,JSON.stringify(updatedForm),'EX',600)
     res.json({
       statusCode: 200,
       message: 'Form updated successfully',
@@ -116,6 +121,7 @@ module.exports.UploadBackground = async (req, res) => {
     form.background =
       'https://formcraft-responses.s3.ap-south-1.amazonaws.com/' + file.key
     const updatedForm = await form.save()
+    redis.setEX(updatedForm._id,JSON.stringify(updatedForm),'EX',600)
     res.status(200).json({ statusCode: 200, updatedForm })
   } catch (err) {
     console.log(err)
@@ -155,8 +161,7 @@ module.exports.Share = async (req, res) => {
       role: roles[index]
     }))
 
-    const updatedForm = (await form.save())
-
+    const updatedForm = await form.save()
     res.status(200).json({ statusCode: 200, updatedForm })
   } catch (err) {
     console.log(err)
@@ -169,6 +174,7 @@ module.exports.Delete = async (req, res) => {
   try {
     let form = req.form
     await form.deleteOne()
+    redis.del(form._id)
     res.status(200).json({ message: 'Resource deleted successfully' })
   } catch (err) {
     res.status(500).json({ statusCode: 500, message: 'Internal server error' })
