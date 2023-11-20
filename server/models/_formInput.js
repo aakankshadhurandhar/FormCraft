@@ -149,7 +149,6 @@ Object.keys(inputDiscriminators).forEach((type) => {
   formInputSchema.discriminator(type, inputDiscriminators[type])
 })
 
-
 /**
  * @description This module exports a Mongoose schema for form input and discriminators for different types of form inputs.
  * @module _formInput

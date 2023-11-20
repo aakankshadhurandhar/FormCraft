@@ -62,16 +62,25 @@ module.exports.DeleteFilesFromS3 = async (files) => {
   }
 }
 
+module.exports.DeleteResponseFilesFromS3 = async (formID) => {
+  try {
+    // form uploads are in /uploads/formID
+    await this.DeleteDirectory(`/uploads/${formID}`)
+  } catch (err) {
+    throw err
+  }
+}
+
 /**
- * Deletes a directory and all its contents from S3
- * @param {string} formID - The ID of the form whose directory is to be deleted
+ * Deletes a directory with a given path and all its contents from S3
+ * @param {string} path - The path of the directory to delete
  * @description Deletes a directory and all its contents from S3
  * @returns {Promise<void>} - A promise that resolves when the directory is deleted
  */
-module.exports.DeleteFormDirectoryFromS3 = async (formID) => {
+module.exports.DeleteDirectory = async (path) => {
   const params = {
     Bucket: bucketName,
-    Prefix: `uploads/${formID}/`,
+    Prefix: path,
   }
   const listedObjects = await s3.listObjectsV2(params).promise()
 
@@ -87,7 +96,7 @@ module.exports.DeleteFormDirectoryFromS3 = async (formID) => {
 
   await s3.deleteObjects(deleteParams).promise()
 
-  if (listedObjects.IsTruncated) await deleteFormDirectory(formID)
+  if (listedObjects.IsTruncated) await DeleteDirectory(path)
 }
 
 /**
@@ -96,11 +105,11 @@ module.exports.DeleteFormDirectoryFromS3 = async (formID) => {
  * @description Uploads a file to S3
  * @returns {Promise<string>} - A promise that resolves with the S3 URL of the uploaded file
  */
-const uploadOne = (file) => {
+const uploadFile = (file) => {
   return new Promise((resolve, reject) => {
     const params = {
       Bucket: bucketName,
-      Key: file.key,
+      Key: file.key, // File name you want to save as in S3
       //Set Content-Disposition to attachment to rename file on download
       ContentDisposition: `attachment; filename=${file.originalname}`,
       Body: fs.createReadStream(file.path),
@@ -131,7 +140,7 @@ const uploadOne = (file) => {
 module.exports.UploadToS3 = async (files) => {
   try {
     if (files) {
-      const uploadPromises = files.map((file) => uploadOne(file))
+      const uploadPromises = files.map((file) => uploadFile(file))
       const s3Urls = await Promise.all(uploadPromises)
       return s3Urls
     }

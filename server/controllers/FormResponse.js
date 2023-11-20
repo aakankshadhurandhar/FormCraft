@@ -1,5 +1,5 @@
 const { default: mongoose } = require('mongoose')
-const {  UploadToS3 } = require('../services/S3')
+const { UploadToS3 } = require('../services/S3')
 const { validateFormResponse } = require('../utils/validations')
 const Models = require('../models')
 const createExportFile = require('../utils/createExportFile')
@@ -33,13 +33,12 @@ module.exports.Create = async (req, res) => {
         path: 'https://formcraft-responses.s3.ap-south-1.amazonaws.com/' + key,
         sizeInKB: size / 1000,
       }
-      
+
       if (formValues[fieldname] == undefined) {
         formValues[fieldname] = []
       }
       formValues[fieldname].push(fileDetails)
     }
-
 
     let { error, value } = validateFormResponse(form, formValues)
     if (error) {
@@ -48,10 +47,10 @@ module.exports.Create = async (req, res) => {
 
     // Upload files to S3 in background
     UploadToS3(files)
-    
+
     const formResponse = new Models.FormResponse({
       _id: responseID,
-      formID: form._id,
+      form: form._id,
       response: value,
     })
     const savedResponse = await formResponse.save()
@@ -66,7 +65,7 @@ module.exports.ReadAll = async (req, res) => {
   try {
     const formID = req.params.formID
     const responses = await Models.FormResponse.find({
-      formID: formID,
+      form: formID,
     }).exec()
     res.json(responses)
   } catch (error) {
@@ -80,7 +79,7 @@ module.exports.Read = async (req, res) => {
     const form = req.form
     const responseID = req.params.responseID
     const response = await Models.FormResponse.findById(responseID)
-    if (!response || response.formID != form._id) {
+    if (!response || response.form != form._id) {
       return res.status(404).json({ message: 'Response not found' })
     }
     res.json(response)
@@ -111,7 +110,7 @@ module.exports.ExportAll = async (req, res) => {
 
     const form = req.form
     const formResponses = await Models.FormResponse.find({
-      formID: form._id,
+      form: form._id,
     }).exec()
 
     const fileBuffer = await createExportFile(form, formResponses, type)
@@ -126,7 +125,6 @@ module.exports.ExportAll = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' })
   }
 }
-
 
 // Set a response to public or private
 module.exports.SetPublicOne = async (req, res) => {

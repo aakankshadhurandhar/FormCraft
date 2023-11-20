@@ -1,7 +1,7 @@
 const { isValidObjectId } = require('mongoose')
 const Models = require('../models')
-const handleFileUpload = require('./handleFileUpload')
 const passport = require('passport')
+const redis  = require('../services/redis')
 
 /**
  * Middleware that checks if the specified parameters in the request contain valid MongoDB ObjectIDs.
@@ -37,15 +37,26 @@ const fetchForm = async (req, res, next) => {
   }
 
   try {
+
+    // check in redis
+    const formJSONString= await redis.getex(formID,'EX',600)
+
+    if(formJSONString){
+      req.form = new Models.FormPage(JSON.parse(formJSONString))
+      return next()
+    }
+    console.log('not found in redis')
     const form = await Models.FormPage.findById(formID)
 
     if (!form) {
       return res.status(404).json({ message: 'Form not found' })
     }
-
+    // Save in redis
+    redis.setex(formID,600,JSON.stringify(form))
     req.form = form
     next()
   } catch (err) {
+    console.log(err)
     return res.status(500).json({ message: 'Internal server error' })
   }
 }
@@ -123,49 +134,6 @@ const readJWT = (req, res, next) => {
 }
 
 /**
- * Middleware Chain that checks if the authenticated user is the owner of the form.
- * @function
- * @name formOwnerOnly
- * @returns {Array} An array of middleware functions that includes isAuthenticated, fetchForm, and the formOwnerOnly function.
- * @description This middleware function checks if the authenticated user is the owner of the form. If the user is the owner, the next middleware function is called. Otherwise, an error is returned.
- */
-const formOwnerOnly = (function () {
-  const fn = (req, res, next) => {
-    if (req.form.userID.toHexString() !== req.user.userID) {
-      return res.status(401).json({ message: 'Unauthorized' })
-    }
-    next()
-  }
-
-  return [isAuthenticated, fetchForm, fn]
-})()
-
-/**
- * Middleware that checks if the user has access to a form.
- *
- * @function
- * @name hasFormAccess
- * @returns {Array} An array of middleware functions that includes isAuthenticated, fetchForm, and the access check function.
- *
- * @description
- * This middleware function checks if the user has access to a form by comparing the form's user ID and sharedWith array with the user ID of the authenticated user making the request. If the user has access, the next middleware function is called. Otherwise, an error is returned.
- */
-const hasFormAccess = (function () {
-  const fn = (req, res, next) => {
-    const form = req.form
-    if (
-      form.userID.toHexString() === req.user.userID ||
-      form.sharedWith.includes(req.user.userID)
-    ) {
-      return next()
-    }
-    return res.status(401).json({ message: 'Unauthorized', form })
-  }
-
-  return [isAuthenticated, fetchForm, fn]
-})()
-
-/**
  * Middleware that checks if the user has access to a form based on their role.
  * @param {string} requiredRole - The minimum role required to access the form.
  * @returns {Array} An array of middleware functions to be executed.
@@ -189,13 +157,13 @@ const checkFormAccess = function (requiredRole) {
 
     if (user) {
       // If user is the owner of the form
-      if (form.userID.toHexString() === user.userID) {
+      if (form.owner.toHexString() === user.id) {
         userRole = 'owner'
       }
       // Find user role in sharedWith array or keep the current role
       userRole =
         form.sharedWith.find(
-          (sharedUser) => sharedUser.userID.toHexString() === user.userID,
+          (sharedUser) => sharedUser.user.toHexString() === user.id,
         )?.role || userRole
     }
 
@@ -227,10 +195,7 @@ module.exports = {
   areObjectIDs,
   fetchForm,
   fetchResponse,
-  handleFileUpload,
   isAuthenticated,
-  formOwnerOnly,
   readJWT,
-  hasFormAccess,
   checkFormAccess,
 }

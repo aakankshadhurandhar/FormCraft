@@ -6,13 +6,11 @@ const Controllers = require('../controllers')
 const {
   areObjectIDs,
   fetchForm,
-  handleFileUpload,
   isAuthenticated,
   readJWT,
-  formOwnerOnly,
-  hasFormAccess,
   checkFormAccess,
 } = require('../middlewares')
+const upload = require('../middlewares/upload.js')
 
 router.use(readJWT)
 
@@ -20,8 +18,14 @@ router.get('/', (req, res) => {
   res.json({ message: 'OK!' })
 })
 
-// Create Form
 router.post('/forms', isAuthenticated, Controllers.Form.Create)
+
+router.put(
+  '/forms/:formID/background',
+  checkFormAccess('editor'),
+  upload.backgroundImage,
+  Controllers.Form.UploadBackground,
+)
 
 // Read Form
 router.get('/forms/:formID', checkFormAccess('public'), Controllers.Form.Read)
@@ -57,7 +61,7 @@ router.get(
 router.post(
   '/forms/:formID/responses',
   fetchForm,
-  handleFileUpload,
+  upload.FormResponse,
   Controllers.FormResponse.Create,
 )
 
