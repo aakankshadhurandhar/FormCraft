@@ -46,6 +46,32 @@ const fileValidationHelper = (maxFileSizeKB, min, max) => {
   }
 }
 
+function validateIncreasingSequence(value, helpers) {
+  for (let i = 1; i < value.length; i++) {
+    if (value[i] <= value[i - 1]) {
+      return helpers.error('any.custom', {
+        message: 'Steps must be in increasing order',
+      })
+    }
+  }
+  return value;
+}
+
+function validateLastStepAgainstMaxValue(maxValue){
+  return (value, helpers) => {
+    if(!maxValue){
+      return value;
+    }
+
+    if( value[value.length - 1] != maxValue){
+      return helpers.error('any.custom', {
+        message: `Last step must be less than or equal to ${maxValue}`,
+      })
+    }
+    return value;
+  }
+}
+
 /**
  * Validates a form response against its input schema.
  *
@@ -288,6 +314,12 @@ function validateForm(formBody) {
     published: Joi.boolean().default(false),
     expiry: Joi.date().min('now'),
     inputs: Joi.array().items(formInputSchema),
+    steps: Joi.array()
+    .items(Joi.number().integer().min(0).max(formBody.inputs?.length-1))
+    .min(Math.min(formBody.inputs?.length-1,1))
+    .unique()
+    .custom(validateIncreasingSequence, 'Increasing Sequence Check')
+    .custom(validateLastStepAgainstMaxValue(formBody.inputs?.length-1), 'Max Inputs Length Check')
   })
 
   return formPageSchema.validate(formBody)
@@ -302,7 +334,7 @@ function validateForm(formBody) {
  */
 function validateUserRegisterSchema(userBody) {
   const userRegistrationSchema = Joi.object({
-    user_name: Joi.string().min(3).max(30).required(),
+    username: Joi.string().min(3).max(30).required(),
     password: Joi.string().min(6).required(),
     email: Joi.string().email().required(),
   })
@@ -318,7 +350,7 @@ function validateUserRegisterSchema(userBody) {
  */
 function validateUserLoginSchema(userBody) {
   const userRegistrationSchema = Joi.object({
-    user_name: Joi.string().min(3).max(30).optional(),
+    username: Joi.string().min(3).max(30).optional(),
     password: Joi.string().min(6).required(),
     email: Joi.string().email().optional(),
   })
