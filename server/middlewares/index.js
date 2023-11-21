@@ -22,14 +22,7 @@ const areObjectIDs =
     next()
   }
 
-/**
- * Middleware to fetch a form by ID and attach it to the request object.
- * @param {Object} req - Express request object.
- * @param {Object} res - Express response object.
- * @param {Function} next - Express next middleware function.
- * @description This middleware function fetches a form by ID and attaches it to the request object. If the form is not found, an error response is sent.
- * @returns {Object} - Express response object.
- */
+
 const fetchForm = async (req, res, next) => {
   const formID = req.params.formID
   if (!isValidObjectId(formID)) {
@@ -37,16 +30,16 @@ const fetchForm = async (req, res, next) => {
   }
 
   try {
-    //Populate owner and sharedWith with username and _id
 
-    // check in redis
     const formJSONString= await redis.getex(formID,'EX',600)
 
     if(formJSONString){
-      req.form = new Models.FormPage(JSON.parse(formJSONString))
+      const form = new Models.FormPage(JSON.parse(formJSONString))
+      await form.populate('owner', 'username _id')
+      await form.populate('sharedWith.user', 'username _id') 
+      req.form = form
       return next()
     }
-    console.log('not found in redis')
     const form = await Models.FormPage.findById(formID)
       .populate('owner', 'username _id')
       .populate('sharedWith.user', 'username _id')
@@ -55,7 +48,7 @@ const fetchForm = async (req, res, next) => {
       return res.status(404).json({ message: 'Form not found' })
     }
     // Save in redis
-    redis.setex(formID,600,JSON.stringify(form))
+    redis.setex(formID,600,JSON.stringify(form.toObject()))
     req.form = form
     next()
   } catch (err) {
