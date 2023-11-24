@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { isFunction } from 'lodash';
+import { isFunction,isEqual } from 'lodash';
 
 // TODO: add Toast element
 
@@ -100,7 +100,18 @@ function actionFactory({
 
         if (typeof failureToast === 'string') {
           // TODO: show some failureToast
+          if (
+            isEqual(
+              err?.response?.data?.status?.status_message,
+              "Token Expired"
+            )
+          ) {
+            localStorage.removeItem("token");
+            // add logout
+
+          }
         }
+
 
         throw err.message;
       });
