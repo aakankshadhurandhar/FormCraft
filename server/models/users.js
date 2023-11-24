@@ -58,6 +58,7 @@ userSchema.methods.toJSON = function () {
 // Generate JWT token
 userSchema.methods.generateToken = function () {
   const payload = {
+
     id: this._id,
     username: this.username,
   }

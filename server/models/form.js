@@ -67,6 +67,10 @@ const formSchema = new mongoose.Schema(
     },
     expiry: Date,
     inputs: [formInputSchema],
+    steps: {
+      type: [Number],
+      default: undefined,
+    }, // Array containing the indices that split steps
   },
   {
     timestamps: true,
@@ -107,6 +111,7 @@ formSchema.pre(
  * @returns {Object} - The form object with sensitive fields stripped.
  * @description This method strips sensitive fields from the form object based on the user role. The user role is passed as a parameter to the method. The method returns the form object with sensitive fields stripped.
  */
+
 formSchema.methods.stripFor = function (userRole) {
   const fieldsToStrip = {
     viewer: ['owner', 'sharedWith', 'createdAt', 'updatedAt', '__v'],
@@ -115,7 +120,7 @@ formSchema.methods.stripFor = function (userRole) {
     owner: [],
   }
 
-  const strippedFormData = { ...this.toObject() }
+  let strippedFormData = this.toJSON();
 
   if (fieldsToStrip[userRole]) {
     for (const field of fieldsToStrip[userRole]) {
@@ -126,7 +131,23 @@ formSchema.methods.stripFor = function (userRole) {
   return strippedFormData
 }
 
+formSchema.methods.toJSON = function () {
+  const form = this
+  const formObject = form.toObject()
 
+  // Remove owner field
+  if (formObject.owner?.username) {
+    formObject.owner = formObject.owner.username
+  }
+
+  // Remove sharedWith field
+  formObject.sharedWith = formObject.sharedWith.map((userDetails) => {
+    userDetails.user = userDetails.user.username
+    return userDetails
+  })
+
+  return formObject
+}
 
 /**
  * Mongoose model for a form.
