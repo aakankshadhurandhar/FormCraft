@@ -13,32 +13,25 @@ module.exports.registerUser = async (req, res, next) => {
   // Validate user input
   const { error } = validateUserRegisterSchema({ username, email, password })
   if (error) {
-    return res.status(400).json({ error: error.details[0].message })
+    return res.sendBadRequest('Validation failed', error)
   }
 
   passport.authenticate('signup', { session: false }, async (err, user) => {
     try {
       if (err) {
         // Handle errors (e.g., duplicate email)
-        return res
-          .status(400)
-          .json({ message: 'Error during signup', error: err })
+        return res.sendBadRequest('Error during signup', err)
       }
 
       if (!user) {
         // Handle failed signup (e.g., duplicate email)
-        return res
-          .status(400)
-          .json({ message: 'Signup failed, user already exists' })
+        return res.sendBadRequest('Signup failed, user already exists')
       }
 
       // User was successfully created
-      return res
-        .status(201)
-        .json({ message: 'User registered successfully', user })
+      return res.sendResponse('User registered successfully', user,201) 
     } catch (error) {
-      // Handle other errors
-      return res.status(500).json({ message: 'Internal server error', error })
+      return res.sendInternalServerError(error)
     }
   })(req, res, next)
 }
@@ -47,31 +40,29 @@ module.exports.registerUser = async (req, res, next) => {
 module.exports.loginUser = (req, res) => {
   passport.authenticate('login', { session: false }, (err, user, info) => {
     if (err) {
-      return res.status(500).json({ message: 'Internal Server Error', info })
+      return res.sendInternalServerError(err)
     }
     if (!user) {
-      return res
-        .status(401)
-        .json({ message: 'Incorrect loginID or password', info })
+      return res.sendBadRequest('Incorrect loginID or password', info)
     }
 
     const token = user.generateToken()
-    res.json({ message: 'User logged in successfully', token })
+    return res.sendResponse('User logged in successfully', { token })
   })(req, res)
 }
 
 // logoutUser
-module.exports.logoutUser = (req, res) => {
+module.exports.logoutUser = async  (req, res) => {
   // get the token from the header
   const token = req.headers.authorization
 
   //add it to the redis blacklist
-  redis
+  await redis
     .set(token, 'blacklisted', 'EX', 60 * 60 * 24 * 7)
     .then(() => {
-      res.json({ message: 'User logged out successfully' })
+      return res.sendSucces()
     })
     .catch((err) => {
-      res.status(500).json({ message: 'Internal server error', err })
+      return res.sendInternalServerError(err)
     })
 }

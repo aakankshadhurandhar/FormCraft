@@ -11,10 +11,10 @@ module.exports.Create = async (req, res) => {
 
     // if form is not published or expired, return error
     if (form.expiry && form.expiry < Date.now()) {
-      return res.status(400).json({ message: 'Form has expired' })
+      return res.sendBadRequest('Form has expired')
     }
     if (!form.published) {
-      return res.status(400).json({ message: 'Form is not public' })
+      return res.sendBadRequest('Form is not published')
     }
 
     const responseID = new mongoose.Types.ObjectId().toHexString()
@@ -42,7 +42,7 @@ module.exports.Create = async (req, res) => {
 
     let { error, value } = validateFormResponse(form, formValues)
     if (error) {
-      return res.status(400).json({ error })
+      return res.sendBadRequest('Form Response validation failed',error)
     }
 
     // Upload files to S3 in background
@@ -54,9 +54,9 @@ module.exports.Create = async (req, res) => {
       response: value,
     })
     const savedResponse = await formResponse.save()
-    res.status(201).json(savedResponse)
+    return res.sendResponse('Form response Submitted', savedResponse,201)
   } catch (err) {
-    res.status(500).json({ message: 'Internal server error' })
+    return res.sendInternalServerError(err)
   }
 }
 
@@ -67,9 +67,10 @@ module.exports.ReadAll = async (req, res) => {
     const responses = await Models.FormResponse.find({
       form: formID,
     }).exec()
-    res.json(responses)
+    return res.sendSuccess('Form responses', responses)
+
   } catch (error) {
-    res.status(500).json({ message: 'Internal server error' })
+    return res.sendInternalServerError(error)
   }
 }
 
@@ -79,12 +80,14 @@ module.exports.Read = async (req, res) => {
     const form = req.form
     const responseID = req.params.responseID
     const response = await Models.FormResponse.findById(responseID)
+
     if (!response || response.form != form._id) {
-      return res.status(404).json({ message: 'Response not found' })
+      return res.sendNotFound('Response not found')
     }
-    res.json(response)
+
+    return res.sendSuccess('Form response', response)
   } catch (error) {
-    res.status(500).json({ message: 'Internal server error' })
+    return res.sendInternalServerError(error)
   }
 }
 
@@ -94,9 +97,9 @@ module.exports.Delete = async (req, res) => {
     const responseID = req.params.responseID
     const response = await Models.FormResponse.findById(responseID)
     await response.deleteOne()
-    res.json({ message: 'Form response deleted successfully' })
+    return res.sendResponse('Form response deleted successfully')
   } catch (error) {
-    res.status(500).json({ message: 'Internal server error' })
+    return res.sendInternalServerError(error)
   }
 }
 
@@ -105,7 +108,7 @@ module.exports.ExportAll = async (req, res) => {
   try {
     const type = req.query.type || 'xlsx'
     if (type != 'xlsx' && type != 'csv') {
-      return res.status(400).json({ message: 'Unsupported export type' })
+      return res.sendBadRequest('Unsupported export type')
     }
 
     const form = req.form
@@ -122,7 +125,7 @@ module.exports.ExportAll = async (req, res) => {
     )
     res.send(fileBuffer)
   } catch (error) {
-    res.status(500).json({ message: 'Internal server error' })
+    return res.sendInternalServerError(error)
   }
 }
 
@@ -130,23 +133,21 @@ module.exports.ExportAll = async (req, res) => {
 module.exports.SetPublicOne = async (req, res) => {
   try {
     const responseID = req.params.responseID
-    const publicStatus = req.body.public || true
-    if (typeof publicStatus != 'boolean') {
-      return res.status(400).json({ message: 'Invalid public status' })
-    }
+    let publicStatus = req.body.public || true
+    publicStatus = publicStatus === 'true' ? true : false
+    
     const response = await Models.FormResponse.findById(responseID)
     if (!response) {
-      return res.status(404).json({ message: 'Response not found' })
+      return res.sendNotFound('Response not found')
     }
     response.public = publicStatus
     await response.save()
     if (response.public) {
-      return res.json({ message: 'Response is now public' })
+      return sendSuccess('Response is now public')
     }
-    return res.json({ message: 'Response is now private' })
+    return sendSuccess('Response is now private')
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: 'Internal server error' })
+    return res.sendInternalServerError(error)
   }
 }
 
@@ -157,18 +158,15 @@ module.exports.SetPublicMany = async (req, res) => {
     if (!Array.isArray(responseIDs)) {
       return res.status(400).json({ message: 'Invalid response IDs' })
     }
-    const publicStatus = req.body.public || true
-    if (typeof publicStatus != 'boolean') {
-      return res.status(400).json({ message: 'Invalid public status' })
-    }
+    let publicStatus = req.body.public || true
+    publicStatus = publicStatus === 'true' ? true : false
 
     const response = await Models.FormResponse.updateMany(
       { _id: { $in: responseIDs } },
       { public: publicStatus },
     )
-    res.json({ message: 'Responses are now public' })
+    return sendSuccess('Responses are now public')
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: 'Internal server error' })
+    return res.sendInternalServerError(error)
   }
 }

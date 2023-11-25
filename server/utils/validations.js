@@ -246,14 +246,14 @@ function validateForm(formBody) {
       then: Joi.date()
         .format('YYYY-MM-DD')
         .utc()
-        .custom((value, helpers) => {
+        .custom((value) => {
           return value.toISOString().split('T')[0]
         }),
       is: 'time',
       then: Joi.date()
         .format('HH:mm')
         .utc()
-        .custom((value, helpers) => {
+        .custom((value) => {
           return value.toISOString().split('T')[0]
         }),
       otherwise: Joi.number(),
@@ -270,7 +270,7 @@ function validateForm(formBody) {
       then: Joi.date()
         .format('HH:mm')
         .utc()
-        .custom((value, helpers) => {
+        .custom((value) => {
           return value.toISOString().split('T')[0]
         }),
       otherwise: Joi.number(),
