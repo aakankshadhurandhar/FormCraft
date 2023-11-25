@@ -1,7 +1,7 @@
 const { isValidObjectId } = require('mongoose')
 const Models = require('../models')
 const passport = require('passport')
-const redis  = require('../services/redis')
+const redis = require('../services/redis')
 
 /**
  * Middleware that checks if the specified parameters in the request contain valid MongoDB ObjectIDs.
@@ -23,7 +23,6 @@ const areObjectIDs =
     next()
   }
 
-
 const fetchForm = async (req, res, next) => {
   const formID = req.params.formID
   if (!isValidObjectId(formID)) {
@@ -32,13 +31,12 @@ const fetchForm = async (req, res, next) => {
   }
 
   try {
+    const formJSONString = await redis.getex(formID, 'EX', 600)
 
-    const formJSONString= await redis.getex(formID,'EX',600)
-
-    if(formJSONString){
+    if (formJSONString) {
       const form = new Models.FormPage(JSON.parse(formJSONString))
       await form.populate('owner', 'username _id')
-      await form.populate('sharedWith.user', 'username _id') 
+      await form.populate('sharedWith.user', 'username _id')
       req.form = form
       return next()
     }
@@ -51,7 +49,7 @@ const fetchForm = async (req, res, next) => {
       // return res.status(404).json({ message: 'Form not found' })
     }
     // Save in redis
-    redis.setex(formID,600,JSON.stringify(form.toObject()))
+    redis.setex(formID, 600, JSON.stringify(form.toObject()))
     req.form = form
     next()
   } catch (err) {
@@ -161,7 +159,6 @@ const checkFormAccess = function (requiredRole) {
     let userRole = 'public' // Default role is public
 
     if (user) {
-
       // If user is the owner of the form
       if (form.owner.username === user.username) {
         userRole = 'owner'

@@ -42,7 +42,7 @@ module.exports.Create = async (req, res) => {
 
     let { error, value } = validateFormResponse(form, formValues)
     if (error) {
-      return res.sendBadRequest('Form Response validation failed',error)
+      return res.sendBadRequest('Form Response validation failed', error)
     }
 
     // Upload files to S3 in background
@@ -54,7 +54,7 @@ module.exports.Create = async (req, res) => {
       response: value,
     })
     const savedResponse = await formResponse.save()
-    return res.sendResponse('Form response Submitted', savedResponse,201)
+    return res.sendResponse('Form response Submitted', savedResponse, 201)
   } catch (err) {
     return res.sendInternalServerError(err)
   }
@@ -68,7 +68,6 @@ module.exports.ReadAll = async (req, res) => {
       form: formID,
     }).exec()
     return res.sendSuccess('Form responses', responses)
-
   } catch (error) {
     return res.sendInternalServerError(error)
   }
@@ -135,7 +134,7 @@ module.exports.SetPublicOne = async (req, res) => {
     const responseID = req.params.responseID
     let publicStatus = req.body.public || true
     publicStatus = publicStatus === 'true' ? true : false
-    
+
     const response = await Models.FormResponse.findById(responseID)
     if (!response) {
       return res.sendNotFound('Response not found')

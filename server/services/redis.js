@@ -4,30 +4,29 @@ const Redis = require('ioredis')
 const redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
 
 redisClient.on('error', (err) => {
-  console.error('Redis error:', err.code);
-  redisClient.connected = false;
-});
+  console.error('Redis error:', err.code)
+  redisClient.connected = false
+})
 
 // Handle successful connection
 redisClient.on('connect', () => {
-  console.log('Redis connected');
-  redisClient.connected = true;
-});
+  console.log('Redis connected')
+  redisClient.connected = true
+})
 
 const redis = new Proxy(redisClient, {
-  get: function(target, prop) {
+  get: function (target, prop) {
     if (typeof target[prop] === 'function') {
-      return function(...args) {
+      return function (...args) {
         if (!target.connected) {
-          return;
+          return
         }
-        return target[prop](...args);
-      };
+        return target[prop](...args)
+      }
     }
-    return target[prop];
-  }
-});
-
+    return target[prop]
+  },
+})
 
 // Export the Redis client instance to be used in other files
 module.exports = redis

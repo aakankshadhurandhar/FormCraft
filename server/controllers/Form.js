@@ -72,7 +72,7 @@ module.exports.Update = async (req, res) => {
     const updatedForm = await Models.FormPage.findByIdAndUpdate(
       req.form._id,
       { title, description, inputs, expiry, published },
-      { new: true }
+      { new: true },
     )
     await updatedForm.populate('owner', 'username _id')
     await updatedForm.populate('sharedWith.user', 'username _id')

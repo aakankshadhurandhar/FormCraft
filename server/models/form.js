@@ -120,7 +120,7 @@ formSchema.methods.stripFor = function (userRole) {
     owner: [],
   }
 
-  let strippedFormData = this.toJSON();
+  let strippedFormData = this.toJSON()
 
   if (fieldsToStrip[userRole]) {
     for (const field of fieldsToStrip[userRole]) {

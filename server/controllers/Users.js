@@ -29,7 +29,7 @@ module.exports.registerUser = async (req, res, next) => {
       }
 
       // User was successfully created
-      return res.sendResponse('User registered successfully', user,201) 
+      return res.sendResponse('User registered successfully', user, 201)
     } catch (error) {
       return res.sendInternalServerError(error)
     }
@@ -52,7 +52,7 @@ module.exports.loginUser = (req, res) => {
 }
 
 // logoutUser
-module.exports.logoutUser = async  (req, res) => {
+module.exports.logoutUser = async (req, res) => {
   // get the token from the header
   const token = req.headers.authorization
 
