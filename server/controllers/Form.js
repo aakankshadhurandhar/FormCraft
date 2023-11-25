@@ -10,11 +10,7 @@ module.exports.Create = async (req, res) => {
 
     const userID = req.user.id
     if (error) {
-      return res.status(400).json({
-        statusCode: 400,
-        message: error.details.map((detail) => detail.message),
-        error,
-      })
+      return res.sendBadRequest('Form validation failed', error)
     }
 
     const form = new Models.FormPage({
@@ -24,11 +20,10 @@ module.exports.Create = async (req, res) => {
 
     const savedForm = await form.save()
     // save in redis
-    redis.setex(savedForm._id,600,JSON.stringify(savedForm))
-    res.status(201).json({ statusCode: 201, savedForm })
+    redis.setex(savedForm._id, 600, JSON.stringify(savedForm))
+    return res.sendResponse('Form created successfully', savedForm, 201)
   } catch (err) {
-    console.log(err)
-    res.status(500).json({ statusCode: 500, message: 'Internal server error' })
+    res.sendInternalServerError(err)
   }
 }
 
@@ -36,20 +31,18 @@ module.exports.Create = async (req, res) => {
 module.exports.ReadAll = async (req, res) => {
   try {
     const userID = req.user.id
-    const myForms = await Models.FormPage.find({ owner: userID }).populate(
-      'owner',
-      'username _id',
-    ).populate('sharedWith.user', 'username _id')
+    const myForms = await Models.FormPage.find({ owner: userID })
+      .populate('owner', 'username _id')
+      .populate('sharedWith.user', 'username _id')
     const sharedForms = await Models.FormPage.find({
       'sharedWith.user': userID,
     })
       .populate('owner', 'username _id')
       .populate('sharedWith.user', 'username _id')
-    res
-      .status(200)
-      .json({ statusCode: 200, response: { myForms, sharedForms } })
+
+    return res.sendSuccess({ myForms, sharedForms })
   } catch (err) {
-    res.status(500).json({ statusCode: 500, message: 'Internal server error' })
+    return res.sendInternalServerError(err)
   }
 }
 
@@ -58,47 +51,36 @@ module.exports.Read = async (req, res) => {
   try {
     const form = req.form
 
-    return res.status(200).json(form.stripFor(req.userRole))
+    return res.sendSuccess(form.stripFor(req.userRole))
   } catch (err) {
-    console.log(err)
-    return res
-      .status(500)
-      .json({ statusCode: 500, message: 'Internal server error' })
+    return res.sendInternalServerError(err)
   }
 }
 
+//TODO: error coming from here
 // Update a form for a user
 module.exports.Update = async (req, res) => {
   try {
     const { error, value } = validateForm(req.body)
 
     if (error) {
-      return res.status(400).json({
-        statusCode: 400,
-        message: error.details.map((detail) => detail.message),
-        error,
-      })
+      return res.sendBadRequest('Form validation failed', error)
     }
-
-    const existingForm = req.form
 
     const { title, description, inputs, expiry, published } = value
 
-    existingForm.title = title
-    existingForm.description = description
-    existingForm.inputs = inputs
-    existingForm.expiry = expiry
-    existingForm.published = published
+    const updatedForm = await Models.FormPage.findByIdAndUpdate(
+      req.form._id,
+      { title, description, inputs, expiry, published },
+      { new: true },
+    )
+    await updatedForm.populate('owner', 'username _id')
+    await updatedForm.populate('sharedWith.user', 'username _id')
+    redis.setex(updatedForm._id, 600, JSON.stringify(updatedForm.toObject()))
 
-    const updatedForm = await existingForm.save()
-    redis.setEX(updatedForm._id,JSON.stringify(updatedForm),'EX',600)
-    res.json({
-      statusCode: 200,
-      message: 'Form updated successfully',
-      updatedForm,
-    })
+    return res.sendSuccess(updatedForm.stripFor(req.userRole))
   } catch (err) {
-    res.status(500).json({ statusCode: 500, message: 'Internal server error' })
+    return res.sendInternalServerError(err)
   }
 }
 
@@ -109,7 +91,7 @@ module.exports.UploadBackground = async (req, res) => {
     const file = req.file
 
     if (!file) {
-      return res.status(400).json({ statusCode: 400, message: 'No file found' })
+      return res.sendBadRequest('No file found')
     }
 
     if (form.background) {
@@ -121,11 +103,10 @@ module.exports.UploadBackground = async (req, res) => {
     form.background =
       'https://formcraft-responses.s3.ap-south-1.amazonaws.com/' + file.key
     const updatedForm = await form.save()
-    redis.setEX(updatedForm._id,JSON.stringify(updatedForm),'EX',600)
-    res.status(200).json({ statusCode: 200, updatedForm })
+    redis.setEX(updatedForm._id, JSON.stringify(updatedForm), 'EX', 600)
+    return res.sendSuccess(updatedForm)
   } catch (err) {
-    console.log(err)
-    res.status(500).json({ statusCode: 500, message: 'Internal server error' })
+    return res.sendInternalServerError(err)
   }
 }
 
@@ -141,15 +122,16 @@ module.exports.Share = async (req, res) => {
 
     // Check if the user is not trying to share the form with himself
     if (usernames.includes(req.user.username)) {
-      return res
-        .status(400)
-        .json({ statusCode: 400, message: 'Cannot share form with yourself' })
+      return res.sendBadRequest('Cannot share form with yourself')
     }
 
-    const users = await Models.Users.find({ username: { $in: usernames } }, '_id username')
-    
+    const users = await Models.Users.find(
+      { username: { $in: usernames } },
+      '_id username',
+    )
+
     if (users.length !== usernames.length) {
-      return res.status(400).json({ statusCode: 400, message: 'Invalid usernames' })
+      return res.sendBadRequest('Invalid usernames')
     }
     const userMap = users.reduce((map, user) => {
       map[user.username] = user
@@ -158,14 +140,13 @@ module.exports.Share = async (req, res) => {
 
     form.sharedWith = usernames.map((username, index) => ({
       user: userMap[username],
-      role: roles[index]
+      role: roles[index],
     }))
 
     const updatedForm = await form.save()
-    res.status(200).json({ statusCode: 200, updatedForm })
+    return res.sendSuccess(updatedForm)
   } catch (err) {
-    console.log(err)
-    res.status(500).json({ statusCode: 500, message: 'Internal server error' })
+    return res.sendInternalServerError(err)
   }
 }
 
@@ -175,8 +156,8 @@ module.exports.Delete = async (req, res) => {
     let form = req.form
     await form.deleteOne()
     redis.del(form._id)
-    res.status(200).json({ message: 'Resource deleted successfully' })
+    return res.sendSuccess({ message: 'Form deleted successfully' })
   } catch (err) {
-    res.status(500).json({ statusCode: 500, message: 'Internal server error' })
+    return res.sendInternalServerError(err)
   }
 }

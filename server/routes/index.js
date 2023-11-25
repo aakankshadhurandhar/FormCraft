@@ -15,7 +15,8 @@ const upload = require('../middlewares/upload.js')
 router.use(readJWT)
 
 router.get('/', (req, res) => {
-  res.json({ message: 'OK!' })
+  throw new Error('Not Found')
+  res.sendResponse('OK')
 })
 
 router.post('/forms', isAuthenticated, Controllers.Form.Create)

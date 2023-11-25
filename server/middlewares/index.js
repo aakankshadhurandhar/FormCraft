@@ -1,7 +1,7 @@
 const { isValidObjectId } = require('mongoose')
 const Models = require('../models')
 const passport = require('passport')
-const redis  = require('../services/redis')
+const redis = require('../services/redis')
 
 /**
  * Middleware that checks if the specified parameters in the request contain valid MongoDB ObjectIDs.
@@ -16,27 +16,27 @@ const areObjectIDs =
       const paramValue = req.params[paramName]
 
       if (!isValidObjectId(paramValue)) {
-        return res.status(400).json({ message: `Invalid ${paramName}` })
+        return res.sendBadRequest(`Invalid ${paramName}`)
+        // return res.status(400).json({ message: `Invalid ${paramName}` })
       }
     }
     next()
   }
 
-
 const fetchForm = async (req, res, next) => {
   const formID = req.params.formID
   if (!isValidObjectId(formID)) {
-    return res.status(400).json({ message: `Invalid formID` })
+    return res.sendBadRequest(`Invalid formID`)
+    // return res.status(400).json({ message: `Invalid formID` })
   }
 
   try {
+    const formJSONString = await redis.getex(formID, 'EX', 600)
 
-    const formJSONString= await redis.getex(formID,'EX',600)
-
-    if(formJSONString){
+    if (formJSONString) {
       const form = new Models.FormPage(JSON.parse(formJSONString))
       await form.populate('owner', 'username _id')
-      await form.populate('sharedWith.user', 'username _id') 
+      await form.populate('sharedWith.user', 'username _id')
       req.form = form
       return next()
     }
@@ -45,15 +45,15 @@ const fetchForm = async (req, res, next) => {
       .populate('sharedWith.user', 'username _id')
 
     if (!form) {
-      return res.status(404).json({ message: 'Form not found' })
+      return res.sendNotFound('Form not found')
+      // return res.status(404).json({ message: 'Form not found' })
     }
     // Save in redis
-    redis.setex(formID,600,JSON.stringify(form.toObject()))
+    redis.setex(formID, 600, JSON.stringify(form.toObject()))
     req.form = form
     next()
   } catch (err) {
-    console.log(err)
-    return res.status(500).json({ message: 'Internal server error' })
+    return res.sendInternalServerError(err)
   }
 }
 
@@ -68,6 +68,7 @@ const fetchForm = async (req, res, next) => {
 const fetchResponse = async (req, res, next) => {
   const responseID = req.params.responseID
   if (!isValidObjectId(responseID)) {
+    return res.sendBadRequest(`Invalid responseID`)
     return res.status(400).json({ message: `Invalid responseID` })
   }
 
@@ -75,13 +76,15 @@ const fetchResponse = async (req, res, next) => {
     const response = await Models.FormResponse.findById(responseID)
 
     if (!response) {
-      return res.status(404).json({ message: 'Response not found' })
+      return res.sendNotFound('Response not found')
+      // return res.status(404).json({ message: 'Response not found' })
     }
 
     req.response = response
     next()
   } catch (err) {
-    return res.status(500).json({ message: 'Internal server error' })
+    return res.sendInternalServerError(err)
+    // return res.status(500).json({ message: 'Internal server error' })
   }
 }
 
@@ -96,7 +99,8 @@ const isAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next()
   }
-  res.status(401).json({ message: 'User not logged in' })
+  return res.sendUnauthorized('User not authenticated')
+  // res.status(401).json({ message: 'User not logged in' })
 }
 
 /**
@@ -113,11 +117,14 @@ const readJWT = (req, res, next) => {
     passport.authenticate('jwt', { session: false }, (err, user, details) => {
       if (err || !user) {
         if (details.message === 'Expired token') {
-          return res
-            .status(401)
-            .json({ message: 'Expired token. Please login again' })
+          return res.sendUnauthorized('Expired token. Please login again')
+          // return res
+          //   .status(401)
+          //   .json({ message: 'Expired token. Please login again' })
         }
-        return res.status(401).json({ message: 'Invalid token' })
+
+        return res.sendUnauthorized('Invalid token')
+        // return res.status(401).json({ message: 'Invalid token' })
       }
 
       req.user = user
@@ -152,7 +159,6 @@ const checkFormAccess = function (requiredRole) {
     let userRole = 'public' // Default role is public
 
     if (user) {
-
       // If user is the owner of the form
       if (form.owner.username === user.username) {
         userRole = 'owner'
@@ -171,13 +177,15 @@ const checkFormAccess = function (requiredRole) {
     if (ROLE_PERMISSIONS[userRole] >= ROLE_PERMISSIONS[requiredRole]) {
       // If user is not authorized to access a draft form
       if (userRole === 'public' && form.published === false) {
-        return res.status(401).json({ message: 'Unauthorized' })
+        return res.sendForbidden()
+        // return res.status(403).json({ message: 'Forbidden' })
       }
       return next()
     }
 
     // If user role does not have enough permissions, unauthorized
-    return res.status(401).json({ message: 'Unauthorized' })
+    return res.sendUnauthorized()
+    // return res.status(401).json({ message: 'Unauthorized' })
   }
 
   // If required role is public, only fetch form

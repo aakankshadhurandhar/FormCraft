@@ -54,21 +54,21 @@ function validateIncreasingSequence(value, helpers) {
       })
     }
   }
-  return value;
+  return value
 }
 
-function validateLastStepAgainstMaxValue(maxValue){
+function validateLastStepAgainstMaxValue(maxValue) {
   return (value, helpers) => {
-    if(!maxValue){
-      return value;
+    if (!maxValue) {
+      return value
     }
 
-    if( value[value.length - 1] != maxValue){
+    if (value[value.length - 1] != maxValue) {
       return helpers.error('any.custom', {
         message: `Last step must be less than or equal to ${maxValue}`,
       })
     }
-    return value;
+    return value
   }
 }
 
@@ -246,14 +246,14 @@ function validateForm(formBody) {
       then: Joi.date()
         .format('YYYY-MM-DD')
         .utc()
-        .custom((value, helpers) => {
+        .custom((value) => {
           return value.toISOString().split('T')[0]
         }),
       is: 'time',
       then: Joi.date()
         .format('HH:mm')
         .utc()
-        .custom((value, helpers) => {
+        .custom((value) => {
           return value.toISOString().split('T')[0]
         }),
       otherwise: Joi.number(),
@@ -270,7 +270,7 @@ function validateForm(formBody) {
       then: Joi.date()
         .format('HH:mm')
         .utc()
-        .custom((value, helpers) => {
+        .custom((value) => {
           return value.toISOString().split('T')[0]
         }),
       otherwise: Joi.number(),
@@ -315,11 +315,19 @@ function validateForm(formBody) {
     expiry: Joi.date().min('now'),
     inputs: Joi.array().items(formInputSchema),
     steps: Joi.array()
-    .items(Joi.number().integer().min(0).max(formBody.inputs?.length-1))
-    .min(Math.min(formBody.inputs?.length-1,1))
-    .unique()
-    .custom(validateIncreasingSequence, 'Increasing Sequence Check')
-    .custom(validateLastStepAgainstMaxValue(formBody.inputs?.length-1), 'Max Inputs Length Check')
+      .items(
+        Joi.number()
+          .integer()
+          .min(0)
+          .max(formBody.inputs?.length - 1),
+      )
+      .min(Math.min(formBody.inputs?.length - 1, 1))
+      .unique()
+      .custom(validateIncreasingSequence, 'Increasing Sequence Check')
+      .custom(
+        validateLastStepAgainstMaxValue(formBody.inputs?.length - 1),
+        'Max Inputs Length Check',
+      ),
   })
 
   return formPageSchema.validate(formBody)

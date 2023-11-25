@@ -74,6 +74,7 @@ const upload = multer({ storage, fileFilter })
 const FormResponse = (req, res, next) => {
   upload.any()(req, res, (err) => {
     if (err) {
+      return res.sendBadRequest('File upload failed', err)
       return res.status(400).json({ error: err.message })
     }
     next()
@@ -97,7 +98,8 @@ const backgroundUpload = multer({ storage, fileFilter: backgroundFileFilter })
 const backgroundImage = (req, res, next) => {
   backgroundUpload.single('background')(req, res, (err) => {
     if (err) {
-      return res.status(400).json({ error: err.message })
+      return res.sendBadRequest('Background image upload failed', err)
+      // return res.status(400).json({ error: err.message })
     }
     next()
   })
