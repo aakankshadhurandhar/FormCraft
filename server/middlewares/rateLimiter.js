@@ -1,10 +1,9 @@
 const moment = require('moment');
-const redis = require('redis');
+const redis = require('../services/redis');
 
-const redisClient = redis.createClient();
 
 const WINDOW_SIZE_IN_HOURS = 24;
-const MAX_WINDOW_REQUEST_COUNT = 1;
+const MAX_WINDOW_REQUEST_COUNT = 90;
 const WINDOW_LOG_INTERVAL_IN_HOURS = 1;
 
 /**
@@ -17,8 +16,10 @@ const WINDOW_LOG_INTERVAL_IN_HOURS = 1;
  */
 const customRedisRateLimiter = async (req, res, next) => {
   try {
-    await redisClient.connect()
-    const record = await redisClient.get(req.ip);
+    if (!redis.connected) {
+        await redis.connect();
+      }
+    const record = await redis.get(req.ip);
     const currentRequestTime = moment();
 
     if (record == null) {
@@ -28,7 +29,7 @@ const customRedisRateLimiter = async (req, res, next) => {
         requestCount: 1,
       };
       newRecord.push(requestLog);
-      await redisClient.set(req.ip, JSON.stringify(newRecord));
+      await redis.set(req.ip, JSON.stringify(newRecord));
       next();
     } else {
       let data = JSON.parse(record);
@@ -56,8 +57,8 @@ const customRedisRateLimiter = async (req, res, next) => {
           });
         }
 
-        await redisClient.set(req.ip, JSON.stringify(data));
-        redisClient.quit();
+        await redis.set(req.ip, JSON.stringify(data));
+        redis.quit();
         next();
       }
     }

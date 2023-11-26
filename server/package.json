@@ -30,7 +30,6 @@
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
-    "redis": "^4.6.11",
     "short-unique-id": "^5.0.3"
   },
   "devDependencies": {
