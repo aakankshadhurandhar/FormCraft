@@ -11,7 +11,7 @@ const {
   checkFormAccess,
 } = require('../middlewares')
 const upload = require('../middlewares/upload.js')
-
+const customRedisRateLimiter = require('../middlewares/rateLimiter.js')
 router.use(readJWT)
 
 router.get('/', (req, res) => {
@@ -62,6 +62,7 @@ router.get(
 router.post(
   '/forms/:formID/responses',
   fetchForm,
+  customRedisRateLimiter,
   upload.FormResponse,
   Controllers.FormResponse.Create,
 )
