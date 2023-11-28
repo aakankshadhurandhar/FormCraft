@@ -18,7 +18,6 @@ const areObjectIDs =
 
       if (!isValidObjectId(paramValue)) {
         return res.sendBadRequest(`Invalid ${paramName}`)
-        // return res.status(400).json({ message: `Invalid ${paramName}` })
       }
     }
     next()
@@ -28,7 +27,6 @@ const fetchForm = async (req, res, next) => {
   const formID = req.params.formID
   if (!isValidObjectId(formID)) {
     return res.sendBadRequest(`Invalid formID`)
-    // return res.status(400).json({ message: `Invalid formID` })
   }
 
   try {
@@ -47,7 +45,6 @@ const fetchForm = async (req, res, next) => {
 
     if (!form) {
       return res.sendNotFound('Form not found')
-      // return res.status(404).json({ message: 'Form not found' })
     }
     // Save in redis
     redis.setex(formID, 600, JSON.stringify(form.toObject()))
@@ -126,13 +123,9 @@ const readJWT = (req, res, next) => {
       if (err || !user) {
         if (details?.message === 'Expired token') {
           return res.sendUnauthorized('Expired token. Please login again')
-          // return res
-          //   .status(401)
-          //   .json({ message: 'Expired token. Please login again' })
         }
 
         return res.sendUnauthorized('Invalid token')
-        // return res.status(401).json({ message: 'Invalid token' })
       }
 
       req.user = user
@@ -186,7 +179,6 @@ const checkFormAccess = function (requiredRole) {
       // If user is not authorized to access a draft form
       if (userRole === 'public' && form.published === false) {
         return res.sendForbidden()
-        // return res.status(403).json({ message: 'Forbidden' })
       }
       return next()
     }

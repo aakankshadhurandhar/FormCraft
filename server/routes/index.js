@@ -118,4 +118,5 @@ router.post('/logout', isAuthenticated, Controllers.Users.logoutUser)
 // mount users/index.js router here
 router.use('/users', require('./users'))
 
+
 module.exports = router
