@@ -5,6 +5,7 @@ const redis = require('../services/redis')
 const {
   sendVerificationEmail,
   sendPasswordChangedEmail,
+  sendResetPasswordEmail,
 } = require('../services/mail')
 const { generateOneTimeToken } = require('../utils/token')
 
@@ -111,7 +112,6 @@ module.exports.verifyUser = async (req, res) => {
 // send a verification email to the user
 module.exports.verificationEmailRequest = async (req, res) => {
   const user = await Models.Users.findById(req.user.id)
-
   if (user.verified) {
     return res.sendBadRequest('User already verified')
   }
@@ -149,7 +149,8 @@ module.exports.forgotPassword = async (req, res) => {
 }
 
 module.exports.resetPassword = async (req, res) => {
-  const { token, password } = req.body
+  const { password } = req.body
+  const token = req.query.token
 
   if (!token || !password) {
     return res.sendBadRequest('Missing token or password')
@@ -169,7 +170,16 @@ module.exports.resetPassword = async (req, res) => {
     return res.sendBadRequest('Invalid token')
   }
 
+  const { error } = validateUserRegisterSchema({
+    username: user.username,
+    email: user.email,
+    password,
+  })
+  if (error) {
+    return res.sendBadRequest('Validation failed', error)
+  }
   user.password = password
+
   await user.save()
   await userToken.deleteOne()
   sendPasswordChangedEmail(user.email, user.username)
