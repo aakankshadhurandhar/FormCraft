@@ -6,6 +6,8 @@ const ExtractJwt = require('passport-jwt').ExtractJwt
 const secretKey = process.env.JWT_SECRET_KEY
 const { validateUserRegisterSchema } = require('../utils/validations')
 const redis = require('../services/redis')
+const { generateOneTimeToken } = require('../utils/jwtEncode')
+const { sendWelcomeEmail } = require('../services/mail');
 
 /**
  * Registers user with user_name,email and password
@@ -34,8 +36,17 @@ const registerUser = async (req, email, password, done) => {
       username: req.body.username,
     })
 
+    if (!user) {
+      return done(null, false, { message: 'Something went wrong' })
+    }
+
+    const token = user.generateOneTimeToken()
+    const Token = await Models.Token.create({ user: user._id, token: token, type: 'verify' })
+    sendWelcomeEmail(user.email, user.username, token)
+
     return done(null, user)
   } catch (error) {
+    console.log(error)
     return done(error)
   }
 }

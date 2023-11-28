@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    verified: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
@@ -60,9 +64,17 @@ userSchema.methods.generateToken = function () {
   const payload = {
     id: this._id,
     username: this.username,
+    verified: this.verified,
   }
   return jwtEncode.generateToken(payload)
 }
+
+// Generate one-time token
+userSchema.methods.generateOneTimeToken = function () {
+  data = JSON.stringify(this._id+ Date.now())
+  return jwtEncode.generateOneTimeToken(data)
+}
+
 
 userSchema.pre(
   'deleteOne',

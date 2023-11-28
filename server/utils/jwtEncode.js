@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const crypto = require('crypto')
 const secretKey = process.env.JWT_SECRET_KEY
 
 /**
@@ -18,6 +19,15 @@ function generateToken(payload, options) {
   return jwt.sign(payload, secretKey, options)
 }
 
+// Function to generate a one-time token
+function generateOneTimeToken(data) {
+  const token = crypto.createHmac('sha256', secretKey)
+                     .update(data)
+                     .digest('hex');
+  return token;
+}
+
 module.exports = {
   generateToken,
+  generateOneTimeToken
 }

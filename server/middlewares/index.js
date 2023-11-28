@@ -69,7 +69,6 @@ const fetchResponse = async (req, res, next) => {
   const responseID = req.params.responseID
   if (!isValidObjectId(responseID)) {
     return res.sendBadRequest(`Invalid responseID`)
-    return res.status(400).json({ message: `Invalid responseID` })
   }
 
   try {
@@ -77,14 +76,12 @@ const fetchResponse = async (req, res, next) => {
 
     if (!response) {
       return res.sendNotFound('Response not found')
-      // return res.status(404).json({ message: 'Response not found' })
     }
 
     req.response = response
     next()
   } catch (err) {
     return res.sendInternalServerError(err)
-    // return res.status(500).json({ message: 'Internal server error' })
   }
 }
 
@@ -100,8 +97,18 @@ const isAuthenticated = (req, res, next) => {
     return next()
   }
   return res.sendUnauthorized('User not authenticated')
-  // res.status(401).json({ message: 'User not logged in' })
 }
+
+//check if user is verified
+const isVerified = function(){
+  const fn = (req, res, next) => {
+    if (req.user.verified) {
+      return next()
+    }
+    return res.sendUnauthorized('User not verified. Please Verify your email')
+  }
+  return [isAuthenticated, fn]
+}()
 
 /**
  * Middleware that reads the JWT token from the request headers and authenticates it
@@ -182,10 +189,7 @@ const checkFormAccess = function (requiredRole) {
       }
       return next()
     }
-
-    // If user role does not have enough permissions, unauthorized
     return res.sendUnauthorized()
-    // return res.status(401).json({ message: 'Unauthorized' })
   }
 
   // If required role is public, only fetch form
@@ -193,7 +197,7 @@ const checkFormAccess = function (requiredRole) {
     return [fetchForm, fn]
   }
   // If required role is not public, authenticate user and fetch form
-  return [isAuthenticated, fetchForm, fn]
+  return [isVerified, fetchForm, fn]
 }
 
 module.exports = {
@@ -201,6 +205,7 @@ module.exports = {
   fetchForm,
   fetchResponse,
   isAuthenticated,
+  isVerified,
   readJWT,
   checkFormAccess,
 }

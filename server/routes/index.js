@@ -114,4 +114,8 @@ router.post('/login', Controllers.Users.loginUser)
 //Logout user
 router.post('/logout', isAuthenticated, Controllers.Users.logoutUser)
 
+router.get('/verify', Controllers.Users.verifyUser)
+
+router.post('/verify', Controllers.Users.verificationEmailRequest)
+
 module.exports = router
