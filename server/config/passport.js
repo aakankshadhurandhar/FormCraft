@@ -6,7 +6,7 @@ const ExtractJwt = require('passport-jwt').ExtractJwt
 const CONFIG = require('../config')
 const { validateUserRegisterSchema } = require('../utils/validations')
 const redis = require('../services/redis')
-const { generateOneTimeToken } = require('../utils/jwtEncode')
+const { generateOneTimeToken } = require('../utils/token')
 const { sendWelcomeEmail } = require('../services/mail')
 
 /**
@@ -40,14 +40,11 @@ const registerUser = async (req, email, password, done) => {
       return done(null, false, { message: 'Something went wrong' })
     }
 
-    const token = user.generateOneTimeToken()
     const Token = await Models.Token.create({
       user: user._id,
-      token: token,
       type: 'verify',
     })
-    console.log('Token', Token)
-    sendWelcomeEmail(user.email, user.username, token)
+    sendWelcomeEmail(user.email, user.username, Token.token)
 
     return done(null, user)
   } catch (error) {

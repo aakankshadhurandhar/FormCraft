@@ -8,7 +8,7 @@ const CONFIG = require('../config')
  * @description Generates a JSON Web Token (JWT) for the given user.
  * @returns {string} - The generated JWT.
  */
-function generateToken(payload, options) {
+function generateJWTToken(payload, options) {
   if (!payload) {
     throw new Error('payload is required')
   }
@@ -20,15 +20,12 @@ function generateToken(payload, options) {
 }
 
 // Function to generate a one-time token
-function generateOneTimeToken(data) {
-  const token = crypto
-    .createHmac('sha256', CONFIG.JWT_SECRET_KEY)
-    .update(data)
-    .digest('hex')
-  return token
+function generateOneTimeToken() {
+  const token = crypto.randomBytes(32).toString('hex');
+  return token;
 }
 
 module.exports = {
-  generateToken,
+  generateJWTToken,
   generateOneTimeToken,
 }

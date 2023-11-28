@@ -3,7 +3,7 @@ const { validateUserRegisterSchema } = require('../utils/validations')
 const Models = require('../models')
 const redis = require('../services/redis')
 const { sendVerificationEmail } = require('../services/mail')
-const { generateOneTimeToken } = require('../utils/jwtEncode')
+const { generateOneTimeToken } = require('../utils/token')
 
 // Registers a new user
 module.exports.registerUser = async (req, res, next) => {
@@ -47,7 +47,7 @@ module.exports.loginUser = (req, res) => {
       return res.sendBadRequest('Incorrect loginID or password', info)
     }
 
-    const token = user.generateToken()
+    const token = user.generateJWTToken()
     return res.sendResponse('User logged in successfully', { token })
   })(req, res)
 }

@@ -34,5 +34,5 @@ const config = {
   EMAIL_SERVICE_PASSWORD:
     process.env.EMAIL_SERVICE_PASSWORD || 'YOUR_EMAIL_SERVICE_PASSWORD',
 }
-console.log(config.DISABLE_EMAIL_VERIFICATION)
+
 module.exports = config
