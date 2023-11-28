@@ -9,6 +9,7 @@ const {
   isAuthenticated,
   readJWT,
   checkFormAccess,
+  isVerified,
 } = require('../middlewares')
 const upload = require('../middlewares/upload.js')
 const customRedisRateLimiter = require('../middlewares/rateLimiter.js')
@@ -19,7 +20,7 @@ router.get('/', (req, res) => {
   res.sendResponse('OK')
 })
 
-router.post('/forms', isAuthenticated, Controllers.Form.Create)
+router.post('/forms', isVerified, Controllers.Form.Create)
 
 router.put(
   '/forms/:formID/background',
@@ -32,7 +33,7 @@ router.put(
 router.get('/forms/:formID', checkFormAccess('public'), Controllers.Form.Read)
 
 //Read All Forms by a User
-router.get('/forms', isAuthenticated, Controllers.Form.ReadAll)
+router.get('/forms', isVerified, Controllers.Form.ReadAll)
 
 //Delete Form
 router.delete(
@@ -114,5 +115,9 @@ router.post('/login', Controllers.Users.loginUser)
 
 //Logout user
 router.post('/logout', isAuthenticated, Controllers.Users.logoutUser)
+
+// mount users/index.js router here
+router.use('/users', require('./users'))
+
 
 module.exports = router

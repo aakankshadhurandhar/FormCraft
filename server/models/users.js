@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
-const jwtEncode = require('../utils/jwtEncode')
+const tokenHelper = require('../utils/token')
 /**
  * Mongoose schema for users collection.
  * @typedef {Object} usersSchema
@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    verified: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
@@ -56,12 +60,18 @@ userSchema.methods.toJSON = function () {
 }
 
 // Generate JWT token
-userSchema.methods.generateToken = function () {
+userSchema.methods.generateJWTToken = function () {
   const payload = {
     id: this._id,
     username: this.username,
+    verified: this.verified,
   }
-  return jwtEncode.generateToken(payload)
+  return tokenHelper.generateJWTToken(payload)
+}
+
+// Generate one-time token
+userSchema.methods.generateOneTimeToken = function () {
+  return tokenHelper.generateOneTimeToken()
 }
 
 userSchema.pre(

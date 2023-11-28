@@ -2,6 +2,7 @@ const { isValidObjectId } = require('mongoose')
 const Models = require('../models')
 const passport = require('passport')
 const redis = require('../services/redis')
+const CONFIG = require('../config')
 
 /**
  * Middleware that checks if the specified parameters in the request contain valid MongoDB ObjectIDs.
@@ -17,7 +18,6 @@ const areObjectIDs =
 
       if (!isValidObjectId(paramValue)) {
         return res.sendBadRequest(`Invalid ${paramName}`)
-        // return res.status(400).json({ message: `Invalid ${paramName}` })
       }
     }
     next()
@@ -27,7 +27,6 @@ const fetchForm = async (req, res, next) => {
   const formID = req.params.formID
   if (!isValidObjectId(formID)) {
     return res.sendBadRequest(`Invalid formID`)
-    // return res.status(400).json({ message: `Invalid formID` })
   }
 
   try {
@@ -46,7 +45,6 @@ const fetchForm = async (req, res, next) => {
 
     if (!form) {
       return res.sendNotFound('Form not found')
-      // return res.status(404).json({ message: 'Form not found' })
     }
     // Save in redis
     redis.setex(formID, 600, JSON.stringify(form.toObject()))
@@ -69,7 +67,6 @@ const fetchResponse = async (req, res, next) => {
   const responseID = req.params.responseID
   if (!isValidObjectId(responseID)) {
     return res.sendBadRequest(`Invalid responseID`)
-    return res.status(400).json({ message: `Invalid responseID` })
   }
 
   try {
@@ -77,14 +74,12 @@ const fetchResponse = async (req, res, next) => {
 
     if (!response) {
       return res.sendNotFound('Response not found')
-      // return res.status(404).json({ message: 'Response not found' })
     }
 
     req.response = response
     next()
   } catch (err) {
     return res.sendInternalServerError(err)
-    // return res.status(500).json({ message: 'Internal server error' })
   }
 }
 
@@ -100,8 +95,18 @@ const isAuthenticated = (req, res, next) => {
     return next()
   }
   return res.sendUnauthorized('User not authenticated')
-  // res.status(401).json({ message: 'User not logged in' })
 }
+
+//check if user is verified
+const isVerified = (function () {
+  const fn = (req, res, next) => {
+    if (CONFIG.DISABLE_EMAIL_VERIFICATION || req.user.verified) {
+      return next()
+    }
+    return res.sendUnauthorized('User not verified. Please Verify your email')
+  }
+  return [isAuthenticated, fn]
+})()
 
 /**
  * Middleware that reads the JWT token from the request headers and authenticates it
@@ -118,12 +123,8 @@ const readJWT = (req, res, next) => {
       if (err || !user) {
         if (details?.message === 'Expired token') {
           return res.sendUnauthorized('Expired token. Please login again')
-          // return res
-          //   .status(401)
-          //   .json({ message: 'Expired token. Please login again' })
         }
         return res.sendUnauthorized('Invalid token')
-        // return res.status(401).json({ message: 'Invalid token' })
       }
 
       req.user = user
@@ -177,14 +178,10 @@ const checkFormAccess = function (requiredRole) {
       // If user is not authorized to access a draft form
       if (userRole === 'public' && form.published === false) {
         return res.sendForbidden()
-        // return res.status(403).json({ message: 'Forbidden' })
       }
       return next()
     }
-
-    // If user role does not have enough permissions, unauthorized
     return res.sendUnauthorized()
-    // return res.status(401).json({ message: 'Unauthorized' })
   }
 
   // If required role is public, only fetch form
@@ -192,7 +189,7 @@ const checkFormAccess = function (requiredRole) {
     return [fetchForm, fn]
   }
   // If required role is not public, authenticate user and fetch form
-  return [isAuthenticated, fetchForm, fn]
+  return [isVerified, fetchForm, fn]
 }
 
 module.exports = {
@@ -200,6 +197,7 @@ module.exports = {
   fetchForm,
   fetchResponse,
   isAuthenticated,
+  isVerified,
   readJWT,
   checkFormAccess,
 }

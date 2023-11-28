@@ -3,9 +3,11 @@ const LocalStrategy = require('passport-local').Strategy
 const Models = require('../models')
 const JwtStrategy = require('passport-jwt').Strategy
 const ExtractJwt = require('passport-jwt').ExtractJwt
-const secretKey = process.env.JWT_SECRET_KEY
+const CONFIG = require('../config')
 const { validateUserRegisterSchema } = require('../utils/validations')
 const redis = require('../services/redis')
+const { generateOneTimeToken } = require('../utils/token')
+const { sendWelcomeEmail } = require('../services/mail')
 
 /**
  * Registers user with user_name,email and password
@@ -34,8 +36,19 @@ const registerUser = async (req, email, password, done) => {
       username: req.body.username,
     })
 
+    if (!user) {
+      return done(null, false, { message: 'Something went wrong' })
+    }
+
+    const Token = await Models.Token.create({
+      user: user._id,
+      type: 'verify',
+    })
+    sendWelcomeEmail(user.email, user.username, Token.token)
+
     return done(null, user)
   } catch (error) {
+    console.log(error)
     return done(error)
   }
 }
@@ -104,7 +117,7 @@ function initialize() {
   )
   const jwtOptions = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKey: secretKey,
+    secretOrKey: CONFIG.JWT_SECRET_KEY,
     passReqToCallback: true,
   }
 

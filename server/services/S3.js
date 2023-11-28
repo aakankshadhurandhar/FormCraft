@@ -1,14 +1,16 @@
 const aws = require('aws-sdk')
 const fs = require('fs')
 
+const CONFIG = require('../config')
+
 aws.config.update({
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  region: process.env.AWS_REGION,
+  secretAccessKey: CONFIG.AWS_SECRET_ACCESS_KEY,
+  accessKeyId: CONFIG.AWS_ACCESS_KEY_ID,
+  region: CONFIG.AWS_REGION,
 })
 
 const s3 = new aws.S3()
-const bucketName = process.env.S3_BUCKET_NAME
+const bucketName = CONFIG.S3_BUCKET_NAME
 
 /**
  * Returns the key of a file in S3
@@ -17,7 +19,7 @@ const bucketName = process.env.S3_BUCKET_NAME
  * @description The key of a file is the path of the file in the S3 bucket
  */
 function getKey(url) {
-  const S3URL = 'https://formcraft-responses.s3.ap-south-1.amazonaws.com/'
+  const S3URL = `https://${bucketName}.s3.${CONFIG.AWS_REGION}.amazonaws.com/`
   return url.replace(S3URL, '')
 }
 

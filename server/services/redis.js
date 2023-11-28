@@ -1,7 +1,8 @@
 const Redis = require('ioredis')
+const CONFIG = require('../config')
 
 // Create a Redis client instance and read the .env file or the default localhost
-const redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
+const redisClient = new Redis(CONFIG.REDIS_URL)
 
 redisClient.on('error', (err) => {
   console.error('Redis error:', err.code)
