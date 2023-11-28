@@ -2,6 +2,7 @@ const { isValidObjectId } = require('mongoose')
 const Models = require('../models')
 const passport = require('passport')
 const redis = require('../services/redis')
+const CONFIG = require('../config')
 
 /**
  * Middleware that checks if the specified parameters in the request contain valid MongoDB ObjectIDs.
@@ -100,15 +101,15 @@ const isAuthenticated = (req, res, next) => {
 }
 
 //check if user is verified
-const isVerified = function(){
+const isVerified = (function () {
   const fn = (req, res, next) => {
-    if (req.user.verified) {
+    if (CONFIG.DISABLE_EMAIL_VERIFICATION || req.user.verified) {
       return next()
     }
     return res.sendUnauthorized('User not verified. Please Verify your email')
   }
   return [isAuthenticated, fn]
-}()
+})()
 
 /**
  * Middleware that reads the JWT token from the request headers and authenticates it

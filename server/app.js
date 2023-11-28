@@ -6,10 +6,10 @@ const morgan = require('morgan')
 const formRouter = require('./routes/')
 const initializePassport = require('./config/passport')
 const responseFormatter = require('./middlewares/responseFormatter')
-
+const CONFIG = require('./config')
 const app = express()
-const port = process.env.PORT || 3000
-const mongoString = process.env.DATABASE_URL
+const port = CONFIG.PORT
+const mongoString = CONFIG.DATABASE_URL
 
 mongoose.connect(mongoString, {
   useNewUrlParser: true,

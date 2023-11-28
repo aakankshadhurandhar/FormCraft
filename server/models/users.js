@@ -71,10 +71,9 @@ userSchema.methods.generateToken = function () {
 
 // Generate one-time token
 userSchema.methods.generateOneTimeToken = function () {
-  data = JSON.stringify(this._id+ Date.now())
+  data = JSON.stringify(this._id + Date.now())
   return jwtEncode.generateOneTimeToken(data)
 }
-
 
 userSchema.pre(
   'deleteOne',

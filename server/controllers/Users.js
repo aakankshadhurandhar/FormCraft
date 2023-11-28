@@ -68,59 +68,58 @@ module.exports.logoutUser = async (req, res) => {
     })
 }
 
-
 module.exports.verifyUser = async (req, res) => {
-  const token = req.query.token;
+  const token = req.query.token
 
   if (!token) {
-    return res.sendBadRequest('No token provided');
+    return res.sendBadRequest('No token provided')
   }
 
-  try{
-
+  try {
     // find the token with type verify and populate the user
-    const Token  = await Models.Token.findOne({ token, type: 'verify' }).populate('user');
+    const Token = await Models.Token.findOne({
+      token,
+      type: 'verify',
+    }).populate('user')
 
     if (!Token) {
-      return res.sendBadRequest('Invalid token');
+      return res.sendBadRequest('Invalid token')
     }
     // check if the token has expired
     if (Token.expiresAt < Date.now()) {
-      return res.sendBadRequest('Token expired');
+      return res.sendBadRequest('Token expired')
     }
     // check if the user is already verified
     if (Token.user.verified) {
-      return res.sendBadRequest('User already verified');
+      return res.sendBadRequest('User already verified')
     }
 
     // mark the user as verified
-    await Token.user.updateOne({ verified: true });
+    await Token.user.updateOne({ verified: true })
 
     // delete the token
-    await Token.deleteOne();
-    return res.sendSuccess('User verified successfully');
-  }catch(err){
+    await Token.deleteOne()
+    return res.sendSuccess('User verified successfully')
+  } catch (err) {
     res.sendInternalServerError(err)
   }
-
 }
 
 // send a verification email to the user
-module.exports.verificationEmailRequest = async (req, res) =>{
-
-  const user = await Models.Users.findById(req.user.id);
+module.exports.verificationEmailRequest = async (req, res) => {
+  const user = await Models.Users.findById(req.user.id)
 
   if (user.verified) {
-    return res.sendBadRequest('User already verified');
+    return res.sendBadRequest('User already verified')
   }
-  const userToken = user.generateOneTimeToken();
+  const userToken = user.generateOneTimeToken()
   await Models.Token.create({
     token: userToken,
     user: user.id,
     type: 'verify',
     expiresAt: Date.now() + 60 * 60 * 1000, // 1 hour
-  });
+  })
 
-  sendVerificationEmail(user.email, user.username, userToken);
-  return res.sendSuccess('Verification email sent');
+  sendVerificationEmail(user.email, user.username, userToken)
+  return res.sendSuccess('Verification email sent')
 }
