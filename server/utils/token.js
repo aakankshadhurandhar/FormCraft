@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
-const secretKey = process.env.JWT_SECRET_KEY
+const crypto = require('crypto')
+const CONFIG = require('../config')
 
 /**
  * Generates a JSON Web Token (JWT) for the given user.
@@ -7,7 +8,7 @@ const secretKey = process.env.JWT_SECRET_KEY
  * @description Generates a JSON Web Token (JWT) for the given user.
  * @returns {string} - The generated JWT.
  */
-function generateToken(payload, options) {
+function generateJWTToken(payload, options) {
   if (!payload) {
     throw new Error('payload is required')
   }
@@ -15,9 +16,16 @@ function generateToken(payload, options) {
   // Default options
   options = options || { expiresIn: '1h' }
 
-  return jwt.sign(payload, secretKey, options)
+  return jwt.sign(payload, CONFIG.JWT_SECRET_KEY, options)
+}
+
+// Function to generate a one-time token
+function generateOneTimeToken() {
+  const token = crypto.randomBytes(32).toString('hex')
+  return token
 }
 
 module.exports = {
-  generateToken,
+  generateJWTToken,
+  generateOneTimeToken,
 }
