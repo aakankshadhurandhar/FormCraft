@@ -116,13 +116,12 @@ const readJWT = (req, res, next) => {
   if (token) {
     passport.authenticate('jwt', { session: false }, (err, user, details) => {
       if (err || !user) {
-        if (details.message === 'Expired token') {
+        if (details?.message === 'Expired token') {
           return res.sendUnauthorized('Expired token. Please login again')
           // return res
           //   .status(401)
           //   .json({ message: 'Expired token. Please login again' })
         }
-
         return res.sendUnauthorized('Invalid token')
         // return res.status(401).json({ message: 'Invalid token' })
       }
