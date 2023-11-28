@@ -1,13 +1,13 @@
 const moment = require('moment')
 const redis = require('../services/redis')
-const rateLimiterConfig = require('../config/rateLimiterConfig')
 const requestIp = require('request-ip')
 const {
-  WINDOW_LOG_INTERVAL_IN_HOURS,
-  MAX_WINDOW_REQUEST_COUNT,
-  WINDOW_SIZE_IN_HOURS,
   DISABLE_RATE_LIMITER,
-} = rateLimiterConfig
+  WINDOW_LOG_INTERVAL_IN_HOURS,
+  WINDOW_SIZE_IN_HOURS,
+  MAX_WINDOW_REQUEST_COUNT,
+} = require('../config')
+
 /**
  * A custom Redis rate limiter function that limits the number of requests per IP address.
  *
