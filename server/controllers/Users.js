@@ -2,7 +2,10 @@ const passport = require('passport')
 const { validateUserRegisterSchema } = require('../utils/validations')
 const Models = require('../models')
 const redis = require('../services/redis')
-const { sendVerificationEmail } = require('../services/mail')
+const {
+  sendVerificationEmail,
+  sendPasswordChangedEmail,
+} = require('../services/mail')
 const { generateOneTimeToken } = require('../utils/token')
 
 // Registers a new user
@@ -122,4 +125,72 @@ module.exports.verificationEmailRequest = async (req, res) => {
 
   sendVerificationEmail(user.email, user.username, userToken)
   return res.sendSuccess('Verification email sent')
+}
+
+module.exports.forgotPassword = async (req, res) => {
+  const { email } = req.body
+  const user = await Models.Users.findOne({ email })
+
+  if (!user) {
+    return res.sendSuccess(
+      'If the a user with this email exists, we will send you a link to reset your password',
+    )
+  }
+
+  const resetToken = await Models.Token.create({
+    user: user.id,
+    type: 'reset',
+    expiresAt: Date.now() + 60 * 60 * 1000, // 1 hour
+  })
+  sendResetPasswordEmail(user.email, user.username, resetToken.token)
+  return res.sendSuccess(
+    'If the a user with this email exists, we will send you a link to reset your password',
+  )
+}
+
+module.exports.resetPassword = async (req, res) => {
+  const { token, password } = req.body
+
+  if (!token || !password) {
+    return res.sendBadRequest('Missing token or password')
+  }
+  const userToken = await Models.Token.findOne({ token, type: 'reset' })
+
+  if (!userToken) {
+    return res.sendBadRequest('Invalid token')
+  }
+
+  if (userToken.expiresAt < Date.now()) {
+    return res.sendBadRequest('Token expired')
+  }
+
+  const user = await Models.Users.findById(userToken.user)
+  if (!user) {
+    return res.sendBadRequest('Invalid token')
+  }
+
+  user.password = password
+  await user.save()
+  await userToken.deleteOne()
+  sendPasswordChangedEmail(user.email, user.username)
+  return res.sendSuccess('Password reset successful')
+}
+
+module.exports.changePassword = async (req, res) => {
+  const { password, newPassword } = req.body
+
+  if (password === newPassword) {
+    return res.sendBadRequest('New password cannot be the same as old password')
+  }
+  const user = await Models.Users.findById(req.user.id)
+
+  const isValidPassword = await user.isValidPassword(password)
+  if (!isValidPassword) {
+    return res.sendBadRequest('Invalid password')
+  }
+
+  user.password = newPassword
+  await user.save()
+  sendPasswordChangedEmail(user.email, user.username)
+  return res.sendSuccess('Password changed successfully')
 }

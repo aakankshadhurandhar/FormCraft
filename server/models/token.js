@@ -3,7 +3,7 @@ const tokenHelper = require('../utils/token')
 
 const tokenSchema = new mongoose.Schema({
   token: {
-    type: String
+    type: String,
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -25,7 +25,7 @@ const tokenSchema = new mongoose.Schema({
   },
 })
 
-// if token is not given in the request during create, generate a new one 
+// if token is not given in the request during create, generate a new one
 tokenSchema.pre('save', function (next) {
   if (!this.token) {
     this.token = tokenHelper.generateOneTimeToken()

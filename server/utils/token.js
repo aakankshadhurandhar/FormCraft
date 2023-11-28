@@ -21,8 +21,8 @@ function generateJWTToken(payload, options) {
 
 // Function to generate a one-time token
 function generateOneTimeToken() {
-  const token = crypto.randomBytes(32).toString('hex');
-  return token;
+  const token = crypto.randomBytes(32).toString('hex')
+  return token
 }
 
 module.exports = {

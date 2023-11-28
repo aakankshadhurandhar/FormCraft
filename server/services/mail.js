@@ -28,7 +28,7 @@ async function sendEmail(mailOptions) {
 }
 
 async function sendWelcomeEmail(email, name, token) {
-  let validationLink = `http://localhost:3000/verify?token=${token}`
+  let validationLink = `http://localhost:3000/users/verify?token=${token}`
 
   let mailOptions = {
     from: SENDER_EMAIL,
@@ -42,7 +42,7 @@ async function sendWelcomeEmail(email, name, token) {
 }
 
 async function sendVerificationEmail(email, name, token) {
-  let validationLink = `http://localhost:3000/verify?token=${token}`
+  let validationLink = `http://localhost:3000/users/verify?token=${token}`
 
   let mailOptions = {
     from: SENDER_EMAIL,
@@ -55,4 +55,36 @@ async function sendVerificationEmail(email, name, token) {
   return sendEmail(mailOptions)
 }
 
-module.exports = { sendEmail, sendWelcomeEmail, sendVerificationEmail }
+async function sendResetPasswordEmail(email, name, token) {
+  let validationLink = `http://localhost:3000/users/reset-password?token=${token}`
+
+  let mailOptions = {
+    from: SENDER_EMAIL,
+    to: email,
+    subject: 'Reset your password',
+    text: `Dear ${name}, please reset your password by clicking on this link: ${validationLink}`,
+    html: `<b>Dear ${name},</b><br>please reset your password by clicking on this <a href="${validationLink}">link</a>.`,
+  }
+
+  return sendEmail(mailOptions)
+}
+
+async function sendPasswordChangedEmail(email, name) {
+  let mailOptions = {
+    from: SENDER_EMAIL,
+    to: email,
+    subject: 'Your password has been Updated',
+    text: `Dear ${name}, your password has been changed successfully.`,
+    html: `<b>Dear ${name},</b><br>your password has been changed successfully.`,
+  }
+
+  return sendEmail(mailOptions)
+}
+
+module.exports = {
+  sendEmail,
+  sendWelcomeEmail,
+  sendVerificationEmail,
+  sendResetPasswordEmail,
+  sendPasswordChangedEmail,
+}

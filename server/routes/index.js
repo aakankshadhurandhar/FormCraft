@@ -115,8 +115,7 @@ router.post('/login', Controllers.Users.loginUser)
 //Logout user
 router.post('/logout', isAuthenticated, Controllers.Users.logoutUser)
 
-router.get('/verify', Controllers.Users.verifyUser)
-
-router.post('/verify', Controllers.Users.verificationEmailRequest)
+// mount users/index.js router here
+router.use('/users', require('./users'))
 
 module.exports = router
