@@ -38,7 +38,8 @@ app.use((req, res, next) => {
 })
 
 app.use((err, req, res, next) => {
-  res.sendInternalServerError(err)
+  console.log(err)
+  // res.sendInternalServerError(err)
 })
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`)

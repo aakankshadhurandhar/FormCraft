@@ -29,9 +29,13 @@ function getExtension(originalname) {
 const fileFilter = function (req, file, cb) {
   const formSchema = req.form
   const fileInput = formSchema.inputs.find(
-    (input) => input.type === 'file' && input.label == file.fieldname,
+    (input) => {
+      return input.type === 'file' && input.label == file.fieldname;
+    }
   )
 
+
+  
   if (!fileInput) {
     return cb(new Error('File upload not allowed for some form values'), false)
   }
@@ -74,6 +78,7 @@ const upload = multer({ storage, fileFilter })
 const FormResponse = (req, res, next) => {
   upload.any()(req, res, (err) => {
     if (err) {
+      console.log(err)
       return res.sendBadRequest('File upload failed', err)
       return res.status(400).json({ error: err.message })
     }

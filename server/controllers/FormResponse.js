@@ -39,8 +39,8 @@ module.exports.Create = async (req, res) => {
       }
       formValues[fieldname].push(fileDetails)
     }
-
     let { error, value } = validateFormResponse(form, formValues)
+    console.log(error)
     if (error) {
       return res.sendBadRequest('Form Response validation failed', error)
     }

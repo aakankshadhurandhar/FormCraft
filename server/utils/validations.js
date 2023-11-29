@@ -170,7 +170,8 @@ function validateFormResponse(form, formResponse) {
         break
       case 'file':
         const maxFileSizeKB = input.maxFileSizeinKB
-        baseSchema = Joi.array()
+        baseSchema = Joi.alternatives(
+          Joi.array()
           .items(
             Joi.object({
               filename: Joi.string().required(),
@@ -178,7 +179,13 @@ function validateFormResponse(form, formResponse) {
               sizeInKB: Joi.number().required(),
             }),
           )
-          .custom(fileValidationHelper(maxFileSizeKB, input.min, input.max))
+          .custom(fileValidationHelper(maxFileSizeKB, input.min, input.max)),
+          Joi.object({
+            filename: Joi.string().required(),
+            path: Joi.string().required(),
+            sizeInKB: Joi.number().required(),
+          }),
+        )
 
         break
       default:
@@ -254,7 +261,7 @@ function validateForm(formBody) {
         .format('HH:mm')
         .utc()
         .custom((value) => {
-          return value.toISOString().split('T')[0]
+          return value.toISOString().split('T')[1].substring(0, 5)
         }),
       otherwise: Joi.number(),
     }),
@@ -271,7 +278,7 @@ function validateForm(formBody) {
         .format('HH:mm')
         .utc()
         .custom((value) => {
-          return value.toISOString().split('T')[0]
+          return value.toISOString().split('T')[1].substring(0, 5)
         }),
       otherwise: Joi.number(),
     }),
