@@ -124,7 +124,6 @@ const readJWT = (req, res, next) => {
         if (details?.message === 'Expired token') {
           return res.sendUnauthorized('Expired token. Please login again')
         }
-
         return res.sendUnauthorized('Invalid token')
       }
 

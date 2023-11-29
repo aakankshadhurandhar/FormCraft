@@ -12,7 +12,7 @@ const {
   isVerified,
 } = require('../middlewares')
 const upload = require('../middlewares/upload.js')
-
+const customRedisRateLimiter = require('../middlewares/rateLimiter.js')
 router.use(readJWT)
 
 router.get('/', (req, res) => {
@@ -63,6 +63,7 @@ router.get(
 router.post(
   '/forms/:formID/responses',
   fetchForm,
+  customRedisRateLimiter,
   upload.FormResponse,
   Controllers.FormResponse.Create,
 )
@@ -117,6 +118,5 @@ router.post('/logout', isAuthenticated, Controllers.Users.logoutUser)
 
 // mount users/index.js router here
 router.use('/users', require('./users'))
-
 
 module.exports = router
