@@ -1,0 +1,3 @@
+cd client
+npm run format
+exit 1
