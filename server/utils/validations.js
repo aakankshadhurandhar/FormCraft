@@ -128,12 +128,12 @@ function validateFormResponse(form, formResponse) {
         break
       case 'time':
         baseSchema = Joi.date()
-          .format('HH:mm') // Specify the time format (24-hour)
           .utc()
+          .format('HH:mm')
           .custom((value, helpers) => {
             const minTime = input.min
             const maxTime = input.max
-            const valueTime = value.toISOString().split('T')[1].split('.')[0]
+            const valueTime = value.toISOString().split('T')[1].substring(0, 5)
 
             if (minTime && valueTime < minTime) {
               return helpers.error('time.min', {
@@ -146,7 +146,7 @@ function validateFormResponse(form, formResponse) {
                 message: `Time must be less than or equal to ${input.max}`,
               })
             }
-            return value.toISOString().split('T')[1].split('.')[0]
+            return value.toISOString().split('T')[1].substring(0, 5)
           })
         break
 
@@ -170,7 +170,8 @@ function validateFormResponse(form, formResponse) {
         break
       case 'file':
         const maxFileSizeKB = input.maxFileSizeinKB
-        baseSchema = Joi.array()
+        baseSchema = Joi.alternatives(
+          Joi.array()
           .items(
             Joi.object({
               filename: Joi.string().required(),
@@ -178,7 +179,13 @@ function validateFormResponse(form, formResponse) {
               sizeInKB: Joi.number().required(),
             }),
           )
-          .custom(fileValidationHelper(maxFileSizeKB, input.min, input.max))
+          .custom(fileValidationHelper(maxFileSizeKB, input.min, input.max)),
+          Joi.object({
+            filename: Joi.string().required(),
+            path: Joi.string().required(),
+            sizeInKB: Joi.number().required(),
+          }),
+        )
 
         break
       default:
@@ -249,14 +256,16 @@ function validateForm(formBody) {
         .custom((value) => {
           return value.toISOString().split('T')[0]
         }),
-      is: 'time',
-      then: Joi.date()
-        .format('HH:mm')
-        .utc()
-        .custom((value) => {
-          return value.toISOString().split('T')[0]
-        }),
-      otherwise: Joi.number(),
+      otherwise: Joi.when('type', {
+        is: 'time',
+        then: Joi.date()
+          .format('HH:mm')
+          .utc()
+          .custom((value) => {
+            return value.toISOString().split('T')[1].substring(0, 5)
+          }),
+        otherwise: Joi.number(),
+      })
     }),
     max: Joi.when('type', {
       is: 'date',
@@ -266,14 +275,16 @@ function validateForm(formBody) {
         .custom((value, helpers) => {
           return value.toISOString().split('T')[0]
         }),
-      is: 'time',
-      then: Joi.date()
-        .format('HH:mm')
-        .utc()
-        .custom((value) => {
-          return value.toISOString().split('T')[0]
-        }),
-      otherwise: Joi.number(),
+      otherwise: Joi.when('type', {
+        is: 'time',
+        then: Joi.date()
+          .format('HH:mm')
+          .utc()
+          .custom((value, helpers) => {
+            return value.toISOString().split('T')[1].substring(0, 5)
+          }),
+        otherwise: Joi.number(),
+      })
     }),
     options: Joi.array()
       .items(
