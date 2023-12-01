@@ -8,12 +8,14 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "format": "prettier --write \"**/*.js\"",
-    "format:check": "prettier --check \"src/**/*.js\""
+    "format:check": "prettier --check \"src/**/*.js\"",
+    "swagger-autogen": "node swagger.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@joi/date": "^2.1.0",
+    "and": "^0.0.3",
     "aws-sdk": "^2.1473.0",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.3.1",
@@ -32,7 +34,9 @@
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "request-ip": "^3.3.0",
-    "short-unique-id": "^5.0.3"
+    "short-unique-id": "^5.0.3",
+    "swagger-autogen": "^2.23.7",
+    "swagger-ui-express": "^5.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1",
