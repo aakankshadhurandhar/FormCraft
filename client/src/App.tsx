@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
-import './App.css';
 import { useAppDispatch } from '../redux/config/store';
 import { login } from '../redux/slices/authSlice';
 import { BrowserRouter } from 'react-router-dom';
 import { Router } from './Routes';
+
+
+
 
 function App() {
   const dispatch = useAppDispatch();
@@ -19,6 +21,7 @@ function App() {
     <>
       <BrowserRouter>
         <Router />
+
       </BrowserRouter>
     </>
   );

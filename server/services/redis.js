@@ -3,16 +3,20 @@ const CONFIG = require('../config')
 
 // Create a Redis client instance and read the .env file or the default localhost
 const redisClient = new Redis(CONFIG.REDIS_URL)
+let errorPrinted = false
 
 redisClient.on('error', (err) => {
-  console.error('Redis error:', err.code)
-  redisClient.connected = false
+  if (!errorPrinted) {
+    console.error('Redis error:', err.code)
+    errorPrinted = true
+  }
 })
 
 // Handle successful connection
 redisClient.on('connect', () => {
   console.log('Redis connected')
   redisClient.connected = true
+  errorPrinted = false
 })
 
 const redis = new Proxy(redisClient, {
